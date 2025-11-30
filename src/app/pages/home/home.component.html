@@ -1,0 +1,151 @@
+<div class="relative pt-32 pb-16">
+  <div class="absolute inset-0 bg-cover bg-center" style="background-image: linear-gradient(to top, rgba(248, 249, 250, 1) 0%, rgba(248, 249, 250, 0) 50%), linear-gradient(rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuDwTmCDbwCCMeFr_CYpysuBELgjMHYJQCTwce0e26HESh46Nktol67V6HtmnS-gQMPW8Ld96SyWoMUGn9-JapwLYcRJtCxbEJYtxRtHOGsz0QmKhKi6e3RMv3izjxdc2uGAMMDhov08myFKC96-W2ZZjD_Vzghsq6f9ucTKOoUARgP_qFq-jii16IWNWJZFY7fN2z77wWJg8NcIHSmJdsAYM4KSmQM9sfvKvt8pTdw_aX8pXzxWUriJQF8h11xGlaYesnD0bd60uA8');"></div>
+  <div class="relative container mx-auto px-6 text-center">
+    <h1 class="text-white text-4xl md:text-6xl font-bold tracking-tight mb-4 font-display">ابحث عن بيت أحلامك</h1>
+    <p class="text-white text-lg md:text-xl max-w-3xl mx-auto mb-8 font-body">استخدم قوة الذكاء الاصطناعي للعثور على منزلك المثالي في مصر. نجعل العملية بسيطة، سريعة، وممتعة.</p>
+    
+    <div class="max-w-4xl mx-auto bg-card-background dark:bg-background-dark p-4 rounded-xl shadow-lg">
+      <div class="flex items-center mb-4">
+        <button (click)="setSearchType('buy')" [class]="searchType === 'buy' ? 'bg-primary text-white' : 'bg-background-light dark:bg-gray-800 text-text-secondary dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'" class="px-6 py-2 text-sm font-bold rounded-t-lg transition-colors font-display">شراء</button>
+        <button (click)="setSearchType('rent')" [class]="searchType === 'rent' ? 'bg-primary text-white' : 'bg-background-light dark:bg-gray-800 text-text-secondary dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'" class="px-6 py-2 text-sm font-bold rounded-t-lg transition-colors font-display">إيجار</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-2 items-center">
+        <div class="md:col-span-2 relative">
+          <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-secondary">auto_awesome</span>
+          <input class="w-full h-14 pr-12 pl-4 border border-border-color rounded-lg bg-background-light dark:bg-gray-800 text-text-primary dark:text-white placeholder:text-text-secondary focus:ring-primary focus:border-primary text-right font-body" placeholder="ابحث بالذكاء الاصطناعي..." type="text"/>
+        </div>
+        <div class="md:col-span-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="flex h-10 items-center justify-center gap-x-2 rounded-lg bg-background-light dark:bg-gray-800 border border-border-color px-4 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <p class="text-text-secondary dark:text-gray-300 text-sm font-medium font-display">النوع</p>
+              <span class="material-symbols-outlined text-text-secondary dark:text-gray-300 text-base">expand_more</span>
+            </button>
+            <button class="flex h-10 items-center justify-center gap-x-2 rounded-lg bg-background-light dark:bg-gray-800 border border-border-color px-4 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <p class="text-text-secondary dark:text-gray-300 text-sm font-medium font-display">المدينة</p>
+              <span class="material-symbols-outlined text-text-secondary dark:text-gray-300 text-base">expand_more</span>
+            </button>
+            <button class="flex h-10 items-center justify-center gap-x-2 rounded-lg bg-background-light dark:bg-gray-800 border border-border-color px-4 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <p class="text-text-secondary dark:text-gray-300 text-sm font-medium font-display">السعر</p>
+              <span class="material-symbols-outlined text-text-secondary dark:text-gray-300 text-base">expand_more</span>
+            </button>
+            <a routerLink="/search" class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-primary text-white transition-transform hover:scale-105 hover:bg-primary/90 shadow-md cursor-pointer">
+              <span class="material-symbols-outlined">search</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="py-16">
+  <div class="container mx-auto px-6">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold text-text-primary dark:text-white font-display">عقارات مختارة لك</h2>
+      <p class="text-text-secondary dark:text-gray-400 mt-2 max-w-2xl mx-auto font-body">بناءً على تصفحك، اخترنا لك هذه المجموعة المميزة.</p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (prop of featuredProperties; track prop.id) {
+        <div class="flex flex-col gap-4 rounded-xl bg-card-background dark:bg-background-dark shadow-md border border-border-color overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 relative group cursor-pointer" [routerLink]="['/property', prop.id]">
+          <div class="absolute top-2 left-2 bg-secondary text-white text-xs font-bold px-3 py-1 rounded z-10 font-display">{{prop.tag}}</div>
+          <div class="w-full bg-center bg-no-repeat aspect-video bg-cover group-hover:scale-105 transition-transform duration-500" [style.background-image]="'url(' + prop.image + ')'"></div>
+          <div class="p-4 flex flex-col flex-1 text-right">
+            <p class="text-primary dark:text-secondary text-xl font-bold font-display">{{prop.price}} ج.م</p>
+            <p class="text-text-primary dark:text-white text-lg font-medium mt-1 font-display">{{prop.title}}</p>
+            <p class="text-text-secondary dark:text-gray-400 text-sm font-body">{{prop.location}}</p>
+            <div class="flex items-center justify-end gap-4 text-text-secondary dark:text-gray-400 mt-4 text-sm border-t border-border-color pt-3">
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">bed</span> {{prop.beds}}</span>
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">bathtub</span> {{prop.baths}}</span>
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">aspect_ratio</span> {{prop.area}} م²</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="py-16 bg-card-background dark:bg-background-dark border-y border-border-color">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-text-primary dark:text-white text-3xl font-bold mb-2 font-display">كيف يعمل Baytology؟</h2>
+    <p class="text-text-secondary dark:text-gray-400 max-w-2xl mx-auto mb-12 font-body">رحلتك للعثور على المنزل المثالي في ثلاث خطوات بسيطة.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div class="flex flex-col items-center group">
+        <div class="flex items-center justify-center size-20 bg-secondary/10 text-secondary rounded-full mb-6 group-hover:bg-secondary group-hover:text-white transition-colors duration-300">
+          <span class="material-symbols-outlined text-4xl">auto_awesome</span>
+        </div>
+        <h3 class="text-text-primary dark:text-white text-xl font-bold mb-2 font-display">بحث ذكي</h3>
+        <p class="text-text-secondary dark:text-gray-400 font-body">اوصف بيت أحلامك بلغتك العامية وسيب الباقي على الذكاء الاصطناعي.</p>
+      </div>
+      <div class="flex flex-col items-center group">
+        <div class="flex items-center justify-center size-20 bg-secondary/10 text-secondary rounded-full mb-6 group-hover:bg-secondary group-hover:text-white transition-colors duration-300">
+          <span class="material-symbols-outlined text-4xl">groups</span>
+        </div>
+        <h3 class="text-text-primary dark:text-white text-xl font-bold mb-2 font-display">تواصل مع الوكلاء</h3>
+        <p class="text-text-secondary dark:text-gray-400 font-body">تواصل مباشرة مع أفضل الوكلاء المعتمدين لترتيب المعاينة.</p>
+      </div>
+      <div class="flex flex-col items-center group">
+        <div class="flex items-center justify-center size-20 bg-secondary/10 text-secondary rounded-full mb-6 group-hover:bg-secondary group-hover:text-white transition-colors duration-300">
+          <span class="material-symbols-outlined text-4xl">real_estate_agent</span>
+        </div>
+        <h3 class="text-text-primary dark:text-white text-xl font-bold mb-2 font-display">أتمم الصفقة</h3>
+        <p class="text-text-secondary dark:text-gray-400 font-body">هنكون معاك خطوة بخطوة لحد ما تستلم مفتاح بيتك.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="py-16">
+  <div class="container mx-auto px-6">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-3xl font-bold text-text-primary dark:text-white font-display">نخبة الوكلاء</h2>
+      <a routerLink="/agents" class="bg-primary/10 text-primary dark:bg-secondary/20 dark:text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/20 transition-colors font-display">عرض الكل</a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (agent of topAgents; track agent.name) {
+        <div class="bg-card-background dark:bg-background-dark p-4 rounded-lg border border-border-color flex items-center gap-4 transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer" [routerLink]="['/agent', 1]">
+          <div class="size-20 rounded-full bg-cover bg-center border-2 border-gray-100" [style.background-image]="'url(' + agent.image + ')'"></div>
+          <div class="flex-1 text-right">
+            <h3 class="font-bold text-text-primary dark:text-white text-lg font-display">{{agent.name}}</h3>
+            <div class="flex items-center justify-end text-sm text-yellow-500 my-1">
+              <span class="text-text-secondary dark:text-gray-400 mr-1 font-body">({{agent.propertiesCount}} عقار)</span>
+              <span class="ml-1 font-semibold text-text-primary dark:text-white">{{agent.rating}}</span>
+              <span class="material-symbols-outlined text-base">star</span>
+            </div>
+            <div class="flex gap-2 mt-2">
+              <button class="bg-primary text-white text-xs px-3 py-1.5 rounded-md flex-1 hover:bg-primary/90 transition-colors font-display">تواصل</button>
+              <button class="bg-primary/10 text-primary dark:bg-secondary/20 dark:text-white text-xs px-3 py-1.5 rounded-md flex-1 hover:bg-primary/20 transition-colors font-display">الملف الشخصي</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="py-16 bg-card-background dark:bg-background-dark">
+  <div class="container mx-auto px-6">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-3xl font-bold text-text-primary dark:text-white font-display">آخر المقالات</h2>
+      <a routerLink="/blog" class="bg-primary/10 text-primary dark:bg-secondary/20 dark:text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/20 transition-colors font-display">عرض الكل</a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (post of latestPosts; track post.title) {
+        <div class="bg-background-light dark:bg-gray-800 rounded-lg border border-border-color overflow-hidden flex flex-col transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer" routerLink="/blog/post-slug">
+          <div class="relative">
+            <div class="w-full aspect-[16/9] bg-cover bg-center transition-transform duration-500 hover:scale-105" [style.background-image]="'url(' + post.image + ')'"></div>
+            <span class="absolute top-4 left-4 bg-secondary/90 text-white text-xs font-bold px-3 py-1 rounded font-display">{{post.category}}</span>
+          </div>
+          <div class="p-4 flex flex-col flex-1 text-right">
+            <h3 class="text-lg font-semibold text-text-primary dark:text-white line-clamp-2 font-display">{{post.title}}</h3>
+            <p class="text-sm text-text-secondary dark:text-gray-400 mt-2 flex-grow line-clamp-2 font-body">{{post.excerpt}}</p>
+            <div class="flex items-center justify-between text-xs text-text-secondary dark:text-gray-500 mt-4 pt-4 border-t border-border-color">
+              <p class="font-body">{{post.author}} - {{post.date}}</p>
+              <span class="text-primary dark:text-secondary font-semibold hover:underline font-display">اقرأ المزيد</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

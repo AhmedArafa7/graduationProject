@@ -1,0 +1,53 @@
+<div class="bg-background-light dark:bg-background-dark font-display min-h-screen py-12">
+  <div class="layout-content-container flex flex-col max-w-6xl mx-auto px-4 md:px-10">
+    
+    <div class="flex flex-wrap gap-2 mb-8 text-sm font-medium">
+      <a routerLink="/" class="text-text-secondary dark:text-gray-400 hover:text-primary transition-colors">الرئيسية</a>
+      <span class="text-text-secondary dark:text-gray-400">/</span>
+      <span class="text-text-primary dark:text-white font-bold">خريطة الموقع</span>
+    </div>
+
+    <div class="flex flex-col gap-4 mb-12 text-center">
+      <h1 class="text-text-primary dark:text-white text-4xl font-black tracking-tight">خريطة الموقع</h1>
+      <p class="text-text-secondary dark:text-gray-400 text-lg max-w-2xl mx-auto font-body">
+        دليل شامل لجميع الصفحات المتاحة على منصة Baytology لمساعدتك في الوصول إلى ما تبحث عنه بسهولة.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      @for (section of sitemapSections; track section.title) {
+        <div class="bg-card-background dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-color dark:border-gray-700 hover:shadow-md transition-shadow duration-300">
+          
+          <div class="flex items-center gap-3 mb-6 pb-4 border-b border-border-color dark:border-gray-700">
+            <div class="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary dark:text-white">
+              <span class="material-symbols-outlined">{{ section.icon }}</span>
+            </div>
+            <h3 class="text-lg font-bold text-text-primary dark:text-white">{{ section.title }}</h3>
+          </div>
+
+          <ul class="space-y-3">
+            @for (link of section.links; track link.label) {
+              <li>
+                <a [routerLink]="link.url" 
+                   [queryParams]="link.queryParams"
+                   class="flex items-center gap-2 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors group">
+                  <span class="material-symbols-outlined text-sm opacity-50 group-hover:opacity-100 rtl:rotate-180 transition-opacity">arrow_right_alt</span>
+                  <span class="text-sm font-medium">{{ link.label }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+    </div>
+
+    <div class="mt-12 p-6 bg-primary/5 dark:bg-white/5 rounded-xl text-center border border-primary/10 dark:border-white/10">
+      <p class="text-text-secondary dark:text-gray-400 text-sm font-medium">
+        تساعد هذه الصفحة محركات البحث مثل Google على فهرسة محتوى الموقع بشكل فعال، وتسهل على المستخدمين التنقل.
+      </p>
+    </div>
+
+  </div>
+</div>

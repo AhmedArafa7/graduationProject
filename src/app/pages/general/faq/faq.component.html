@@ -1,0 +1,93 @@
+<div class="bg-background-light dark:bg-background-dark font-display min-h-screen py-12">
+  <div class="layout-content-container flex flex-col max-w-4xl mx-auto px-4 md:px-10">
+    
+    <div class="flex flex-wrap gap-2 mb-8 text-sm font-medium">
+      <a routerLink="/" class="text-text-secondary dark:text-gray-400 hover:text-primary transition-colors">الرئيسية</a>
+      <span class="text-text-secondary dark:text-gray-400">/</span>
+      <span class="text-text-primary dark:text-white font-bold">الأسئلة الشائعة</span>
+    </div>
+
+    <div class="text-center mb-12">
+      <h1 class="text-3xl md:text-4xl font-black text-text-primary dark:text-white mb-4 tracking-tight">كيف يمكننا مساعدتك؟</h1>
+      <p class="text-text-secondary dark:text-gray-400 mb-8 text-lg">ابحث في قاعدة المعرفة الخاصة بـ Baytology أو تصفح الأسئلة حسب القسم.</p>
+      
+      <div class="relative max-w-2xl mx-auto">
+        <input 
+          [(ngModel)]="searchQuery"
+          type="text" 
+          class="w-full h-14 pr-12 pl-4 rounded-2xl border border-border-color dark:border-gray-600 bg-white dark:bg-gray-800 text-text-primary dark:text-white shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-text-secondary"
+          placeholder="ابحث عن سؤالك هنا..."
+        >
+        <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary text-2xl">search</span>
+      </div>
+    </div>
+
+    <div class="mb-8 overflow-x-auto pb-2 no-scrollbar">
+      <div class="flex items-center gap-3 min-w-max justify-start md:justify-center px-1">
+        @for (cat of categories; track cat) {
+          <button 
+            (click)="setCategory(cat)"
+            class="px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 border"
+            [class]="activeCategory() === cat 
+              ? 'bg-primary text-white border-primary shadow-md' 
+              : 'bg-white dark:bg-gray-800 text-text-secondary dark:text-gray-400 border-border-color dark:border-gray-700 hover:border-primary hover:text-primary dark:hover:text-white'">
+            {{ cat }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      @if (filteredFaqs().length === 0) {
+        <div class="text-center py-12">
+          <span class="material-symbols-outlined text-6xl text-text-secondary/30 mb-4">help_center</span>
+          <h3 class="text-xl font-bold text-text-primary dark:text-white">لم يتم العثور على نتائج</h3>
+          <p class="text-text-secondary dark:text-gray-400 mt-2">حاول البحث بكلمات مختلفة أو تصفح الأقسام.</p>
+        </div>
+      } @else {
+        @for (faq of filteredFaqs(); track faq.id) {
+          <div class="bg-card-background dark:bg-gray-800 rounded-xl border border-border-color dark:border-gray-700 overflow-hidden transition-all duration-300"
+               [class.shadow-md]="openQuestionId() === faq.id">
+            
+            <button 
+              (click)="toggleQuestion(faq.id)"
+              class="w-full flex items-center justify-between p-5 text-right bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+              <h3 class="text-base md:text-lg font-bold text-text-primary dark:text-white">{{ faq.question }}</h3>
+              <span class="material-symbols-outlined text-text-secondary transition-transform duration-300"
+                    [class.rotate-180]="openQuestionId() === faq.id">
+                expand_more
+              </span>
+            </button>
+
+            <div class="overflow-hidden transition-all duration-300 ease-in-out"
+                 [style.max-height]="openQuestionId() === faq.id ? '500px' : '0'"
+                 [style.opacity]="openQuestionId() === faq.id ? '1' : '0'">
+              <div class="p-5 pt-0 text-text-secondary dark:text-gray-300 leading-loose border-t border-border-color dark:border-gray-700 bg-background-light/30 dark:bg-gray-900/30">
+                {{ faq.answer }}
+              </div>
+            </div>
+
+          </div>
+        }
+      }
+    </div>
+
+    <div class="mt-16 bg-card-background dark:bg-gray-800 rounded-2xl p-8 text-center border border-border-color dark:border-gray-700 shadow-sm">
+      <h3 class="text-2xl font-bold text-text-primary dark:text-white mb-2">لم تجد إجابتك؟</h3>
+      <p class="text-text-secondary dark:text-gray-400 mb-6">تواصل معنا مباشرة أو اسأل مساعدنا الذكي.</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a routerLink="/contact" class="flex items-center gap-2 h-12 px-8 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-lg hover:shadow-xl">
+          <span class="material-symbols-outlined">mail</span>
+          تواصل معنا
+        </a>
+        <button 
+          (click)="openChatbot()" 
+            class="flex items-center gap-2 h-12 px-8 bg-secondary text-white rounded-xl font-bold hover:bg-secondary/90 transition-colors shadow-lg hover:shadow-xl cursor-pointer">
+              <span class="material-symbols-outlined">smart_toy</span>
+                اسأل المساعد الذكي
+            </button>
+      </div>
+    </div>
+
+  </div>
+</div>

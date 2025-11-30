@@ -1,0 +1,37 @@
+<header class="fixed top-0 left-0 right-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm border-b border-border-color">
+  <div class="container mx-auto px-6 py-3 flex items-center justify-between">
+    
+    <a routerLink="/" class="flex items-center gap-3 text-text-primary dark:text-white hover:opacity-90 transition-opacity">
+      <img [src]="logoUrl" alt="Baytology Logo" class="h-10 w-auto object-contain">
+      <h2 class="text-text-primary dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] font-display">Baytology</h2>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8 font-display">
+      <a routerLink="/search" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">شراء</a>
+      <a routerLink="/search" [queryParams]="{type: 'rent'}" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">إيجار</a>
+      <a routerLink="/agents" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">الوكلاء</a>
+      <a routerLink="/blog" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">المدونة</a>
+      <a routerLink="/about" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">من نحن</a>
+    </nav>
+
+    <div class="flex items-center gap-3 font-display">
+      @if (isLoggedIn()) {
+        <button class="flex items-center justify-center rounded-full h-10 w-10 bg-background-light dark:bg-gray-800 text-text-secondary hover:bg-gray-200 transition-colors">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <div class="size-10 rounded-full overflow-hidden border border-border-color cursor-pointer" [style.backgroundImage]="'url(' + userAvatar() + ')'" style="background-size: cover; background-position: center;"></div>
+      } @else {
+        <a routerLink="/auth/login" class="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-6 bg-primary/10 text-primary dark:text-white text-sm font-bold hover:bg-primary/20 transition-colors">
+           تسجيل الدخول
+        </a>
+        <a routerLink="/auth/signup" class="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-6 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-transform hover:scale-105 shadow-sm">
+           حساب جديد
+        </a>
+      }
+      <button class="md:hidden p-2 text-text-primary dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+
+  </div>
+</header>

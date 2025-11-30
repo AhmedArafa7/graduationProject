@@ -1,0 +1,248 @@
+<div class="flex min-h-screen w-full font-display bg-white dark:bg-background-dark">
+  <!-- Left Side - Login Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 bg-white dark:bg-background-dark overflow-y-auto">
+    <div class="w-full max-w-md py-8">
+      
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-text-primary dark:text-white mb-3">تسجيل الدخول</h2>
+        <p class="text-text-secondary dark:text-gray-400">أدخل بياناتك للمتابعة</p>
+      </div>
+
+      <!-- Login Form -->
+      <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="space-y-6" novalidate>
+        
+        <!-- Email Field -->
+        <div class="space-y-1.5">
+          <label for="email" class="block text-sm font-medium text-text-secondary dark:text-gray-300">
+            البريد الإلكتروني
+          </label>
+          <input 
+            id="email"
+            [(ngModel)]="email" 
+            #emailCtrl="ngModel"
+            name="email" 
+            type="email"
+            class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2 focus:outline-none"
+            [class]="getInputClasses(emailCtrl, 'email')"
+            placeholder="name@example.com" 
+            required
+            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            (blur)="onEmailBlur()"
+            [attr.aria-invalid]="emailCtrl.invalid"
+            aria-describedby="email-error"
+          />
+          
+          @if (showEmailError()) {
+            <div id="email-error" class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
+              <span class="material-symbols-outlined text-sm">error</span>
+              @if (emailCtrl.hasError('required')) {
+                <span>البريد الإلكتروني مطلوب</span>
+              } @else if (emailCtrl.hasError('pattern')) {
+                <span>صيغة البريد غير صحيحة</span>
+              } @else if (emailCtrl.hasError('emailNotFound')) {
+                <span>البريد الإلكتروني غير مسجل</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Password Field -->
+        <div class="space-y-1.5">
+          <label for="password" class="block text-sm font-medium text-text-secondary dark:text-gray-300">
+            كلمة المرور
+          </label>
+          <div class="relative">
+            <input 
+              id="password"
+              [(ngModel)]="password" 
+              #passwordCtrl="ngModel"
+              name="password"
+              [type]="isPasswordVisible() ? 'text' : 'password'"
+              class="w-full h-12 px-4 pr-12 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2 focus:outline-none"
+              [class]="getInputClasses(passwordCtrl, 'password')"
+              placeholder="••••••••" 
+              required
+              minlength="8"
+              (input)="onPasswordInput()"
+              [attr.aria-invalid]="passwordCtrl.invalid"
+              aria-describedby="password-error password-strength"
+            />
+            <button 
+              type="button" 
+              (click)="togglePasswordVisibility()" 
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 rounded p-1"
+              [attr.aria-label]="isPasswordVisible() ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'"
+            >
+              <span class="material-symbols-outlined text-xl">
+                {{ isPasswordVisible() ? 'visibility' : 'visibility_off' }}
+              </span>
+            </button>
+          </div>
+
+          <!-- Password Strength -->
+          @if (password().length > 0 && !passwordCtrl.hasError('required')) {
+            <div id="password-strength" class="mt-2">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs text-text-secondary dark:text-gray-400">قوة كلمة المرور:</span>
+                <span class="text-xs font-medium" [class]="getPasswordStrengthClass()">
+                  {{ getPasswordStrengthText() }}
+                </span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                <div class="h-1.5 rounded-full transition-all duration-300" [class]="getPasswordStrengthBarClass()" [style.width.%]="getPasswordStrength()"></div>
+              </div>
+            </div>
+          }
+
+          <!-- Password Error -->
+          @if (showPasswordError()) {
+            <div id="password-error" class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
+              <span class="material-symbols-outlined text-sm">error</span>
+              @if (passwordCtrl.hasError('required')) {
+                <span>كلمة المرور مطلوبة</span>
+              } @else if (passwordCtrl.hasError('minlength')) {
+                <span>يجب أن تكون 8 أحرف على الأقل</span>
+              } @else if (passwordCtrl.hasError('incorrectPassword')) {
+                <span>كلمة المرور غير صحيحة</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Remember Me & Forgot Password -->
+        <div class="flex items-center justify-between pt-1">
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <div class="relative flex items-center">
+              <input 
+                id="rememberMe"
+                [(ngModel)]="rememberMe" 
+                name="rememberMe" 
+                type="checkbox" 
+                class="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-primary checked:border-primary transition-all focus:ring-2 focus:ring-primary/50" 
+              />
+              <span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </div>
+            <span class="text-sm text-text-secondary dark:text-gray-400 select-none group-hover:text-primary transition-colors">
+              تذكرني
+            </span>
+          </label>
+          <a 
+            routerLink="/auth/forgot-password" 
+            class="text-sm font-bold text-primary hover:underline transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 rounded px-1"
+          >
+            نسيت كلمة المرور؟
+          </a>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          [disabled]="loginForm.invalid || isSubmitting()"
+          class="w-full h-12 bg-primary hover:bg-primary/90 disabled:hover:bg-primary text-white font-bold rounded-lg shadow-md transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-primary/50"
+          [attr.aria-busy]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <span class="material-symbols-outlined animate-spin text-xl">progress_activity</span>
+            <span>جاري التحقق...</span>
+          } @else {
+            <span>تسجيل الدخول</span>
+            <span class="material-symbols-outlined rtl:rotate-180">login</span>
+          }
+        </button>
+      </form>
+
+      <!-- Social Login Divider -->
+      <div class="relative my-8">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="bg-white dark:bg-background-dark px-4 text-text-secondary dark:text-gray-400">
+            أو تابع باستخدام
+          </span>
+        </div>
+      </div>
+
+      <!-- Social Login Buttons -->
+      <div class="flex gap-4">
+        <button 
+          (click)="loginWithGoogle()"
+          [disabled]="isSubmitting()"
+          class="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-text-primary dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-gray-400/50"
+        >
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="Google" loading="lazy">
+          Google
+        </button>
+        <button 
+          (click)="loginWithFacebook()"
+          [disabled]="isSubmitting()"
+          class="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-text-primary dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+        >
+          <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="Facebook" loading="lazy">
+          Facebook
+        </button>
+      </div>
+
+      <!-- Signup Link -->
+      <p class="mt-8 text-center text-sm text-text-secondary dark:text-gray-400">
+        ليس لديك حساب؟ 
+        <a 
+          routerLink="/auth/signup" 
+          class="font-bold text-primary hover:underline transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 rounded px-1"
+        >
+          إنشاء حساب جديد
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Right Side - Brand Section -->
+  <div class="relative hidden w-1/2 lg:flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-[#4B4B4B] text-white overflow-hidden">
+    
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]"></div>
+    
+    <!-- Content -->
+    <div class="relative z-10 flex flex-col items-center text-center p-12 max-w-lg">
+      
+      <!-- Logo -->
+      <div class="mb-8 flex flex-col items-center gap-3">
+        <img 
+          src="/Baytology_image.png" 
+          alt="Baytology Logo" 
+          class="h-16 w-auto brightness-0 invert opacity-90"
+          loading="lazy"
+        >
+        <h1 class="text-3xl font-bold tracking-tight">Baytology</h1>
+      </div>
+      
+      <!-- Welcome Message -->
+      <h2 class="text-4xl font-bold mb-4">مرحباً بعودتك!</h2>
+      <p class="text-lg text-gray-300 leading-relaxed mb-12">
+        المنصة العقارية الأكثر ثقة في مصر للبيع والشراء والإيجار.
+      </p>
+
+      <!-- Stats -->
+      <div class="flex justify-center gap-4 w-full">
+        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px] hover:bg-white/15 transition-all">
+          <p class="text-gray-300 text-xs">عقارات متاحة</p>
+          <p class="text-xl font-bold">10,210+</p>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px] hover:bg-white/15 transition-all">
+          <p class="text-gray-300 text-xs">عملاء سعداء</p>
+          <p class="text-xl font-bold">5,000+</p>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px] hover:bg-white/15 transition-all">
+          <p class="text-gray-300 text-xs">صفقات ناجحة</p>
+          <p class="text-xl font-bold">3,500+</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

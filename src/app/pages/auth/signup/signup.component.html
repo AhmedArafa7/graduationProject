@@ -1,0 +1,243 @@
+<div class="flex min-h-screen w-full font-display bg-white dark:bg-background-dark">
+
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 bg-white dark:bg-background-dark overflow-y-auto">
+    <div class="w-full max-w-md py-8">
+      
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-text-primary dark:text-white mb-3">إنشاء حساب جديد</h2>
+        <p class="text-text-secondary dark:text-gray-400">ابدأ رحلتك العقارية معنا اليوم</p>
+      </div>
+
+      <div class="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8">
+        <button (click)="setUserType('buyer')" 
+                class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2"
+                [class]="userType() === 'buyer' ? 'bg-white dark:bg-gray-700 text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-gray-400 hover:text-primary'">
+          <span class="material-symbols-outlined text-lg">person</span>
+          مشتري / مستأجر
+        </button>
+        <button (click)="setUserType('agent')" 
+                class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2"
+                [class]="userType() === 'agent' ? 'bg-white dark:bg-gray-700 text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-gray-400 hover:text-primary'">
+          <span class="material-symbols-outlined text-lg">real_estate_agent</span>
+          وكيل عقاري
+        </button>
+      </div>
+
+      <form #signupForm="ngForm" (ngSubmit)="onSubmit(signupForm)" class="space-y-5" novalidate>
+        
+        <div class="space-y-1.5">
+          <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">الاسم بالكامل</label>
+          <input 
+            [(ngModel)]="name" #nameCtrl="ngModel" name="name" type="text"
+            class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2"
+            [class]="(nameCtrl.invalid && (nameCtrl.dirty || nameCtrl.touched || signupForm.submitted)) 
+              ? 'border-red-500 focus:ring-red-500' 
+              : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
+            placeholder="أدخل اسمك الكامل"
+            required
+            minlength="3"
+            pattern="^[\u0600-\u06FFa-zA-Z\s]+$"
+          />
+          @if (nameCtrl.invalid && (nameCtrl.dirty || nameCtrl.touched || signupForm.submitted)) {
+            <div class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
+              @if (nameCtrl.hasError('required')) { <span>الاسم مطلوب</span> }
+              @else if (nameCtrl.hasError('minlength')) { <span>الاسم قصير جداً</span> }
+              @else if (nameCtrl.hasError('pattern')) { <span>يرجى إدخال حروف فقط</span> }
+            </div>
+          }
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">البريد الإلكتروني</label>
+          <input 
+            [(ngModel)]="email" #emailCtrl="ngModel" name="email" type="email"
+            class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2"
+            [class]="(emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched || signupForm.submitted)) 
+              ? 'border-red-500 focus:ring-red-500' 
+              : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
+            placeholder="name@example.com" required
+            pattern="^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+          />
+          @if (emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched || signupForm.submitted)) {
+            <div class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
+              @if (emailCtrl.hasError('required')) { <span>البريد الإلكتروني مطلوب</span> }
+              @else { <span>صيغة البريد غير صحيحة</span> }
+            </div>
+          }
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">رقم الهاتف</label>
+          <div class="flex direction-ltr">
+            <input 
+              [(ngModel)]="phone" #phoneCtrl="ngModel" name="phone" type="tel"
+              class="w-full h-12 px-4 rounded-r-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 text-right focus:ring-2"
+              [class]="(phoneCtrl.invalid && (phoneCtrl.dirty || phoneCtrl.touched || signupForm.submitted)) 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
+              placeholder="01xxxxxxxxx" 
+              required
+              pattern="^01[0125][0-9]{8}$"
+            />
+            <div class="flex items-center justify-center px-4 bg-gray-50 dark:bg-gray-700 border border-l-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-text-secondary font-bold text-sm">
+              +20
+            </div>
+          </div>
+          @if (phoneCtrl.invalid && (phoneCtrl.dirty || phoneCtrl.touched || signupForm.submitted)) {
+            <div class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
+              @if (phoneCtrl.hasError('required')) { <span>رقم الهاتف مطلوب</span> }
+              @else { <span>رقم هاتف مصري غير صحيح (يجب أن يبدأ بـ 01 ويتكون من 11 رقم)</span> }
+            </div>
+          }
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">كلمة المرور</label>
+          <div class="relative">
+            <input 
+              [(ngModel)]="password" #passCtrl="ngModel" name="password"
+              [type]="isPasswordVisible() ? 'text' : 'password'"
+              class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2"
+              [class]="(passCtrl.invalid && (passCtrl.dirty || passCtrl.touched || signupForm.submitted)) 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
+              placeholder="••••••••" required minlength="8"
+            />
+            <button type="button" (click)="togglePasswordVisibility()" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors focus:outline-none">
+              <span class="material-symbols-outlined text-xl">{{ isPasswordVisible() ? 'visibility' : 'visibility_off' }}</span>
+            </button>
+          </div>
+          
+          @if (password().length > 0) {
+            <div class="flex gap-1 mt-2 h-1 transition-all duration-300">
+              <div class="h-full rounded-full flex-1" [class]="password().length >= 1 ? 'bg-red-500' : 'bg-gray-200'"></div>
+              <div class="h-full rounded-full flex-1" [class]="password().length >= 6 ? 'bg-yellow-500' : 'bg-gray-200'"></div>
+              <div class="h-full rounded-full flex-1" [class]="password().length >= 8 ? 'bg-green-500' : 'bg-gray-200'"></div>
+              <div class="h-full rounded-full flex-1" [class]="password().length >= 10 ? 'bg-blue-500' : 'bg-gray-200'"></div>
+            </div>
+          }
+          
+          @if (passCtrl.invalid && (passCtrl.dirty || passCtrl.touched || signupForm.submitted)) {
+            <div class="text-red-500 text-xs font-bold mt-1">يجب أن تكون 8 أحرف على الأقل</div>
+          }
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">تأكيد كلمة المرور</label>
+          <div class="relative">
+            <input 
+              [(ngModel)]="confirmPassword" #confirmPassCtrl="ngModel" name="confirmPassword"
+              [type]="isConfirmPasswordVisible() ? 'text' : 'password'"
+              class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2"
+              [class]="(!passwordsMatch() && confirmPassCtrl.dirty) 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
+              placeholder="••••••••" required
+            />
+            <button type="button" (click)="toggleConfirmPasswordVisibility()" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors focus:outline-none">
+              <span class="material-symbols-outlined text-xl">{{ isConfirmPasswordVisible() ? 'visibility' : 'visibility_off' }}</span>
+            </button>
+          </div>
+          @if (!passwordsMatch() && confirmPassCtrl.dirty) {
+            <div class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
+              <span class="material-symbols-outlined text-sm">error</span>
+              <span>كلمات المرور غير متطابقة</span>
+            </div>
+          }
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <label class="flex items-start gap-3 cursor-pointer group">
+            <div class="relative flex items-center mt-0.5">
+              <input [(ngModel)]="agreeTerms" name="agreeTerms" type="checkbox" class="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-primary checked:border-primary transition-all" required />
+              <span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+              </span>
+            </div>
+            <span class="text-sm text-text-secondary dark:text-gray-400 group-hover:text-text-primary transition-colors select-none">
+              أوافق على <a routerLink="/terms" class="text-primary font-bold hover:underline">الشروط والأحكام</a> و <a routerLink="/privacy-policy" class="text-primary font-bold hover:underline">سياسة الخصوصية</a>
+            </span>
+          </label>
+          
+          <label class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative flex items-center">
+              <input [(ngModel)]="newsletter" name="newsletter" type="checkbox" class="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-primary checked:border-primary transition-all" />
+              <span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+              </span>
+            </div>
+            <span class="text-sm text-text-secondary dark:text-gray-400 group-hover:text-text-primary transition-colors select-none">
+              أرغب في تلقي النشرة الإخبارية وعروض العقارات
+            </span>
+          </label>
+        </div>
+
+        <button 
+          type="submit" 
+          [disabled]="signupForm.invalid || !passwordsMatch() || isSubmitting()"
+          class="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-md transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          @if (isSubmitting()) {
+            <span class="material-symbols-outlined animate-spin text-xl">progress_activity</span>
+            <span>جاري إنشاء الحساب...</span>
+          } @else {
+            <span>إنشاء الحساب</span>
+            <span class="material-symbols-outlined rtl:rotate-180">person_add</span>
+          }
+        </button>
+      </form>
+      <div class="relative my-8">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="bg-white dark:bg-background-dark px-4 text-text-secondary dark:text-gray-400">أو سجل باستخدام</span>
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <button class="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-text-primary dark:text-white text-sm font-semibold">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="Google">
+          Google
+        </button>
+        <button class="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-text-primary dark:text-white text-sm font-semibold">
+          <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="Facebook">
+          Facebook
+        </button>
+      </div>
+
+      <p class="mt-8 text-center text-sm text-text-secondary dark:text-gray-400">
+        لديك حساب بالفعل؟ 
+        <a routerLink="/auth/login" class="font-bold text-primary hover:underline transition-colors">تسجيل الدخول</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="relative hidden w-1/2 lg:flex flex-col items-center justify-center bg-[#4B4B4B] text-white overflow-hidden">
+    <div class="relative z-10 flex flex-col items-center text-center p-12 max-w-lg">
+      <div class="mb-8 flex flex-col items-center gap-3">
+        <img src="/Baytology_image.png" alt="Baytology Logo" class="h-16 w-auto brightness-0 invert opacity-90">
+        <h1 class="text-3xl font-bold tracking-tight">Baytology</h1>
+      </div>
+      <h2 class="text-4xl font-bold mb-4">انضم إلينا!</h2>
+      <p class="text-lg text-gray-300 leading-relaxed mb-12">
+        استمتع بتجربة بحث عقاري فريدة واحصل على توصيات ذكية تناسب احتياجاتك.
+      </p>
+      <div class="flex justify-center gap-4 w-full">
+        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px]">
+          <p class="text-gray-300 text-xs">عقارات متاحة</p>
+          <p class="text-xl font-bold">10,210+</p>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px]">
+          <p class="text-gray-300 text-xs">عملاء سعداء</p>
+          <p class="text-xl font-bold">5,000+</p>
+        </div>
+        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px]">
+          <p class="text-gray-300 text-xs">صفقات ناجحة</p>
+          <p class="text-xl font-bold">3,500+</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

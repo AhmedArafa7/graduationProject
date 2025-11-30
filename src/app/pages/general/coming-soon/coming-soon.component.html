@@ -1,0 +1,70 @@
+<div class="min-h-[85vh] flex items-center justify-center p-4 md:p-8 font-display">
+  
+  <div class="w-full max-w-5xl bg-card-background dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden border border-border-color dark:border-gray-700 relative min-h-[600px] flex items-center">
+    
+    <div class="absolute inset-0 bg-cover bg-center z-0" 
+         style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDYEehqcNGApWk5yWJ0CDSfo7IJbAWrf0rb2lpHjYBOmgaXdWja7vaWClORbGZeCfi7qArtvwsre8rjZn06MsomKYBOpugTb92f2wKvL6zF8YfRc-em9Edo42xsOSOyjcn4nHsJW3TiCiQUX7P23bP60zdaiPrzYCQLxaeITmu9ih1DIrjjXKh7Zalj6FARmiYaj8lji7WlhU52A0ZXiwF8-5z-YR4gxTCkqIAm70G2i4oj5VRqujGRPXMh_HwQeOsZlrarnSbzb6o');">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/40 dark:from-background-dark/95 dark:via-background-dark/80 dark:to-background-dark/40 z-10"></div>
+
+    <div class="relative z-20 w-full md:w-3/4 lg:w-1/2 p-8 md:p-16 flex flex-col gap-8">
+      
+      <div class="space-y-4">
+        <span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary dark:bg-secondary/20 dark:text-white text-sm font-bold tracking-wide">
+          قريباً
+        </span>
+        <h1 class="text-4xl md:text-6xl font-black text-text-primary dark:text-white leading-tight">
+          ميزة جديدة<br>في الطريق!
+        </h1>
+        <p class="text-lg text-text-secondary dark:text-gray-300 leading-relaxed">
+          يعمل فريق Baytology بجد لإطلاق تجربة عقارية فريدة ستجعل بحثك عن المنزل أسهل وأذكى من أي وقت مضى.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-4">
+        <div class="flex flex-col items-center bg-white dark:bg-gray-900/80 backdrop-blur-sm p-4 rounded-xl border border-border-color dark:border-gray-600 w-20 shadow-sm">
+          <span class="text-3xl font-bold text-secondary">{{ days() }}</span>
+          <span class="text-xs text-text-secondary dark:text-gray-400 font-medium">يوم</span>
+        </div>
+        <div class="flex flex-col items-center bg-white dark:bg-gray-900/80 backdrop-blur-sm p-4 rounded-xl border border-border-color dark:border-gray-600 w-20 shadow-sm">
+          <span class="text-3xl font-bold text-primary dark:text-white">{{ hours() }}</span>
+          <span class="text-xs text-text-secondary dark:text-gray-400 font-medium">ساعة</span>
+        </div>
+        <div class="flex flex-col items-center bg-white dark:bg-gray-900/80 backdrop-blur-sm p-4 rounded-xl border border-border-color dark:border-gray-600 w-20 shadow-sm">
+          <span class="text-3xl font-bold text-primary dark:text-white">{{ minutes() }}</span>
+          <span class="text-xs text-text-secondary dark:text-gray-400 font-medium">دقيقة</span>
+        </div>
+        <div class="flex flex-col items-center bg-white dark:bg-gray-900/80 backdrop-blur-sm p-4 rounded-xl border border-border-color dark:border-gray-600 w-20 shadow-sm">
+          <span class="text-3xl font-bold text-primary dark:text-white">{{ seconds() }}</span>
+          <span class="text-xs text-text-secondary dark:text-gray-400 font-medium">ثانية</span>
+        </div>
+      </div>
+
+      <div class="w-full max-w-md">
+        <p class="text-sm font-bold text-text-primary dark:text-white mb-3">كن أول من يعلم عند الإطلاق</p>
+        
+        @if (isSubscribed()) {
+          <div class="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800 animate-fadeIn">
+            <span class="material-symbols-outlined">check_circle</span>
+            <span class="font-bold text-sm">تم التسجيل بنجاح! سنبقيك على اطلاع.</span>
+          </div>
+        } @else {
+          <div class="flex gap-2">
+            <input 
+              type="email" 
+              [(ngModel)]="email"
+              class="flex-1 h-12 px-4 rounded-xl border border-border-color dark:border-gray-600 bg-white/50 dark:bg-gray-900/50 text-text-primary dark:text-white placeholder:text-text-secondary focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+              placeholder="بريدك الإلكتروني"
+            >
+            <button 
+              (click)="subscribe()"
+              class="h-12 px-6 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-105 flex items-center justify-center">
+              <span class="material-symbols-outlined rtl:rotate-180">send</span>
+            </button>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+</div>

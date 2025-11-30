@@ -1,0 +1,126 @@
+<div class="flex flex-col h-[calc(100vh-64px)] font-display overflow-hidden">
+  
+  <div class="flex-shrink-0 z-20 bg-white dark:bg-background-dark border-b border-border-color dark:border-gray-700 px-4 py-3 shadow-sm">
+    <div class="container mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <div class="flex items-center flex-1 max-w-lg bg-background-light dark:bg-gray-800 rounded-lg px-3 h-10 border border-border-color dark:border-gray-600 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+        <span class="material-symbols-outlined text-text-secondary text-xl">search</span>
+        <input 
+          [(ngModel)]="searchQuery"
+          class="flex-1 bg-transparent border-none text-sm px-2 text-text-primary dark:text-white placeholder:text-text-secondary focus:ring-0" 
+          placeholder="ابحث عن مدينة، حي، أو مشروع..."
+        >
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a routerLink="/search" class="flex items-center gap-2 h-9 px-4 rounded-lg text-text-secondary dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm font-bold border border-transparent hover:border-border-color">
+          <span class="material-symbols-outlined text-lg">list</span>
+          قائمة
+        </a>
+        <div class="flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-white text-sm font-bold shadow-sm cursor-default">
+          <span class="material-symbols-outlined text-lg">map</span>
+          خريطة
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="flex flex-1 overflow-hidden relative">
+
+    <div class="w-full md:w-[400px] lg:w-[450px] bg-background-light dark:bg-background-dark border-l border-border-color dark:border-gray-700 flex flex-col z-10 shadow-xl">
+      
+      <div class="p-4 border-b border-border-color dark:border-gray-700 bg-white dark:bg-background-dark sticky top-0 z-10">
+        <h1 class="text-lg font-bold text-text-primary dark:text-white">عقارات للبيع في القاهرة</h1>
+        <p class="text-sm text-text-secondary dark:text-gray-400">{{ properties.length }} عقار متاح</p>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        @for (prop of properties; track prop.id) {
+          <div 
+            (mouseenter)="onCardHover(prop.id)"
+            (mouseleave)="onCardHover(null)"
+            [routerLink]="['/property', prop.id]"
+            class="bg-white dark:bg-gray-800 border border-border-color dark:border-gray-700 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex cursor-pointer group"
+            [class.border-primary]="hoveredPropertyId() === prop.id"
+            [class.ring-2]="hoveredPropertyId() === prop.id"
+            [ngClass]="{'ring-primary/20': hoveredPropertyId() === prop.id}"
+          >
+            <div class="w-32 bg-cover bg-center flex-shrink-0 group-hover:scale-105 transition-transform duration-500" 
+                 [style.background-image]="'url(' + prop.image + ')'">
+            </div>
+            
+            <div class="p-3 flex flex-col justify-between flex-1 bg-white dark:bg-gray-800 relative z-10">
+              <div>
+                <div class="flex justify-between items-start mb-1">
+                  <h3 class="text-sm font-bold text-text-primary dark:text-white line-clamp-1">{{ prop.title }}</h3>
+                  <button class="text-text-secondary hover:text-red-500 transition-colors">
+                    <span class="material-symbols-outlined text-lg">favorite</span>
+                  </button>
+                </div>
+                <p class="text-xs text-text-secondary dark:text-gray-400 flex items-center gap-1 mb-2">
+                  <span class="material-symbols-outlined text-[10px]">location_on</span> {{ prop.location }}
+                </p>
+                <p class="text-primary font-bold text-base">{{ prop.price }} ج.م</p>
+              </div>
+              
+              <div class="flex items-center gap-3 text-xs text-text-secondary dark:text-gray-400 border-t border-border-color dark:border-gray-700 pt-2 mt-2">
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">bed</span> {{ prop.beds }}</span>
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">bathtub</span> {{ prop.baths }}</span>
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">square_foot</span> {{ prop.area }} م²</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="flex-1 relative bg-gray-200 dark:bg-gray-900 overflow-hidden">
+      <div class="absolute inset-0 bg-cover bg-center opacity-80 dark:opacity-60" 
+           style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD_2plKoLCMr8_hOq6j4nR_grHncHoEI1jXzESJeL8Y9EL6hFysMG2uSK3Mtk-5cCdYJsVhXIXeA0QVg6vmUv5ZCGR8oOPeeIeq3zpqWkZ_dZTfp1AVKlBc32kSYUqq07i50I0gAYUEX1QKDJiCI22WYH9HmKeAP2xVF02Bs2E3eWOr0hXbxWdql8mUPcdbxduotXY6gR94Gn9MQz2-DU2ijjGKgGfL1GAq6tRFmBXRSS8uLn48Yr9UoV0E_j3a1qkRgO9xmmUs0q8'); filter: grayscale(20%);">
+      </div>
+      
+      @for (prop of properties; track prop.id) {
+        <div 
+          class="absolute transform -translate-x-1/2 -translate-y-full transition-all duration-300 cursor-pointer z-10 group"
+          [style.top]="prop.mapPosition.top"
+          [style.left]="prop.mapPosition.left"
+          [style.z-index]="hoveredPropertyId() === prop.id ? 50 : 10"
+        >
+          <div 
+            (mouseenter)="onCardHover(prop.id)"
+            (mouseleave)="onCardHover(null)"
+            [class]="hoveredPropertyId() === prop.id ? 'bg-secondary scale-110' : 'bg-primary hover:bg-secondary'"
+            class="text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-lg border-2 border-white dark:border-gray-800 relative flex items-center gap-1 transition-colors"
+          >
+            <span>{{ prop.price }}</span>
+            
+            <div [class]="hoveredPropertyId() === prop.id ? 'border-t-secondary' : 'border-t-primary group-hover:border-t-secondary'"
+                 class="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent transition-colors">
+            </div>
+          </div>
+
+          <div [class.opacity-100]="hoveredPropertyId() === prop.id"
+               [class.visible]="hoveredPropertyId() === prop.id"
+               class="opacity-0 invisible absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden transition-all duration-200 pointer-events-none">
+            <div class="h-24 bg-cover bg-center" [style.background-image]="'url(' + prop.image + ')'"></div>
+            <div class="p-2 text-center">
+              <p class="font-bold text-text-primary dark:text-white text-xs truncate">{{ prop.title }}</p>
+              <p class="text-primary font-bold text-xs mt-1">{{ prop.price }} ج.م</p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="absolute bottom-6 right-6 flex flex-col gap-2">
+        <button class="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg shadow-md flex items-center justify-center text-text-secondary hover:text-primary">
+          <span class="material-symbols-outlined">add</span>
+        </button>
+        <button class="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg shadow-md flex items-center justify-center text-text-secondary hover:text-primary">
+          <span class="material-symbols-outlined">remove</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

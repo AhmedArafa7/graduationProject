@@ -1,0 +1,56 @@
+<div class="min-h-[80vh] bg-background-light dark:bg-background-dark font-display flex items-center justify-center p-4 py-20">
+  <div class="max-w-4xl w-full text-center">
+
+    <div class="relative mb-12">
+       <h1 class="text-[120px] md:text-[180px] font-black text-primary/5 dark:text-white/5 leading-none select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">
+         404
+       </h1>
+       
+       <div class="relative z-10 flex flex-col items-center justify-center mt-10">
+         <div class="w-24 h-24 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-6 animate-bounce-slow">
+            <span class="material-symbols-outlined text-5xl text-red-500 dark:text-red-400">running_with_errors</span>
+         </div>
+
+         <h2 class="text-4xl md:text-5xl font-black text-text-primary dark:text-white mb-4 tracking-tight">
+           عذراً، هذه الصفحة غير موجودة
+         </h2>
+         <p class="text-text-secondary dark:text-gray-400 text-lg max-w-lg mx-auto leading-relaxed">
+           يبدو أن الرابط الذي حاولت الوصول إليه خاطئ، أو قد تكون الصفحة قد نُقلت أو حُذفت.
+         </p>
+       </div>
+    </div>
+
+    <div class="my-16 max-w-3xl mx-auto">
+      <div class="flex items-center gap-4 mb-8 justify-center">
+        <div class="h-px bg-border-color dark:bg-gray-700 flex-1"></div>
+        <p class="text-text-primary dark:text-white font-bold text-sm uppercase tracking-wider">هل كنت تبحث عن؟</p>
+        <div class="h-px bg-border-color dark:bg-gray-700 flex-1"></div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-right">
+        @for (link of suggestedLinks; track link.label) {
+          <a [routerLink]="link.url" class="flex items-start gap-4 p-5 rounded-2xl bg-white dark:bg-gray-800 border border-border-color dark:border-gray-700 hover:border-primary/50 dark:hover:border-primary/50 hover:shadow-md transition-all group">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 flex-shrink-0 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-2xl">{{ link.icon }}</span>
+            </div>
+            <div>
+              <h3 class="font-bold text-text-primary dark:text-white text-lg mb-1 group-hover:text-primary transition-colors">
+                {{ link.label }}
+              </h3>
+              <p class="text-text-secondary dark:text-gray-400 text-sm leading-snug">
+                {{ link.description }}
+              </p>
+            </div>
+            <span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity mr-auto self-center rtl:rotate-180">arrow_right_alt</span>
+          </a>
+        }
+      </div>
+    </div>
+
+    <a routerLink="/" class="inline-flex items-center gap-3 h-14 px-10 bg-primary hover:bg-primary/90 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+      <span class="material-symbols-outlined">home</span>
+      <span>العودة للصفحة الرئيسية</span>
+    </a>
+
+  </div>
+</div>

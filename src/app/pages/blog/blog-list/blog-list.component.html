@@ -1,0 +1,192 @@
+<div class="px-4 md:px-10 lg:px-20 xl:px-40 py-8 font-display bg-background-light dark:bg-background-dark min-h-screen">
+  <div class="layout-content-container flex flex-col max-w-screen-xl mx-auto flex-1">
+    
+    <div class="flex flex-wrap gap-2 mb-8 text-sm">
+      <a routerLink="/" class="text-text-secondary dark:text-gray-400 font-medium hover:text-primary transition-colors">الرئيسية</a>
+      <span class="text-text-secondary dark:text-gray-400">/</span>
+      <span class="text-text-primary dark:text-white font-bold">المدونة</span>
+    </div>
+
+    <div class="text-center mb-12 space-y-4">
+      <h1 class="text-4xl md:text-5xl font-black text-text-primary dark:text-white tracking-tight">مدونة Sakna</h1>
+      <p class="text-lg text-text-secondary dark:text-gray-400 max-w-2xl mx-auto">
+        أحدث الرؤى، اتجاهات السوق، ونصائح الخبراء لمساعدتك في اتخاذ قرارات عقارية ذكية.
+      </p>
+    </div>
+ 
+    <div class="sticky top-16 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm pb-4 mb-8 overflow-x-auto no-scrollbar">
+      <div class="flex items-center gap-3 min-w-max px-1">
+        @for (cat of categories; track cat) {
+          <button 
+            (click)="setCategory(cat)"
+            class="px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border"
+            [class]="selectedCategory() === cat 
+              ? 'bg-primary text-white border-primary shadow-md transform scale-105' 
+              : 'bg-white dark:bg-gray-800 text-text-secondary dark:text-gray-400 border-border-color dark:border-gray-700 hover:border-primary hover:text-primary dark:hover:text-white'">
+            {{ cat }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-10">
+      
+      <div class="w-full lg:w-[70%] flex flex-col gap-10">
+        
+        @if (isLoading()) {
+          <div class="animate-pulse rounded-2xl bg-gray-200 dark:bg-gray-800 h-[400px] w-full"></div>
+        } @else {
+          <div class="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer" [routerLink]="['/blog', featuredPost.id]">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+            <div class="w-full h-[400px] bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+                 [style.background-image]="'url(' + featuredPost.image + ')'">
+            </div>
+            <div class="absolute bottom-0 right-0 p-6 md:p-8 z-20 w-full md:w-3/4">
+              <span class="inline-block bg-secondary text-white text-xs font-bold px-3 py-1 rounded-full mb-3 shadow-sm">
+                {{ featuredPost.category }}
+              </span>
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-3 leading-tight group-hover:text-secondary transition-colors">
+                {{ featuredPost.title }}
+              </h2>
+              <p class="text-gray-200 text-sm md:text-base line-clamp-2 mb-4">
+                {{ featuredPost.excerpt }}
+              </p>
+              <div class="flex items-center gap-4 text-gray-300 text-xs font-medium">
+                <div class="flex items-center gap-2">
+                  <img [src]="featuredPost.authorImage" class="w-8 h-8 rounded-full border-2 border-white/20">
+                  <span>{{ featuredPost.author }}</span>
+                </div>
+                <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                <span>{{ featuredPost.date }}</span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                <span>{{ featuredPost.readTime }}</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          
+          @if (isLoading()) {
+            @for (item of [1,2,3,4]; track item) {
+              <div class="flex flex-col gap-4">
+                <div class="w-full h-48 bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4 animate-pulse"></div>
+                <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 animate-pulse"></div>
+              </div>
+            }
+          } @else if (displayedPosts().length === 0) {
+            <div class="col-span-full flex flex-col items-center justify-center py-16 text-center">
+              <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-text-secondary">
+                <span class="material-symbols-outlined text-4xl">search_off</span>
+              </div>
+              <h3 class="text-xl font-bold text-text-primary dark:text-white">لا توجد نتائج</h3>
+              <p class="text-text-secondary dark:text-gray-400 mt-2">لم نعثر على مقالات تطابق بحثك. جرب كلمات مفتاحية أخرى.</p>
+              <button (click)="searchQuery.set('')" class="mt-6 text-primary font-bold hover:underline">عرض كل المقالات</button>
+            </div>
+          } @else {
+            @for (post of displayedPosts(); track post.id) {
+              <div class="group flex flex-col bg-card-background dark:bg-gray-800 rounded-xl overflow-hidden border border-border-color dark:border-gray-700 hover:shadow-xl transition-all duration-300 hover:-translate-y-1" [routerLink]="['/blog', post.id]">
+                
+                <div class="relative overflow-hidden h-56">
+                  <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
+                       [style.background-image]="'url(' + post.image + ')'">
+                  </div>
+                  <div class="absolute top-4 right-4">
+                    <span class="text-xs font-bold px-3 py-1 rounded-full shadow-sm" [ngClass]="post.catColor">
+                      {{ post.category }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="p-5 flex flex-col flex-grow">
+                  <div class="flex items-center gap-2 text-xs text-text-secondary dark:text-gray-400 mb-3">
+                    <span class="material-symbols-outlined text-sm">calendar_today</span>
+                    <span>{{ post.date }}</span>
+                    <span class="w-1 h-1 bg-gray-300 rounded-full mx-1"></span>
+                    <span class="material-symbols-outlined text-sm">schedule</span>
+                    <span>{{ post.readTime }}</span>
+                  </div>
+                  
+                  <h3 class="text-lg font-bold text-text-primary dark:text-white mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                    {{ post.title }}
+                  </h3>
+                  
+                  <p class="text-sm text-text-secondary dark:text-gray-300 line-clamp-3 mb-4 flex-grow leading-relaxed">
+                    {{ post.excerpt }}
+                  </p>
+                  
+                  <div class="flex items-center justify-between border-t border-border-color dark:border-gray-700 pt-4 mt-auto">
+                    <div class="flex items-center gap-2">
+                      <img [src]="post.authorImage" class="w-8 h-8 rounded-full object-cover">
+                      <span class="text-xs font-bold text-text-primary dark:text-white">{{ post.author }}</span>
+                    </div>
+                    <span class="text-primary text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                      اقرأ المزيد <span class="material-symbols-outlined text-sm rotate-180">arrow_back</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+      </div>
+
+      <aside class="w-full lg:w-[30%] space-y-8">
+        
+        <div class="bg-card-background dark:bg-gray-800 p-6 rounded-xl border border-border-color dark:border-gray-700 shadow-sm sticky top-24">
+          <h4 class="text-lg font-bold text-text-primary dark:text-white mb-4">بحث</h4>
+          <div class="relative">
+            <input 
+              [(ngModel)]="searchQuery"
+              type="text" 
+              class="w-full h-12 pr-10 pl-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white focus:ring-2 focus:ring-primary focus:border-primary text-sm transition-shadow"
+              placeholder="ابحث في المقالات..."
+            >
+            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary">search</span>
+          </div>
+        </div>
+
+        <div class="bg-card-background dark:bg-gray-800 p-6 rounded-xl border border-border-color dark:border-gray-700 shadow-sm">
+          <h4 class="text-lg font-bold text-text-primary dark:text-white mb-5 pb-2 border-b border-border-color dark:border-gray-700">الأكثر قراءة</h4>
+          <div class="flex flex-col gap-5">
+            @for (pop of popularPosts; track pop.id) {
+              <a [routerLink]="['/blog', pop.id]" class="flex gap-4 group items-center">
+                <div class="w-20 h-20 rounded-lg bg-cover bg-center flex-shrink-0 overflow-hidden">
+                  <div class="w-full h-full transition-transform duration-300 group-hover:scale-110" [style.background-image]="'url(' + pop.image + ')'"></div>
+                </div>
+                <div>
+                  <span class="text-xs text-text-secondary dark:text-gray-400 mb-1 block">{{ pop.date }}</span>
+                  <h5 class="text-sm font-bold text-text-primary dark:text-white leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                    {{ pop.title }}
+                  </h5>
+                </div>
+              </a>
+            }
+          </div>
+        </div>
+
+        <div class="bg-primary rounded-2xl p-8 text-center text-white relative overflow-hidden shadow-lg">
+          <div class="relative z-10">
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <span class="material-symbols-outlined text-2xl">mark_email_unread</span>
+            </div>
+            <h4 class="text-xl font-bold mb-2">النشرة العقارية</h4>
+            <p class="text-white/80 text-sm mb-6 leading-relaxed">اشترك ليصلك أحدث أخبار السوق ونصائح الاستثمار أسبوعياً.</p>
+            <div class="flex flex-col gap-3">
+              <input type="email" class="w-full h-11 px-4 rounded-lg border-0 bg-white/10 text-white placeholder:text-white/60 text-sm focus:ring-2 focus:ring-secondary backdrop-blur-sm" placeholder="البريد الإلكتروني">
+              <button class="w-full h-11 bg-secondary hover:bg-secondary/90 text-white font-bold text-sm rounded-lg transition-transform hover:scale-105 shadow-md">
+                اشترك الآن
+              </button>
+            </div>
+          </div>
+          <div class="absolute -top-12 -right-12 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+          <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+</div>

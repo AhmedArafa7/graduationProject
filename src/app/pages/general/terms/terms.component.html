@@ -1,0 +1,165 @@
+<div class="bg-background-light dark:bg-background-dark font-display min-h-screen py-12">
+  <div class="container mx-auto px-4 md:px-10 lg:px-20 xl:px-40">
+    
+    <div class="flex flex-wrap gap-2 mb-8 text-sm font-medium">
+      <a routerLink="/" class="text-text-secondary dark:text-gray-400 hover:text-primary transition-colors">الرئيسية</a>
+      <span class="text-text-secondary dark:text-gray-400">/</span>
+      <span class="text-text-primary dark:text-white font-bold">شروط الخدمة</span>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-12">
+      
+      <div class="w-full lg:w-3/4">
+        <div class="bg-card-background dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-border-color dark:border-gray-700">
+          
+          <div class="flex flex-wrap justify-between gap-6 items-start mb-10 border-b border-border-color dark:border-gray-700 pb-8">
+            <div class="flex flex-col gap-2">
+              <h1 class="text-text-primary dark:text-white text-4xl font-black tracking-tight">شروط الخدمة</h1>
+              <p class="text-text-secondary dark:text-gray-400 text-base">آخر تحديث: {{ lastUpdated() }}</p>
+            </div>
+            <button class="flex items-center justify-center gap-2 h-11 px-6 bg-secondary/10 text-secondary hover:bg-secondary hover:text-white rounded-lg text-sm font-bold transition-all duration-300">
+              <span class="material-symbols-outlined text-lg">download</span>
+              <span>تحميل PDF</span>
+            </button>
+          </div>
+
+          <article class="prose prose-lg max-w-none dark:prose-invert text-text-primary dark:text-gray-300 space-y-12">
+            
+            <section id="introduction" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">1.</span> المقدمة
+              </h2>
+              <p class="leading-loose text-base">
+                مرحبًا بك في <strong class="text-primary dark:text-white">Baytology</strong>. باستخدامك لمنصتنا وخدماتنا، فإنك توافق على الالتزام بشروط الخدمة هذه ("الشروط"). يرجى قراءتها بعناية قبل البدء في استخدام الموقع. إذا كنت لا توافق على هذه الشروط، يرجى التوقف عن استخدام خدماتنا فوراً.
+              </p>
+            </section>
+
+            <section id="acceptance" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">2.</span> الموافقة على الشروط
+              </h2>
+              <p class="leading-loose text-base">
+                من خلال الوصول إلى أو استخدام منصة Baytology، فإنك تقر بأنك قرأت وفهمت وتوافق على الالتزام بهذه الشروط وبسياسة الخصوصية الخاصة بنا. هذه الاتفاقية ملزمة قانونياً وتطبق على جميع الزوار والمستخدمين والوكلاء.
+              </p>
+            </section>
+
+            <section id="accounts" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">3.</span> حسابات المستخدمين
+              </h2>
+              <p class="leading-loose text-base mb-4">
+                للوصول إلى بعض الميزات (مثل حفظ العقارات أو التواصل مع الوكلاء)، يجب عليك إنشاء حساب. أنت توافق على:
+              </p>
+              <ul class="list-disc list-inside space-y-2 bg-background-light dark:bg-gray-700/50 p-6 rounded-xl border border-border-color dark:border-gray-600">
+                <li>تقديم معلومات دقيقة وكاملة وحديثة.</li>
+                <li>الحفاظ على سرية كلمة المرور الخاصة بك.</li>
+                <li>تحمل المسؤولية الكاملة عن جميع الأنشطة التي تحدث تحت حسابك.</li>
+                <li>إبلاغنا فوراً عن أي استخدام غير مصرح به لحسابك.</li>
+              </ul>
+            </section>
+
+            <section id="conduct" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">4.</span> سلوك المستخدم
+              </h2>
+              <p class="leading-loose text-base">
+                أنت توافق على عدم استخدام الخدمة لأي غرض غير قانوني أو محظور. يحظر تماماً: نشر معلومات كاذبة أو مضللة عن العقارات، مضايقة المستخدمين الآخرين، استخدام برامج آلية (Bots) لجمع البيانات، أو محاولة اختراق أمان الموقع.
+              </p>
+            </section>
+
+            <section id="content" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">5.</span> المحتوى وحقوق الملكية
+              </h2>
+              <p class="leading-loose text-base">
+                عندما تقوم برفع محتوى (مثل صور العقارات أو الأوصاف)، فإنك تحتفظ بملكية هذا المحتوى، ولكنك تمنح Baytology ترخيصاً عالمياً وغير حصري لاستخدامه وعرضه وتوزيعه عبر المنصة لأغراض التسويق والتشغيل.
+              </p>
+            </section>
+
+            <section id="disclaimer" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">6.</span> إخلاء المسؤولية
+              </h2>
+              <p class="leading-loose text-base">
+                يتم توفير خدماتنا على أساس "كما هي". Baytology هي منصة تربط بين البائعين والمشترين ولا تضمن دقة أو اكتمال المعلومات المقدمة من قبل الأطراف الثالثة (الوكلاء أو الملاك)، ولا تتحمل مسؤولية أي صفقات تتم خارج المنصة.
+              </p>
+            </section>
+
+            <section id="termination" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">7.</span> الإنهاء
+              </h2>
+              <p class="leading-loose text-base">
+                نحتفظ بالحق في إنهاء أو تعليق حسابك ومنع وصولك إلى الخدمة فوراً، دون إشعار مسبق، إذا قمت بانتهاك هذه الشروط، أو لأي سبب آخر نراه مناسباً لضمان سلامة المنصة.
+              </p>
+            </section>
+
+            <section id="law" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">8.</span> القانون الحاكم وفض النزاعات
+              </h2>
+              <p class="leading-loose text-base">
+                تخضع هذه الشروط وتُفسر وفقًا لقوانين <strong>جمهورية مصر العربية</strong>. أي نزاع ينشأ عن هذه الشروط أو يتعلق بها سيتم حله ودياً أولاً، وإذا تعذر ذلك، يتم اللجوء إلى المحاكم المختصة في القاهرة.
+              </p>
+            </section>
+
+          </article>
+        </div>
+      </div>
+
+      <aside class="w-full lg:w-1/4 hidden lg:block">
+        <div class="sticky top-24">
+          <div class="bg-card-background dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-color dark:border-gray-700">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-border-color dark:border-gray-700">
+              <span class="material-symbols-outlined text-primary text-2xl">gavel</span>
+              <h3 class="text-text-primary dark:text-white text-lg font-bold">بنود الاتفاقية</h3>
+            </div>
+            
+            <nav class="flex flex-col gap-1">
+              <button (click)="scrollToSection('introduction')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">info</span>
+                <span class="text-sm font-medium">المقدمة</span>
+              </button>
+
+              <button (click)="scrollToSection('acceptance')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">check_circle</span>
+                <span class="text-sm font-medium">الموافقة على الشروط</span>
+              </button>
+
+              <button (click)="scrollToSection('accounts')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">manage_accounts</span>
+                <span class="text-sm font-medium">حسابات المستخدمين</span>
+              </button>
+
+              <button (click)="scrollToSection('conduct')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">rule</span>
+                <span class="text-sm font-medium">سلوك المستخدم</span>
+              </button>
+
+              <button (click)="scrollToSection('content')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">copyright</span>
+                <span class="text-sm font-medium">المحتوى والملكية</span>
+              </button>
+
+              <button (click)="scrollToSection('disclaimer')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">warning</span>
+                <span class="text-sm font-medium">إخلاء المسؤولية</span>
+              </button>
+
+              <button (click)="scrollToSection('termination')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">block</span>
+                <span class="text-sm font-medium">الإنهاء</span>
+              </button>
+
+              <button (click)="scrollToSection('law')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">balance</span>
+                <span class="text-sm font-medium">القانون والنزاعات</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</div>

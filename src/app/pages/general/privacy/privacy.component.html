@@ -1,0 +1,149 @@
+<div class="bg-background-light dark:bg-background-dark font-display min-h-screen py-12">
+  <div class="container mx-auto px-4 md:px-10 lg:px-20 xl:px-40">
+    
+    <div class="flex flex-wrap gap-2 mb-8 text-sm font-medium">
+      <a routerLink="/" class="text-text-secondary dark:text-gray-400 hover:text-primary transition-colors">الرئيسية</a>
+      <span class="text-text-secondary dark:text-gray-400">/</span>
+      <span class="text-text-primary dark:text-white font-bold">سياسة الخصوصية</span>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-12">
+      
+      <div class="w-full lg:w-3/4">
+        <div class="bg-card-background dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-border-color dark:border-gray-700">
+          
+          <div class="flex flex-wrap justify-between gap-6 items-start mb-10 border-b border-border-color dark:border-gray-700 pb-8">
+            <div class="flex flex-col gap-2">
+              <h1 class="text-text-primary dark:text-white text-4xl font-black tracking-tight">سياسة الخصوصية</h1>
+              <p class="text-text-secondary dark:text-gray-400 text-base">آخر تحديث: {{ lastUpdated() }}</p>
+            </div>
+            <button class="flex items-center justify-center gap-2 h-11 px-6 bg-secondary/10 text-secondary hover:bg-secondary hover:text-white rounded-lg text-sm font-bold transition-all duration-300">
+              <span class="material-symbols-outlined text-lg">download</span>
+              <span>تحميل PDF</span>
+            </button>
+          </div>
+
+          <article class="prose prose-lg max-w-none dark:prose-invert text-text-primary dark:text-gray-300 space-y-12">
+            
+            <section id="introduction" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">1.</span> مقدمة
+              </h2>
+              <p class="leading-loose text-base">
+                تلتزم <strong class="text-primary dark:text-white">Baytology</strong> بحماية خصوصية مستخدميها. تشرح سياسة الخصوصية هذه كيف نجمع ونستخدم ونكشف ونحمي معلوماتك عند زيارة موقعنا الإلكتروني واستخدام خدماتنا. يرجى قراءة سياسة الخصوصية هذه بعناية. إذا كنت لا توافق على شروط سياسة الخصوصية هذه، يرجى عدم الوصول إلى الموقع.
+              </p>
+            </section>
+
+            <section id="information" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">2.</span> المعلومات التي نجمعها
+              </h2>
+              <p class="leading-loose text-base mb-4">
+                قد نجمع معلومات عنك بطرق متنوعة. تشمل المعلومات التي قد نجمعها على الموقع ما يلي:
+              </p>
+              <ul class="list-disc list-inside space-y-2 bg-background-light dark:bg-gray-700/50 p-6 rounded-xl border border-border-color dark:border-gray-600">
+                <li><strong>البيانات الشخصية:</strong> مثل اسمك وعنوان بريدك الإلكتروني ورقم هاتفك.</li>
+                <li><strong>المعلومات الديموغرافية:</strong> مثل عمرك وجنسك وموطنك واهتماماتك.</li>
+                <li><strong>بيانات العقار:</strong> تفاصيل العقارات التي تبحث عنها أو تعرضها للبيع/الإيجار.</li>
+              </ul>
+            </section>
+
+            <section id="usage" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">3.</span> كيف نستخدم معلوماتك
+              </h2>
+              <p class="leading-loose text-base">
+                إن الحصول على معلومات دقيقة عنك يسمح لنا بتزويدك بتجربة سلسة وفعالة ومخصصة. نستخدم المعلومات من أجل: إنشاء وإدارة حسابك، إرسال التنبيهات العقارية، تمكين التواصل مع الوكلاء، وتحسين خوارزميات الذكاء الاصطناعي لدينا.
+              </p>
+            </section>
+
+            <section id="sharing" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">4.</span> مشاركة البيانات
+              </h2>
+              <p class="leading-loose text-base">
+                قد نشارك المعلومات مع جهات خارجية فقط في الحالات التالية: بموجب القانون، لحماية الحقوق، أو مع مزودي الخدمات الموثوقين (مثل بوابات الدفع) لإتمام معاملاتك.
+              </p>
+            </section>
+
+            <section id="cookies" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">5.</span> ملفات تعريف الارتباط (Cookies)
+              </h2>
+              <p class="leading-loose text-base">
+                نستخدم الكوكيز لتحسين تجربتك، مثل تذكر تفضيلات البحث وحالة تسجيل الدخول. يمكنك التحكم في إعدادات الكوكيز من متصفحك، ولكن قد يؤثر ذلك على بعض وظائف الموقع.
+              </p>
+            </section>
+
+            <section id="security" class="scroll-mt-28">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
+                <span class="text-secondary">6.</span> أمان البيانات
+              </h2>
+              <p class="leading-loose text-base">
+                نحن نستخدم تدابير أمنية متقدمة (تشفير SSL، جدران حماية) لحماية معلوماتك. ومع ذلك، لا يوجد نظام آمن بنسبة 100%، لذا نوصي دائماً بالحفاظ على سرية كلمة المرور الخاصة بك.
+              </p>
+            </section>
+
+            <section id="contact" class="scroll-mt-28 border-t border-border-color dark:border-gray-700 pt-8">
+              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4">اتصل بنا</h2>
+              <p class="leading-loose text-base">
+                إذا كانت لديك أسئلة حول سياسة الخصوصية، يرجى التواصل معنا عبر البريد الإلكتروني: 
+                <a href="mailto:privacy@baytology.com" class="text-secondary font-bold hover:underline">privacy&#64;baytology.com</a>
+              </p>
+            </section>
+
+          </article>
+        </div>
+      </div>
+
+      <aside class="w-full lg:w-1/4 hidden lg:block">
+        <div class="sticky top-24">
+          <div class="bg-card-background dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-color dark:border-gray-700">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-border-color dark:border-gray-700">
+              <span class="material-symbols-outlined text-primary text-2xl">menu_book</span>
+              <h3 class="text-text-primary dark:text-white text-lg font-bold">محتويات السياسة</h3>
+            </div>
+            
+            <nav class="flex flex-col gap-1">
+              <button (click)="scrollToSection('introduction')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">info</span>
+                <span class="text-sm font-medium">مقدمة</span>
+              </button>
+
+              <button (click)="scrollToSection('information')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">database</span>
+                <span class="text-sm font-medium">المعلومات التي نجمعها</span>
+              </button>
+
+              <button (click)="scrollToSection('usage')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">settings</span>
+                <span class="text-sm font-medium">كيف نستخدم معلوماتك</span>
+              </button>
+
+              <button (click)="scrollToSection('sharing')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">share</span>
+                <span class="text-sm font-medium">مشاركة البيانات</span>
+              </button>
+
+              <button (click)="scrollToSection('cookies')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">cookie</span>
+                <span class="text-sm font-medium">ملفات تعريف الارتباط</span>
+              </button>
+
+              <button (click)="scrollToSection('security')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">lock</span>
+                <span class="text-sm font-medium">أمان البيانات</span>
+              </button>
+
+              <button (click)="scrollToSection('contact')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group mt-2 border-t border-border-color dark:border-gray-700 pt-4">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">mark_email_unread</span>
+                <span class="text-sm font-medium">اتصل بنا</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</div>
