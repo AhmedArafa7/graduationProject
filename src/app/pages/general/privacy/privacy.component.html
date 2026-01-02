@@ -2,7 +2,7 @@
   <div class="container mx-auto px-4 md:px-10 lg:px-20 xl:px-40">
     
     <div class="flex flex-wrap gap-2 mb-8 text-sm font-medium">
-      <a routerLink="/" class="text-text-secondary dark:text-gray-400 hover:text-primary transition-colors">الرئيسية</a>
+      <a routerLink="/" class="text-text-secondary dark:text-gray-400 hover:text-primary transition-colors cursor-pointer">الرئيسية</a>
       <span class="text-text-secondary dark:text-gray-400">/</span>
       <span class="text-text-primary dark:text-white font-bold">سياسة الخصوصية</span>
     </div>
@@ -10,133 +10,166 @@
     <div class="flex flex-col lg:flex-row gap-12">
       
       <div class="w-full lg:w-3/4">
-        <div class="bg-card-background dark:bg-gray-800 p-8 rounded-2xl shadow-sm border border-border-color dark:border-gray-700">
+        <div class="bg-card-background dark:bg-gray-800 p-1 rounded-2xl shadow-sm border border-border-color dark:border-gray-700 overflow-hidden">
           
-          <div class="flex flex-wrap justify-between gap-6 items-start mb-10 border-b border-border-color dark:border-gray-700 pb-8">
-            <div class="flex flex-col gap-2">
+          <div class="p-8 pb-0 flex flex-wrap justify-between gap-6 items-start mb-6">
+            <div>
               <h1 class="text-text-primary dark:text-white text-4xl font-black tracking-tight">سياسة الخصوصية</h1>
-              <p class="text-text-secondary dark:text-gray-400 text-base">آخر تحديث: {{ lastUpdated() }}</p>
+              <p class="text-text-secondary dark:text-gray-400 text-base mt-2">آخر تحديث: {{ lastUpdated() }}</p>
             </div>
-            <button class="flex items-center justify-center gap-2 h-11 px-6 bg-secondary/10 text-secondary hover:bg-secondary hover:text-white rounded-lg text-sm font-bold transition-all duration-300">
-              <span class="material-symbols-outlined text-lg">download</span>
-              <span>تحميل PDF</span>
+            
+            <button (click)="downloadPdf()" 
+                    [disabled]="isGeneratingPdf()"
+                    class="flex items-center justify-center gap-2 h-11 px-6 bg-secondary/10 text-secondary hover:bg-secondary hover:text-white rounded-lg text-sm font-bold transition-all duration-300 cursor-pointer disabled:opacity-70 disabled:cursor-wait">
+              @if (isGeneratingPdf()) {
+                <span class="material-symbols-outlined animate-spin text-lg">progress_activity</span>
+                <span>جاري المعالجة...</span>
+              } @else {
+                <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                <span>تحميل PDF</span>
+              }
             </button>
           </div>
 
-          <article class="prose prose-lg max-w-none dark:prose-invert text-text-primary dark:text-gray-300 space-y-12">
+          <div id="privacy-content-for-pdf" class="p-8 md:p-10 bg-white text-black w-full">
             
-            <section id="introduction" class="scroll-mt-28">
-              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
-                <span class="text-secondary">1.</span> مقدمة
-              </h2>
-              <p class="leading-loose text-base">
-                تلتزم <strong class="text-primary dark:text-white">Baytology</strong> بحماية خصوصية مستخدميها. تشرح سياسة الخصوصية هذه كيف نجمع ونستخدم ونكشف ونحمي معلوماتك عند زيارة موقعنا الإلكتروني واستخدام خدماتنا. يرجى قراءة سياسة الخصوصية هذه بعناية. إذا كنت لا توافق على شروط سياسة الخصوصية هذه، يرجى عدم الوصول إلى الموقع.
-              </p>
-            </section>
+            <div class="mb-10 text-center border-b-2 border-gray-100 pb-6">
+              <h2 class="text-3xl font-black text-[#2C3E87] mb-1">Baytology</h2>
+              <p class="text-gray-500 text-sm font-medium">وثيقة سياسة الخصوصية وشروط الاستخدام</p>
+            </div>
 
-            <section id="information" class="scroll-mt-28">
-              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
-                <span class="text-secondary">2.</span> المعلومات التي نجمعها
-              </h2>
-              <p class="leading-loose text-base mb-4">
-                قد نجمع معلومات عنك بطرق متنوعة. تشمل المعلومات التي قد نجمعها على الموقع ما يلي:
-              </p>
-              <ul class="list-disc list-inside space-y-2 bg-background-light dark:bg-gray-700/50 p-6 rounded-xl border border-border-color dark:border-gray-600">
-                <li><strong>البيانات الشخصية:</strong> مثل اسمك وعنوان بريدك الإلكتروني ورقم هاتفك.</li>
-                <li><strong>المعلومات الديموغرافية:</strong> مثل عمرك وجنسك وموطنك واهتماماتك.</li>
-                <li><strong>بيانات العقار:</strong> تفاصيل العقارات التي تبحث عنها أو تعرضها للبيع/الإيجار.</li>
-              </ul>
-            </section>
+            <article class="prose prose-lg max-w-none text-black leading-loose" dir="rtl">
+              
+              <section id="introduction" class="mb-10 scroll-mt-32">
+                <h3 class="text-xl font-bold text-[#2C3E87] mb-4 flex items-center gap-2">
+                  <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#2C3E87]/10 text-[#2C3E87] text-sm">1</span>
+                  المقدمة
+                </h3>
+                <p class="text-gray-700 text-justify text-base">
+                  مرحبًا بك في منصة <strong>Baytology</strong>. نحن ندرك أهمية الخصوصية بالنسبة لك، ونلتزم بحماية بياناتك الشخصية واحترام حقوقك. توضح هذه السياسة كيفية جمعنا واستخدامنا ومشاركتنا للمعلومات عند استخدامك لموقعنا الإلكتروني وتطبيقاتنا وخدماتنا العقارية. باستخدامك للمنصة، فإنك توافق على الممارسات الموضحة في هذه السياسة.
+                </p>
+              </section>
 
-            <section id="usage" class="scroll-mt-28">
-              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
-                <span class="text-secondary">3.</span> كيف نستخدم معلوماتك
-              </h2>
-              <p class="leading-loose text-base">
-                إن الحصول على معلومات دقيقة عنك يسمح لنا بتزويدك بتجربة سلسة وفعالة ومخصصة. نستخدم المعلومات من أجل: إنشاء وإدارة حسابك، إرسال التنبيهات العقارية، تمكين التواصل مع الوكلاء، وتحسين خوارزميات الذكاء الاصطناعي لدينا.
-              </p>
-            </section>
+              <section id="information" class="mb-10 scroll-mt-32">
+                <h3 class="text-xl font-bold text-[#2C3E87] mb-4 flex items-center gap-2">
+                  <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#2C3E87]/10 text-[#2C3E87] text-sm">2</span>
+                  المعلومات التي نجمعها
+                </h3>
+                <p class="text-gray-700 mb-4 text-sm">نقوم بجمع أنواع مختلفة من المعلومات لتقديم خدماتنا وتحسينها:</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 text-base pr-4">
+                  <li><strong>المعلومات الشخصية:</strong> الاسم، عنوان البريد الإلكتروني، رقم الهاتف، والعنوان البريدي عند إنشاء حساب أو التواصل معنا.</li>
+                  <li><strong>معلومات العقار:</strong> تفاصيل العقارات التي تبحث عنها، أو التي تقوم بعرضها للبيع أو الإيجار، بما في ذلك الصور والموقع والسعر.</li>
+                  <li><strong>بيانات الاستخدام:</strong> معلومات حول كيفية تفاعلك مع خدماتنا، مثل الصفحات التي تزورها، والوقت الذي تقضيه، وعمليات البحث التي تجريها.</li>
+                  <li><strong>المعلومات التقنية:</strong> عنوان IP، نوع المتصفح، ونظام التشغيل.</li>
+                </ul>
+              </section>
 
-            <section id="sharing" class="scroll-mt-28">
-              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
-                <span class="text-secondary">4.</span> مشاركة البيانات
-              </h2>
-              <p class="leading-loose text-base">
-                قد نشارك المعلومات مع جهات خارجية فقط في الحالات التالية: بموجب القانون، لحماية الحقوق، أو مع مزودي الخدمات الموثوقين (مثل بوابات الدفع) لإتمام معاملاتك.
-              </p>
-            </section>
+              <section id="usage" class="mb-10 scroll-mt-32">
+                <h3 class="text-xl font-bold text-[#2C3E87] mb-4 flex items-center gap-2">
+                  <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#2C3E87]/10 text-[#2C3E87] text-sm">3</span>
+                  كيف نستخدم معلوماتك
+                </h3>
+                <p class="text-gray-700 text-justify text-base">
+                  نستخدم المعلومات التي نجمعها للأغراض التالية:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <strong class="block text-[#2C3E87] mb-1 text-sm">تقديم الخدمة</strong>
+                    <span class="text-gray-600 text-sm">إدارة حسابك، وتسهيل عمليات البيع والشراء، والربط بينك وبين الوكلاء.</span>
+                  </div>
+                  <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <strong class="block text-[#2C3E87] mb-1 text-sm">التخصيص والذكاء الاصطناعي</strong>
+                    <span class="text-gray-600 text-sm">تقديم توصيات عقارية ذكية تناسب تفضيلاتك باستخدام خوارزمياتنا.</span>
+                  </div>
+                  <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <strong class="block text-[#2C3E87] mb-1 text-sm">التواصل</strong>
+                    <span class="text-gray-600 text-sm">إرسال تحديثات، نشرات إخبارية، وتنبيهات حول العقارات الجديدة.</span>
+                  </div>
+                  <div class="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                    <strong class="block text-[#2C3E87] mb-1 text-sm">الأمان والتحسين</strong>
+                    <span class="text-gray-600 text-sm">كشف الاحتيال، وتحسين أداء الموقع، وتطوير ميزات جديدة.</span>
+                  </div>
+                </div>
+              </section>
 
-            <section id="cookies" class="scroll-mt-28">
-              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
-                <span class="text-secondary">5.</span> ملفات تعريف الارتباط (Cookies)
-              </h2>
-              <p class="leading-loose text-base">
-                نستخدم الكوكيز لتحسين تجربتك، مثل تذكر تفضيلات البحث وحالة تسجيل الدخول. يمكنك التحكم في إعدادات الكوكيز من متصفحك، ولكن قد يؤثر ذلك على بعض وظائف الموقع.
-              </p>
-            </section>
+              <section id="sharing" class="mb-10 scroll-mt-32">
+                <h3 class="text-xl font-bold text-[#2C3E87] mb-4 flex items-center gap-2">
+                  <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#2C3E87]/10 text-[#2C3E87] text-sm">4</span>
+                  مشاركة المعلومات
+                </h3>
+                <p class="text-gray-700 text-justify text-base">
+                  نحن لا نبيع بياناتك الشخصية لأطراف ثالثة. قد نشارك معلوماتك فقط في الحالات التالية:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-gray-700 text-base mt-3 pr-4">
+                  <li>مع <strong>الوكلاء العقاريين والمطورين</strong> عندما تطلب التواصل معهم بخصوص عقار معين.</li>
+                  <li>مع <strong>مزودي الخدمات</strong> الذين يساعدوننا في تشغيل الموقع (مثل استضافة الخوادم).</li>
+                  <li>للامتثال <strong>للقوانين واللوائح</strong> المعمول بها أو استجابة لطلب قانوني ملزم.</li>
+                </ul>
+              </section>
 
-            <section id="security" class="scroll-mt-28">
-              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4 flex items-center gap-2">
-                <span class="text-secondary">6.</span> أمان البيانات
-              </h2>
-              <p class="leading-loose text-base">
-                نحن نستخدم تدابير أمنية متقدمة (تشفير SSL، جدران حماية) لحماية معلوماتك. ومع ذلك، لا يوجد نظام آمن بنسبة 100%، لذا نوصي دائماً بالحفاظ على سرية كلمة المرور الخاصة بك.
-              </p>
-            </section>
+              <section id="security" class="mb-10 scroll-mt-32">
+                <h3 class="text-xl font-bold text-[#2C3E87] mb-4 flex items-center gap-2">
+                  <span class="flex items-center justify-center w-8 h-8 rounded-full bg-[#2C3E87]/10 text-[#2C3E87] text-sm">5</span>
+                  أمن البيانات
+                </h3>
+                <p class="text-gray-700 text-justify text-base">
+                  نحن نستخدم تدابير أمنية إدارية وتقنية ومادية معقولة لحماية معلوماتك الشخصية. على الرغم من ذلك، لا يوجد نظام آمن بنسبة 100%، ولا يمكننا ضمان أمان معلوماتك بشكل مطلق، لكننا نسعى جاهدين لحمايتها وفقاً لأفضل المعايير.
+                </p>
+              </section>
 
-            <section id="contact" class="scroll-mt-28 border-t border-border-color dark:border-gray-700 pt-8">
-              <h2 class="text-2xl font-bold text-primary dark:text-white mb-4">اتصل بنا</h2>
-              <p class="leading-loose text-base">
-                إذا كانت لديك أسئلة حول سياسة الخصوصية، يرجى التواصل معنا عبر البريد الإلكتروني: 
-                <a href="mailto:privacy@baytology.com" class="text-secondary font-bold hover:underline">privacy&#64;baytology.com</a>
-              </p>
-            </section>
+              <section id="contact" class="mt-8 pt-8 border-t border-gray-200">
+                <h3 class="text-xl font-bold text-[#2C3E87] mb-4">اتصل بنا</h3>
+                <p class="text-gray-700 text-base mb-4">
+                  إذا كانت لديك أي أسئلة أو مخاوف بشأن سياسة الخصوصية هذه، يرجى الاتصال بفريق حماية البيانات لدينا:
+                </p>
+                <div class="flex items-center gap-2 text-base font-bold text-gray-800 bg-gray-100 p-4 rounded-lg w-fit">
+                  <span class="material-symbols-outlined text-[#2C3E87]">mail</span>
+                  <a href="mailto:privacy@baytology.ai" class="hover:text-[#2C3E87] transition-colors">privacy&#64;baytology.ai</a>
+                </div>
+              </section>
 
-          </article>
-        </div>
+            </article>
+            
+            <div class="mt-16 pt-6 border-t border-gray-200 text-center">
+              <p class="text-xs text-gray-400">© 2026 Baytology. جميع الحقوق محفوظة.</p>
+              <p class="text-xs text-gray-400 mt-1">تم إنشاء هذا المستند إلكترونياً عبر منصة Baytology</p>
+            </div>
+
+          </div>
+          </div>
       </div>
 
       <aside class="w-full lg:w-1/4 hidden lg:block">
         <div class="sticky top-24">
           <div class="bg-card-background dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-border-color dark:border-gray-700">
             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-border-color dark:border-gray-700">
-              <span class="material-symbols-outlined text-primary text-2xl">menu_book</span>
-              <h3 class="text-text-primary dark:text-white text-lg font-bold">محتويات السياسة</h3>
+              <span class="material-symbols-outlined text-primary text-2xl">toc</span>
+              <h3 class="text-text-primary dark:text-white text-lg font-bold">فهرس المحتويات</h3>
             </div>
             
             <nav class="flex flex-col gap-1">
-              <button (click)="scrollToSection('introduction')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
-                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">info</span>
-                <span class="text-sm font-medium">مقدمة</span>
+              <button (click)="scrollToSection('introduction')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group cursor-pointer">
+                <span class="text-sm font-medium">1. المقدمة</span>
+              </button>
+              
+              <button (click)="scrollToSection('information')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group cursor-pointer">
+                <span class="text-sm font-medium">2. المعلومات المجمعة</span>
               </button>
 
-              <button (click)="scrollToSection('information')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
-                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">database</span>
-                <span class="text-sm font-medium">المعلومات التي نجمعها</span>
+              <button (click)="scrollToSection('usage')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group cursor-pointer">
+                <span class="text-sm font-medium">3. استخدام المعلومات</span>
               </button>
 
-              <button (click)="scrollToSection('usage')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
-                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">settings</span>
-                <span class="text-sm font-medium">كيف نستخدم معلوماتك</span>
+              <button (click)="scrollToSection('sharing')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group cursor-pointer">
+                <span class="text-sm font-medium">4. مشاركة البيانات</span>
               </button>
 
-              <button (click)="scrollToSection('sharing')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
-                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">share</span>
-                <span class="text-sm font-medium">مشاركة البيانات</span>
+              <button (click)="scrollToSection('security')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group cursor-pointer">
+                <span class="text-sm font-medium">5. الأمن والحماية</span>
               </button>
 
-              <button (click)="scrollToSection('cookies')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
-                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">cookie</span>
-                <span class="text-sm font-medium">ملفات تعريف الارتباط</span>
-              </button>
-
-              <button (click)="scrollToSection('security')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group">
-                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">lock</span>
-                <span class="text-sm font-medium">أمان البيانات</span>
-              </button>
-
-              <button (click)="scrollToSection('contact')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group mt-2 border-t border-border-color dark:border-gray-700 pt-4">
-                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">mark_email_unread</span>
+              <button (click)="scrollToSection('contact')" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary/5 dark:hover:bg-white/5 text-text-secondary dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors text-right group mt-2 border-t border-border-color dark:border-gray-700 pt-4 cursor-pointer">
+                <span class="material-symbols-outlined text-lg opacity-50 group-hover:opacity-100">contact_support</span>
                 <span class="text-sm font-medium">اتصل بنا</span>
               </button>
             </nav>

@@ -10,7 +10,7 @@ export const routes: Routes = [
       // الصفحة الرئيسية
       { 
         path: '', 
-        title: 'Sakna.ai - الرئيسية',
+        title: 'Baytology.ai - الرئيسية',
         loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) 
       },
       // صفحة "قريباً" (Landing Page)

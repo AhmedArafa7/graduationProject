@@ -8,15 +8,15 @@
         <p class="text-text-secondary dark:text-gray-400">ابدأ رحلتك العقارية معنا اليوم</p>
       </div>
 
-      <div class="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8">
+      <div class="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8 border border-border-color dark:border-gray-700">
         <button (click)="setUserType('buyer')" 
-                class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2"
+                class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                 [class]="userType() === 'buyer' ? 'bg-white dark:bg-gray-700 text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-gray-400 hover:text-primary'">
           <span class="material-symbols-outlined text-lg">person</span>
           مشتري / مستأجر
         </button>
         <button (click)="setUserType('agent')" 
-                class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2"
+                class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                 [class]="userType() === 'agent' ? 'bg-white dark:bg-gray-700 text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-gray-400 hover:text-primary'">
           <span class="material-symbols-outlined text-lg">real_estate_agent</span>
           وكيل عقاري
@@ -27,156 +27,136 @@
         
         <div class="space-y-1.5">
           <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">الاسم بالكامل</label>
-          <input 
-            [(ngModel)]="name" #nameCtrl="ngModel" name="name" type="text"
-            class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2"
-            [class]="(nameCtrl.invalid && (nameCtrl.dirty || nameCtrl.touched || signupForm.submitted)) 
-              ? 'border-red-500 focus:ring-red-500' 
-              : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
-            placeholder="أدخل اسمك الكامل"
-            required
-            minlength="3"
-            pattern="^[\u0600-\u06FFa-zA-Z\s]+$"
-          />
-          @if (nameCtrl.invalid && (nameCtrl.dirty || nameCtrl.touched || signupForm.submitted)) {
-            <div class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
-              @if (nameCtrl.hasError('required')) { <span>الاسم مطلوب</span> }
-              @else if (nameCtrl.hasError('minlength')) { <span>الاسم قصير جداً</span> }
-              @else if (nameCtrl.hasError('pattern')) { <span>يرجى إدخال حروف فقط</span> }
-            </div>
+          <input [ngModel]="name()" (ngModelChange)="name.set($event)" #nameCtrl="ngModel" name="name" type="text"
+                 class="w-full h-12 px-4 rounded-lg border bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                 [class.border-red-500]="nameCtrl.invalid && (nameCtrl.dirty || nameCtrl.touched)"
+                 [class.border-gray-200]="!nameCtrl.invalid"
+                 [class.dark:border-gray-600]="!nameCtrl.invalid"
+                 placeholder="أدخل اسمك الكامل" required minlength="3">
+          
+          @if (nameCtrl.invalid && (nameCtrl.dirty || nameCtrl.touched)) {
+            <p class="text-red-500 text-xs font-bold animate-fadeIn">
+              @if (nameCtrl.hasError('required')) { الاسم مطلوب }
+              @if (nameCtrl.hasError('minlength')) { الاسم يجب أن يكون 3 أحرف على الأقل }
+            </p>
           }
         </div>
 
         <div class="space-y-1.5">
           <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">البريد الإلكتروني</label>
-          <input 
-            [(ngModel)]="email" #emailCtrl="ngModel" name="email" type="email"
-            class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2"
-            [class]="(emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched || signupForm.submitted)) 
-              ? 'border-red-500 focus:ring-red-500' 
-              : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
-            placeholder="name@example.com" required
-            pattern="^[a-zA-Z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
-          />
-          @if (emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched || signupForm.submitted)) {
-            <div class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
-              @if (emailCtrl.hasError('required')) { <span>البريد الإلكتروني مطلوب</span> }
-              @else { <span>صيغة البريد غير صحيحة</span> }
-            </div>
+          <input [ngModel]="email()" (ngModelChange)="email.set($event)" #emailCtrl="ngModel" name="email" type="email"
+                 dir="ltr"
+                 class="w-full h-12 px-4 rounded-lg border bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 text-right focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                 [class.border-red-500]="emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched)"
+                 [class.border-gray-200]="!emailCtrl.invalid"
+                 [class.dark:border-gray-600]="!emailCtrl.invalid"
+                 placeholder="name@example.com" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
+          
+          @if (emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched)) {
+            <p class="text-red-500 text-xs font-bold animate-fadeIn">بريد إلكتروني غير صحيح</p>
           }
         </div>
 
         <div class="space-y-1.5">
           <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">رقم الهاتف</label>
-          <div class="flex direction-ltr">
-            <input 
-              [(ngModel)]="phone" #phoneCtrl="ngModel" name="phone" type="tel"
-              class="w-full h-12 px-4 rounded-r-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 text-right focus:ring-2"
-              [class]="(phoneCtrl.invalid && (phoneCtrl.dirty || phoneCtrl.touched || signupForm.submitted)) 
-                ? 'border-red-500 focus:ring-red-500' 
-                : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
-              placeholder="01xxxxxxxxx" 
-              required
-              pattern="^01[0125][0-9]{8}$"
-            />
-            <div class="flex items-center justify-center px-4 bg-gray-50 dark:bg-gray-700 border border-l-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-text-secondary font-bold text-sm">
+          
+          <div class="flex w-full h-12 rounded-lg border overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all bg-gray-50 dark:bg-gray-700"
+               [class.border-red-500]="phoneCtrl.invalid && (phoneCtrl.dirty || phoneCtrl.touched)"
+               [class.border-gray-200]="!phoneCtrl.invalid"
+               [class.dark:border-gray-600]="!phoneCtrl.invalid"
+               dir="ltr">
+            
+            <div class="bg-gray-100 dark:bg-gray-600 flex items-center justify-center px-4 text-text-secondary dark:text-gray-200 font-bold text-sm border-r border-gray-200 dark:border-gray-500">
               +20
             </div>
+
+            <input [ngModel]="phone()" (ngModelChange)="phone.set($event)" #phoneCtrl="ngModel" name="phone" type="tel"
+                   (input)="restrictToNumbers($event)"
+                   class="flex-1 h-full px-4 border-none bg-transparent text-text-primary dark:text-white focus:ring-0 outline-none text-right placeholder:text-gray-400"
+                   placeholder="01xxxxxxxxx" required pattern="^01[0125][0-9]{8}$" maxlength="11">
           </div>
-          @if (phoneCtrl.invalid && (phoneCtrl.dirty || phoneCtrl.touched || signupForm.submitted)) {
-            <div class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
-              @if (phoneCtrl.hasError('required')) { <span>رقم الهاتف مطلوب</span> }
-              @else { <span>رقم هاتف مصري غير صحيح (يجب أن يبدأ بـ 01 ويتكون من 11 رقم)</span> }
-            </div>
+
+          @if (phoneCtrl.invalid && (phoneCtrl.dirty || phoneCtrl.touched)) {
+            <p class="text-red-500 text-xs font-bold animate-fadeIn text-right">رقم موبايل مصري غير صحيح</p>
           }
         </div>
 
         <div class="space-y-1.5">
           <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">كلمة المرور</label>
           <div class="relative">
-            <input 
-              [(ngModel)]="password" #passCtrl="ngModel" name="password"
-              [type]="isPasswordVisible() ? 'text' : 'password'"
-              class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2"
-              [class]="(passCtrl.invalid && (passCtrl.dirty || passCtrl.touched || signupForm.submitted)) 
-                ? 'border-red-500 focus:ring-red-500' 
-                : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
-              placeholder="••••••••" required minlength="8"
-            />
-            <button type="button" (click)="togglePasswordVisibility()" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors focus:outline-none">
-              <span class="material-symbols-outlined text-xl">{{ isPasswordVisible() ? 'visibility' : 'visibility_off' }}</span>
+            <input [ngModel]="password()" (ngModelChange)="password.set($event)" #passCtrl="ngModel" name="password"
+                   [type]="isPasswordVisible() ? 'text' : 'password'"
+                   dir="ltr"
+                   class="w-full h-12 px-4 pr-10 rounded-lg border bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                   [class.border-red-500]="passCtrl.invalid && (passCtrl.dirty || passCtrl.touched)"
+                   [class.border-gray-200]="!passCtrl.invalid"
+                   [class.dark:border-gray-600]="!passCtrl.invalid"
+                   placeholder="••••••••" required minlength="8">
+            
+            <button type="button" (click)="togglePasswordVisibility()" 
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors focus:outline-none cursor-pointer p-1">
+              <span class="material-symbols-outlined text-xl select-none">
+                {{ isPasswordVisible() ? 'visibility' : 'visibility_off' }}
+              </span>
             </button>
           </div>
           
           @if (password().length > 0) {
-            <div class="flex gap-1 mt-2 h-1 transition-all duration-300">
+            <div class="flex gap-1 mt-1 h-1 transition-all duration-300">
               <div class="h-full rounded-full flex-1" [class]="password().length >= 1 ? 'bg-red-500' : 'bg-gray-200'"></div>
               <div class="h-full rounded-full flex-1" [class]="password().length >= 6 ? 'bg-yellow-500' : 'bg-gray-200'"></div>
               <div class="h-full rounded-full flex-1" [class]="password().length >= 8 ? 'bg-green-500' : 'bg-gray-200'"></div>
               <div class="h-full rounded-full flex-1" [class]="password().length >= 10 ? 'bg-blue-500' : 'bg-gray-200'"></div>
             </div>
           }
-          
-          @if (passCtrl.invalid && (passCtrl.dirty || passCtrl.touched || signupForm.submitted)) {
-            <div class="text-red-500 text-xs font-bold mt-1">يجب أن تكون 8 أحرف على الأقل</div>
+
+          @if (passCtrl.invalid && (passCtrl.dirty || passCtrl.touched)) {
+            <p class="text-red-500 text-xs font-bold animate-fadeIn">يجب أن تكون 8 أحرف على الأقل</p>
           }
         </div>
 
         <div class="space-y-1.5">
           <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">تأكيد كلمة المرور</label>
           <div class="relative">
-            <input 
-              [(ngModel)]="confirmPassword" #confirmPassCtrl="ngModel" name="confirmPassword"
-              [type]="isConfirmPasswordVisible() ? 'text' : 'password'"
-              class="w-full h-12 px-4 rounded-lg border bg-white dark:bg-gray-800 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:ring-2"
-              [class]="(!passwordsMatch() && confirmPassCtrl.dirty) 
-                ? 'border-red-500 focus:ring-red-500' 
-                : 'border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-primary/50'"
-              placeholder="••••••••" required
-            />
-            <button type="button" (click)="toggleConfirmPasswordVisibility()" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors focus:outline-none">
-              <span class="material-symbols-outlined text-xl">{{ isConfirmPasswordVisible() ? 'visibility' : 'visibility_off' }}</span>
+            <input [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" #confirmPassCtrl="ngModel" name="confirmPassword"
+                   [type]="isConfirmPasswordVisible() ? 'text' : 'password'"
+                   dir="ltr"
+                   class="w-full h-12 px-4 pr-10 rounded-lg border bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                   [class.border-red-500]="!passwordsMatch() && confirmPassCtrl.dirty"
+                   [class.border-gray-200]="passwordsMatch() || !confirmPassCtrl.dirty"
+                   [class.dark:border-gray-600]="passwordsMatch() || !confirmPassCtrl.dirty"
+                   placeholder="••••••••" required>
+            
+            <button type="button" (click)="toggleConfirmPasswordVisibility()" 
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors focus:outline-none cursor-pointer p-1">
+              <span class="material-symbols-outlined text-xl select-none">
+                {{ isConfirmPasswordVisible() ? 'visibility' : 'visibility_off' }}
+              </span>
             </button>
           </div>
+          
           @if (!passwordsMatch() && confirmPassCtrl.dirty) {
-            <div class="text-red-500 text-xs font-bold mt-1 flex items-center gap-1 animate-fadeIn">
-              <span class="material-symbols-outlined text-sm">error</span>
-              <span>كلمات المرور غير متطابقة</span>
-            </div>
+            <p class="text-red-500 text-xs font-bold animate-fadeIn">كلمات المرور غير متطابقة</p>
           }
         </div>
 
         <div class="space-y-3 pt-2">
           <label class="flex items-start gap-3 cursor-pointer group">
-            <div class="relative flex items-center mt-0.5">
-              <input [(ngModel)]="agreeTerms" name="agreeTerms" type="checkbox" class="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-primary checked:border-primary transition-all" required />
-              <span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-              </span>
-            </div>
+            <input [ngModel]="agreeTerms()" (ngModelChange)="agreeTerms.set($event)" name="agreeTerms" type="checkbox" 
+                   class="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-primary checked:border-primary transition-all focus:ring-primary bg-white" required />
+            <span class="material-symbols-outlined absolute text-white text-xs pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity ml-0.5 mt-0.5">check</span>
             <span class="text-sm text-text-secondary dark:text-gray-400 group-hover:text-text-primary transition-colors select-none">
-              أوافق على <a routerLink="/terms" class="text-primary font-bold hover:underline">الشروط والأحكام</a> و <a routerLink="/privacy-policy" class="text-primary font-bold hover:underline">سياسة الخصوصية</a>
+              أوافق على <a routerLink="/terms" class="text-primary font-bold hover:underline">الشروط والأحكام</a>
             </span>
           </label>
-          
-          <label class="flex items-center gap-3 cursor-pointer group">
-            <div class="relative flex items-center">
-              <input [(ngModel)]="newsletter" name="newsletter" type="checkbox" class="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 checked:bg-primary checked:border-primary transition-all" />
-              <span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-              </span>
-            </div>
-            <span class="text-sm text-text-secondary dark:text-gray-400 group-hover:text-text-primary transition-colors select-none">
-              أرغب في تلقي النشرة الإخبارية وعروض العقارات
-            </span>
-          </label>
+          @if (!agreeTerms() && signupForm.submitted) {
+             <p class="text-red-500 text-xs font-bold animate-fadeIn">يجب الموافقة للمتابعة</p>
+          }
         </div>
 
-        <button 
-          type="submit" 
-          [disabled]="signupForm.invalid || !passwordsMatch() || isSubmitting()"
-          class="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-md transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-        >
+        <button type="submit" 
+                [disabled]="isSubmitting()"
+                class="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-md transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
           @if (isSubmitting()) {
             <span class="material-symbols-outlined animate-spin text-xl">progress_activity</span>
             <span>جاري إنشاء الحساب...</span>
@@ -186,6 +166,7 @@
           }
         </button>
       </form>
+
       <div class="relative my-8">
         <div class="absolute inset-0 flex items-center">
           <div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
@@ -196,48 +177,35 @@
       </div>
 
       <div class="flex gap-4">
-        <button class="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-text-primary dark:text-white text-sm font-semibold">
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="Google">
+        <button (click)="socialLogin('Google')" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-text-primary dark:text-white text-sm font-semibold cursor-pointer">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
           Google
         </button>
-        <button class="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-text-primary dark:text-white text-sm font-semibold">
-          <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="Facebook">
+        <button (click)="socialLogin('Facebook')" class="flex-1 flex items-center justify-center gap-2 h-11 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-text-primary dark:text-white text-sm font-semibold cursor-pointer">
+          <svg class="w-5 h-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
           Facebook
         </button>
       </div>
 
       <p class="mt-8 text-center text-sm text-text-secondary dark:text-gray-400">
         لديك حساب بالفعل؟ 
-        <a routerLink="/auth/login" class="font-bold text-primary hover:underline transition-colors">تسجيل الدخول</a>
+        <a routerLink="/auth/login" class="font-bold text-primary hover:underline transition-colors cursor-pointer">تسجيل الدخول</a>
       </p>
     </div>
   </div>
 
-  <div class="relative hidden w-1/2 lg:flex flex-col items-center justify-center bg-[#4B4B4B] text-white overflow-hidden">
+  <div class="relative hidden w-1/2 lg:flex flex-col items-center justify-center bg-gray-900 text-white overflow-hidden">
+    <div class="absolute inset-0 bg-cover bg-center opacity-40" 
+         style="background-image: url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2000&auto=format&fit=crop');">
+    </div>
     <div class="relative z-10 flex flex-col items-center text-center p-12 max-w-lg">
-      <div class="mb-8 flex flex-col items-center gap-3">
-        <img src="/Baytology_image.png" alt="Baytology Logo" class="h-16 w-auto brightness-0 invert opacity-90">
-        <h1 class="text-3xl font-bold tracking-tight">Baytology</h1>
-      </div>
-      <h2 class="text-4xl font-bold mb-4">انضم إلينا!</h2>
-      <p class="text-lg text-gray-300 leading-relaxed mb-12">
-        استمتع بتجربة بحث عقاري فريدة واحصل على توصيات ذكية تناسب احتياجاتك.
+      <h1 class="text-4xl font-black mb-4">انضم إلينا!</h1>
+      <p class="text-lg text-gray-200 leading-relaxed mb-8">
+        سجل الآن واستمتع بتجربة بحث عقاري فريدة واحصل على توصيات ذكية تناسب احتياجاتك.
       </p>
-      <div class="flex justify-center gap-4 w-full">
-        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px]">
-          <p class="text-gray-300 text-xs">عقارات متاحة</p>
-          <p class="text-xl font-bold">10,210+</p>
-        </div>
-        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px]">
-          <p class="text-gray-300 text-xs">عملاء سعداء</p>
-          <p class="text-xl font-bold">5,000+</p>
-        </div>
-        <div class="flex-1 flex flex-col items-center justify-center gap-1 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 p-4 min-h-[100px]">
-          <p class="text-gray-300 text-xs">صفقات ناجحة</p>
-          <p class="text-xl font-bold">3,500+</p>
-        </div>
-      </div>
     </div>
   </div>
 
 </div>
+
+Facebook

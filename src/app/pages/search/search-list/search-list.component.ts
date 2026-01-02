@@ -1,18 +1,104 @@
-import { Component } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { GlobalStateService, SearchFilters } from '../../../core/services/global-state.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-search-list',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './search-list.component.html',
   styleUrl: './search-list.component.scss'
 })
 export class SearchListComponent {
-  // حالة العرض (شبكة / قائمة)
-  viewMode: 'grid' | 'list' = 'grid';
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  public globalState = inject(GlobalStateService);
+  private toast = inject(ToastService);
 
-  // بيانات العقارات (محاكاة)
+  viewMode = signal<'grid' | 'list'>('grid');
+  currentPage = signal(1);
+  isLoading = signal(false);
+
+  // Local Filters
+  localFilters: SearchFilters;
+
+  constructor() {
+    // تحميل الفلاتر من الذاكرة العامة
+    this.localFilters = { ...this.globalState.searchFilters() };
+
+    this.route.queryParams.subscribe(params => {
+      if (params['type']) {
+        this.localFilters.type = params['type'] === 'buy' ? 'شقة' : 'فيلا';
+        this.applyFilters();
+      }
+    });
+  }
+
+  setView(mode: 'grid' | 'list') {
+    this.viewMode.set(mode);
+  }
+
+  toggleFavorite(event: Event, id: number) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.globalState.toggleFavorite(id);
+    const action = this.globalState.isFavorite(id) ? 'إضافة إلى' : 'إزالة من';
+    this.toast.show(`تم ${action} المفضلة`, 'info');
+  }
+
+  saveSearch() {
+    this.toast.show('تم حفظ البحث بنجاح! سنرسل لك تنبيهات للعقارات الجديدة.', 'success');
+  }
+
+  applyFilters() {
+    this.isLoading.set(true);
+    setTimeout(() => {
+      this.globalState.updateFilters(this.localFilters);
+      this.isLoading.set(false);
+      this.toast.show('تم تحديث نتائج البحث', 'success');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 600);
+  }
+
+  resetFilters() {
+    this.globalState.resetFilters();
+    this.localFilters = { ...this.globalState.searchFilters() };
+    this.toast.show('تم إعادة تعيين الفلاتر', 'info');
+  }
+
+  // --- دالة جديدة لحذف الفلاتر عند الضغط على X ---
+  removeFilter(filterKey: string) {
+    const current = this.globalState.searchFilters();
+    const updatedFilters = { ...current };
+
+    // منطق الحذف حسب نوع الفلتر
+    if (filterKey === 'type') {
+      updatedFilters.type = 'شقة'; // العودة للافتراضي
+    } else if (filterKey === 'pool') {
+      updatedFilters.amenities = { ...current.amenities, pool: false };
+    } else if (filterKey === 'garden') {
+      updatedFilters.amenities = { ...current.amenities, garden: false };
+    }
+    // يمكنك إضافة باقي الحالات هنا (جراج، شرفة، إلخ)
+
+    // 1. تحديث الحالة العامة
+    this.globalState.updateFilters(updatedFilters);
+    
+    // 2. تحديث الفلاتر المحلية (عشان الـ Checkbox في السايدبار يتشال)
+    this.localFilters = { ...updatedFilters };
+
+    this.toast.show('تم إزالة الفلتر', 'info');
+  }
+
+  onPageChange(event: Event, page: number) {
+    event.preventDefault();
+    this.currentPage.set(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Data (Mock)
   properties = [
     {
       id: 1,
@@ -23,16 +109,14 @@ export class SearchListComponent {
       beds: 4,
       baths: 5,
       area: 500,
-      type: 'بيع',
+      type: 'فيلا',
       tags: ['مميز', 'جديد'],
       agentType: 'وكيل عقاري',
       agentImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwsPA9c31HBt2vXqoZ00tYJx2RIr9cHIYSdSmV9fxvyKziuR0dz2LFsmx8OhGV1sL_n1Yus1lK9363sWb3gWqUfBbpIXA0sDejx5rBJljOwbQ0S3ekK6IeiRe8jm7282x_rMXb30iaeN7mvFh8bZf5SFkOieg4XzCetPe68ao1xbc4A8Owyu8nGpmsWyu0LTbZ-ykOto0Zi0JbclcntcDQ-T4WpLwji4G5tthQ94W4E8o0T0e-2F-I27Cc1qsq9sVbNp4JH8m3tZs',
-      aiAnalysis: {
-        status: 'fair', // low, fair, high
-        percentage: 60,
-        label: 'سعر عادل'
-      }
+      mapPosition: { top: '40%', left: '60%' },
+      aiAnalysis: { status: 'fair', percentage: 60, label: 'سعر عادل' }
     },
+    // ... باقي البيانات كما هي
     {
       id: 2,
       title: 'شقة مريحة في وسط البلد',
@@ -42,15 +126,12 @@ export class SearchListComponent {
       beds: 2,
       baths: 2,
       area: 150,
-      type: 'بيع',
+      type: 'شقة',
       tags: ['مقترح بالذكاء الاصطناعي'],
       agentType: 'المالك',
       agentImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwsPA9c31HBt2vXqoZ00tYJx2RIr9cHIYSdSmV9fxvyKziuR0dz2LFsmx8OhGV1sL_n1Yus1lK9363sWb3gWqUfBbpIXA0sDejx5rBJljOwbQ0S3ekK6IeiRe8jm7282x_rMXb30iaeN7mvFh8bZf5SFkOieg4XzCetPe68ao1xbc4A8Owyu8nGpmsWyu0LTbZ-ykOto0Zi0JbclcntcDQ-T4WpLwji4G5tthQ94W4E8o0T0e-2F-I27Cc1qsq9sVbNp4JH8m3tZs',
-      aiAnalysis: {
-        status: 'high',
-        percentage: 85,
-        label: 'سعر مرتفع قليلاً'
-      }
+      mapPosition: { top: '55%', left: '70%' },
+      aiAnalysis: { status: 'high', percentage: 85, label: 'سعر مرتفع قليلاً' }
     },
     {
       id: 3,
@@ -61,15 +142,12 @@ export class SearchListComponent {
       beds: 3,
       baths: 3,
       area: 280,
-      type: 'بيع',
+      type: 'تاون هاوس',
       tags: [],
       agentType: 'وكيل عقاري',
       agentImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwsPA9c31HBt2vXqoZ00tYJx2RIr9cHIYSdSmV9fxvyKziuR0dz2LFsmx8OhGV1sL_n1Yus1lK9363sWb3gWqUfBbpIXA0sDejx5rBJljOwbQ0S3ekK6IeiRe8jm7282x_rMXb30iaeN7mvFh8bZf5SFkOieg4XzCetPe68ao1xbc4A8Owyu8nGpmsWyu0LTbZ-ykOto0Zi0JbclcntcDQ-T4WpLwji4G5tthQ94W4E8o0T0e-2F-I27Cc1qsq9sVbNp4JH8m3tZs',
-      aiAnalysis: {
-        status: 'low',
-        percentage: 30,
-        label: 'سعر لقطة'
-      }
+      mapPosition: { top: '60%', left: '20%' },
+      aiAnalysis: { status: 'low', percentage: 30, label: 'سعر لقطة' }
     },
     {
       id: 4,
@@ -80,19 +158,26 @@ export class SearchListComponent {
       beds: 2,
       baths: 1,
       area: 110,
-      type: 'بيع',
+      type: 'شاليه',
       tags: ['استثمار جيد'],
       agentType: 'المالك',
       agentImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwsPA9c31HBt2vXqoZ00tYJx2RIr9cHIYSdSmV9fxvyKziuR0dz2LFsmx8OhGV1sL_n1Yus1lK9363sWb3gWqUfBbpIXA0sDejx5rBJljOwbQ0S3ekK6IeiRe8jm7282x_rMXb30iaeN7mvFh8bZf5SFkOieg4XzCetPe68ao1xbc4A8Owyu8nGpmsWyu0LTbZ-ykOto0Zi0JbclcntcDQ-T4WpLwji4G5tthQ94W4E8o0T0e-2F-I27Cc1qsq9sVbNp4JH8m3tZs',
-      aiAnalysis: {
-        status: 'fair',
-        percentage: 55,
-        label: 'سعر عادل'
-      }
+      mapPosition: { top: '80%', left: '80%' },
+      aiAnalysis: { status: 'fair', percentage: 55, label: 'سعر عادل' }
     }
   ];
 
-  setView(mode: 'grid' | 'list') {
-    this.viewMode = mode;
-  }
+  filteredProperties = computed(() => {
+    const filters = this.globalState.searchFilters();
+    return this.properties.filter(prop => {
+      // Filter logic (Type)
+      if (filters.type && filters.type !== 'شقة' && prop.type !== filters.type) return false;
+      
+      // Filter logic (Amenities - Mock example)
+      // هنا مفروض نتأكد ان العقار فيه المرفق ده، بس عشان البيانات Mock هنفترض ان كله تمام
+      // في الحقيقة هيكون: if (filters.amenities.pool && !prop.amenities.pool) return false;
+      
+      return true;
+    });
+  });
 }

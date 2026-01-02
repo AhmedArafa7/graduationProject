@@ -1,21 +1,59 @@
-import { Component } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
-  searchType: 'buy' | 'rent' = 'buy';
+  private router = inject(Router);
+
+  // State Signals
+  searchType = signal<'buy' | 'rent'>('buy');
+  searchQuery = signal('');
+  favorites = signal<number[]>([]); 
 
   setSearchType(type: 'buy' | 'rent') {
-    this.searchType = type;
+    this.searchType.set(type);
   }
 
-  // العقارات المميزة
+  onSearch() {
+    this.router.navigate(['/search'], {
+      queryParams: {
+        type: this.searchType(),
+        q: this.searchQuery()
+      }
+    });
+  }
+
+  toggleFavorite(event: Event, id: number) {
+    event.stopPropagation();
+    event.preventDefault();
+    
+    this.favorites.update(current => {
+      if (current.includes(id)) {
+        return current.filter(favId => favId !== id);
+      } else {
+        return [...current, id];
+      }
+    });
+  }
+
+  // تعديل: التوجيه لصفحة الرسائل الداخلية
+  contactAgent(event: Event, agentId: number) { // غيرت الاسم لـ agentId أو نستخدم الاسم كمعرف مؤقت
+    event.stopPropagation();
+    event.preventDefault();
+    
+    // هنا نوجه المستخدم لصندوق الرسائل (Message Bag)
+    // يمكنك تمرير معرف الوكيل لفتح المحادثة معه مباشرة
+    this.router.navigate(['/messages'], { queryParams: { with: agentId } });
+  }
+
+  // --- البيانات (Mock Data) ---
   featuredProperties = [
     {
       id: 1,
@@ -63,17 +101,15 @@ export class HomeComponent {
     }
   ];
 
-  // أفضل الوكلاء - تم استبدال الروابط بروابط Unsplash للأشخاص
   topAgents = [
-    { name: 'أحمد ماهر', rating: 4.9, propertiesCount: 120, image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop' },
-    { name: 'فاطمة السيد', rating: 4.8, propertiesCount: 95, image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop' },
-    { name: 'يوسف علي', rating: 4.8, propertiesCount: 88, image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop' },
-    { name: 'نور حسن', rating: 4.7, propertiesCount: 82, image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop' },
-    { name: 'مريم عادل', rating: 4.7, propertiesCount: 75, image: 'https://images.unsplash.com/photo-1598550874175-4d7112ee7e89?q=80&w=200&auto=format&fit=crop' },
-    { name: 'خالد إبراهيم', rating: 4.6, propertiesCount: 68, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop' }
+    { id: 101, name: 'أحمد ماهر', rating: 4.9, propertiesCount: 120, image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop' },
+    { id: 102, name: 'فاطمة السيد', rating: 4.8, propertiesCount: 95, image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop' },
+    { id: 103, name: 'يوسف علي', rating: 4.8, propertiesCount: 88, image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop' },
+    { id: 104, name: 'نور حسن', rating: 4.7, propertiesCount: 82, image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop' },
+    { id: 105, name: 'مريم عادل', rating: 4.7, propertiesCount: 75, image: 'https://images.unsplash.com/photo-1598550874175-4d7112ee7e89?q=80&w=200&auto=format&fit=crop' },
+    { id: 106, name: 'خالد إبراهيم', rating: 4.6, propertiesCount: 68, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop' }
   ];
 
-  // آراء العملاء - تم استبدال الروابط بروابط Unsplash للأشخاص
   testimonials = [
     {
       name: 'حسن مصطفى',
@@ -98,7 +134,6 @@ export class HomeComponent {
     }
   ];
 
-  // أحدث المقالات - تم تحديث الصور بصور ديكور وعقارات من Unsplash
   latestPosts = [
     {
       id: 1,

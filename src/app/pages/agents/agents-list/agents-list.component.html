@@ -1,228 +1,180 @@
-<!-- 
-  هذا هو ملف find-agent.component.html
-  تم تحويل كل الكلاسات إلى "Arbitrary Values"
-  وتم إزالة الـ Dark Mode و plugins الفورم
--->
-<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden bg-[#f6f7f8] font-['Manrope',_sans-serif] text-[#0d171b]">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-[#f6f7f8] dark:bg-background-dark font-display text-[#0d171b] dark:text-white">
   <div class="layout-container flex h-full grow flex-col">
     
-    <!-- الهيدر -->
-    <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e7eff3] px-10 py-3 sticky top-0 bg-[#f6f7f8] z-10">
-      <div class="flex items-center gap-8">
-        <div class="flex items-center gap-4 text-[#1193d4]">
-          <span class="material-symbols-outlined text-3xl"> real_estate_agent </span>
-          <h2 class="text-[#0d171b] text-lg font-bold leading-tight tracking-[-0.015em]">Baytology</h2>
-        </div>
-        <div class="hidden md:flex items-center gap-9">
-          <a class="text-[#0d171b] text-sm font-medium leading-normal" href="#">Buy</a>
-          <a class="text-[#0d171b] text-sm font-medium leading-normal" href="#">Rent</a>
-          <a class="text-[#1193d4] font-bold text-sm leading-normal" href="#">Agents</a>
-          <a class="text-[#0d171b] text-sm font-medium leading-normal" href="#">News</a>
-        </div>
-      </div>
-      <div class="flex flex-1 justify-end gap-4 items-center">
-        <label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
-          <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
-            <div class="text-[#4c809a] flex border-none bg-[#e7eff3] items-center justify-center pl-4 rounded-l-lg border-r-0">
-              <span class="material-symbols-outlined"> search </span>
-            </div>
-            <input class="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d171b] focus:outline-none focus:ring-0 border-none bg-[#e7eff3] focus:border-none h-full placeholder:text-[#4c809a] px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Search" value=""/>
-          </div>
-        </label>
-        <div class="hidden sm:flex gap-2">
-          <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1193d4] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-            <span class="truncate">Login</span>
-          </button>
-          <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#e7eff3] text-[#0d171b] text-sm font-bold leading-normal tracking-[0.015em]">
-            <span class="truncate">Sign Up</span>
-          </button>
-        </div>
-        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB_HC-JrdFCjoAmbqmYowe7UrruF4qejtjUEnFBM3xiVGrU82aXdiAD9yMj2NmDQMq7wgOq8dpm4zqjKtldoPEpi3aOXgRmbsu8Lof6s0vGavFZdAApBy4pXLPnN9UxC7QzCKZ1FnHP7jydHmSnwvYH6GeTm3iGyatKxxaOqdMOxWIc4XG9UOa91L-IN2oKUoei8fLhHVzBRL8nz04ZwgaybW8t140uuQFYMWC724kpCecwbztBuzL7bCGedV_b6-wuMRZSF3YvMqE");'></div>
-      </div>
-    </header>
-
-    <!-- المحتوى الرئيسي -->
-    <main class="flex flex-1 justify-center py-5 px-4 sm:px-10">
+    <main class="flex flex-1 justify-center py-8 px-4 sm:px-10">
       <div class="layout-content-container flex flex-col max-w-7xl flex-1">
-        <div class="flex flex-wrap justify-between gap-3 p-4">
-          <p class="text-[#0d171b] text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Find Your Expert Real Estate Agent</p>
-        </div>
-        <div class="flex flex-1 gap-8">
+        
+        <div class="flex flex-wrap justify-between items-center gap-4 p-4 mb-6">
+          <div class="flex flex-col gap-1">
+            <h1 class="text-[#0d171b] dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">
+              اعثر على وكيلك العقاري الخبير
+            </h1>
+            <p class="text-[#4c809a] dark:text-gray-400 text-sm">تواصل مع أفضل الخبراء في السوق المصري</p>
+          </div>
           
-          <!-- الشريط الجانبي للفلاتر -->
-          <aside class="w-1/4 hidden lg:block">
-            <div class="flex h-full min-h-[700px] flex-col justify-between bg-[#f6f7f8] p-4 rounded-xl border border-solid border-[#e7eff3] sticky top-28">
-              <div class="flex flex-col gap-6">
-                <h1 class="text-[#0d171b] text-base font-medium leading-normal">Filters</h1>
-                <div class="flex flex-col gap-4">
-                  <!-- فلتر الموقع -->
-                  <div class="flex flex-col gap-2">
-                    <p class="text-[#0d171b] text-sm font-medium leading-normal">Location</p>
-                    <div class="flex w-full flex-1 items-stretch rounded-lg h-10">
-                      <div class="text-[#4c809a] flex border border-solid border-[#e7eff3] bg-transparent items-center justify-center pl-3 rounded-l-lg border-r-0">
-                        <span class="material-symbols-outlined"> location_on </span>
-                      </div>
-                      <input class="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0d171b] focus:outline-none focus:ring-[#1193d4] border border-solid border-[#e7eff3] bg-transparent focus:border-[#1193d4] h-full placeholder:text-[#4c809a] px-3 rounded-l-none border-l-0 text-sm font-normal leading-normal" placeholder="City or Neighborhood" value=""/>
-                    </div>
+          <div class="flex w-full md:w-96 h-12 bg-white dark:bg-gray-800 rounded-xl border border-[#e7eff3] dark:border-gray-700 overflow-hidden focus-within:ring-2 ring-[#1193d4]/50 transition-all shadow-sm">
+            <div class="flex items-center justify-center pl-4 text-[#4c809a]">
+              <span class="material-symbols-outlined">search</span>
+            </div>
+            <input 
+              [(ngModel)]="searchQuery"
+              class="w-full h-full border-none bg-transparent focus:ring-0 text-sm px-3 placeholder:text-[#4c809a] dark:text-white" 
+              placeholder="ابحث بالاسم..."
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+          
+          <aside class="w-full lg:w-1/4">
+            <div class="flex flex-col gap-6 bg-white dark:bg-gray-800 p-6 rounded-xl border border-[#e7eff3] dark:border-gray-700 sticky top-24 shadow-sm">
+              <div class="flex justify-between items-center">
+                <h2 class="text-[#0d171b] dark:text-white text-lg font-bold">تصفية النتائج</h2>
+                <button (click)="resetFilters()" 
+                        class="text-[#1193d4] text-xs font-bold hover:underline">
+                  إعادة تعيين
+                </button>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label class="text-[#0d171b] dark:text-white text-sm font-bold">الموقع</label>
+                <div class="flex w-full items-center rounded-lg h-10 border border-[#e7eff3] dark:border-gray-600 bg-[#f6f7f8] dark:bg-gray-700 overflow-hidden">
+                  <div class="flex items-center justify-center pl-3 text-[#4c809a]">
+                    <span class="material-symbols-outlined text-lg">location_on</span>
                   </div>
-                  <!-- فلتر التخصص -->
-                  <div class="flex flex-col gap-2">
-                    <p class="text-[#0d171b] text-sm font-medium leading-normal">Specialty</p>
-                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-[#e7eff3]">
-                      <span class="material-symbols-outlined text-[#0d171b]"> business_center </span>
-                      <p class="text-[#0d171b] text-sm font-medium leading-normal flex-1">Residential</p>
-                      <span class="material-symbols-outlined text-[#1193d4]"> check_circle </span>
-                    </div>
-                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#e7eff3]">
-                      <span class="material-symbols-outlined text-[#0d171b]"> apartment </span>
-                      <p class="text-[#0d171b] text-sm font-medium leading-normal">Commercial</p>
-                    </div>
-                    <div class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#e7eff3]">
-                      <span class="material-symbols-outlined text-[#0d171b]"> diamond </span>
-                      <p class="text-[#0d171b] text-sm font-medium leading-normal">Luxury</p>
-                    </div>
-                  </div>
-                  <!-- فلتر التقييم -->
-                  <div class="flex flex-col gap-2">
-                    <p class="text-[#0d171b] text-sm font-medium leading-normal">Rating</p>
-                    <div class="flex items-center gap-2 text-yellow-500">
-                      <span class="material-symbols-outlined"><i class="fa-solid fa-star"></i></span>
-                      <span class="material-symbols-outlined"><i class="fa-solid fa-star"></i></span>
-                      <span class="material-symbols-outlined"><i class="fa-solid fa-star"></i></span>
-                      <span class="material-symbols-outlined"><i class="fa-solid fa-star"></i></span>
-                      <span class="material-symbols-outlined text-gray-300">star_border</span>
-                      <span class="text-[#4c809a] text-xs ml-1">4+</span>
-                    </div>
-                    <input class="w-full h-2 bg-[#e7eff3] rounded-lg appearance-none cursor-pointer accent-[#1193d4]" max="5" min="1" type="range" value="4"/>
-                  </div>
+                  <input [(ngModel)]="locationFilter" 
+                         class="w-full h-full border-none bg-transparent focus:ring-0 text-sm placeholder:text-[#4c809a] dark:text-white" 
+                         placeholder="المدينة أو الحي" />
                 </div>
               </div>
-              <button class="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1193d4] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="truncate">Apply Filters</span>
+
+              <div class="flex flex-col gap-2">
+                <label class="text-[#0d171b] dark:text-white text-sm font-bold">التخصص</label>
+                
+                <div (click)="setSpecialty('Residential')" 
+                     class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                     [class]="specialtyFilter() === 'Residential' ? 'bg-[#e7eff3] dark:bg-gray-700 text-[#1193d4]' : 'hover:bg-[#f6f7f8] dark:hover:bg-gray-700 text-[#0d171b] dark:text-gray-300'">
+                  <span class="material-symbols-outlined">home_work</span>
+                  <span class="text-sm font-medium flex-1">سكني</span>
+                  @if(specialtyFilter() === 'Residential') { <span class="material-symbols-outlined text-lg">check_circle</span> }
+                </div>
+
+                <div (click)="setSpecialty('Commercial')" 
+                     class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                     [class]="specialtyFilter() === 'Commercial' ? 'bg-[#e7eff3] dark:bg-gray-700 text-[#1193d4]' : 'hover:bg-[#f6f7f8] dark:hover:bg-gray-700 text-[#0d171b] dark:text-gray-300'">
+                  <span class="material-symbols-outlined">storefront</span>
+                  <span class="text-sm font-medium flex-1">تجاري</span>
+                  @if(specialtyFilter() === 'Commercial') { <span class="material-symbols-outlined text-lg">check_circle</span> }
+                </div>
+
+                <div (click)="setSpecialty('Luxury')" 
+                     class="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors"
+                     [class]="specialtyFilter() === 'Luxury' ? 'bg-[#e7eff3] dark:bg-gray-700 text-[#1193d4]' : 'hover:bg-[#f6f7f8] dark:hover:bg-gray-700 text-[#0d171b] dark:text-gray-300'">
+                  <span class="material-symbols-outlined">diamond</span>
+                  <span class="text-sm font-medium flex-1">فاخر</span>
+                  @if(specialtyFilter() === 'Luxury') { <span class="material-symbols-outlined text-lg">check_circle</span> }
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <div class="flex justify-between">
+                  <label class="text-[#0d171b] dark:text-white text-sm font-bold">التقييم</label>
+                  <span class="text-[#1193d4] text-sm font-bold">{{ ratingFilter() }}+</span>
+                </div>
+                <input type="range" min="0" max="5" step="0.5" 
+                       [(ngModel)]="ratingFilter"
+                       class="w-full h-2 bg-[#e7eff3] dark:bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[#1193d4]"/>
+                <div class="flex text-yellow-500 text-sm">
+                  @for (star of [1,2,3,4,5]; track star) {
+                    <span class="material-symbols-outlined text-lg">
+                      {{ star <= ratingFilter() ? 'star' : 'star_border' }}
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <button (click)="applyFilters()" class="flex w-full items-center justify-center rounded-xl h-12 bg-[#1193d4] text-white text-sm font-bold hover:bg-[#0f82bc] transition-colors shadow-lg shadow-[#1193d4]/20">
+                تطبيق الفلاتر
               </button>
             </div>
           </aside>
 
-          <!-- قائمة الوكلاء -->
           <div class="w-full lg:w-3/4">
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-4">
-              <!-- كارت وكيل 1 -->
-              <div class="flex flex-col gap-4 text-center pb-4 rounded-xl border border-solid border-[#e7eff3] bg-[#f6f7f8] p-4 transition-shadow hover:shadow-lg">
-                <div class="px-4">
-                  <div class="w-32 h-32 mx-auto bg-center bg-no-repeat aspect-square bg-cover rounded-full" data-alt="Profile picture of Alex Johnson" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBzGBbIeHAdOVa5G3DbUiWrWWVoGTg8K3nICAYmjFPONcemLrlTvT-JHDUeCLTOgemPinZAuv1WHGcVvAeURKXxxFFeu3SdcmWq-WfWclxgDAJ6rm5QO-ojn7LL6oQhZaBlsxN-kSGvD3pIPuJztX2r9enivqMlytColq3yhbAD3i9nYhzu0DhvVvqs9TTjjaevbxBz56CVedjczahulpgvbdGte5IBizJDKpFfpyKKe_fSnXNJeznUtjtYpnFDXvNW3tuJSddt-60");'></div>
-                </div>
-                <div>
-                  <p class="text-[#0d171b] text-lg font-bold leading-normal">Alex Johnson</p>
-                  <p class="text-yellow-500 text-sm font-normal leading-normal my-1">⭐ 4.8 <span class="text-[#4c809a]">(32 Properties)</span></p>
-                  <div class="flex justify-center items-center gap-3 text-[#4c809a] mt-2">
-                    <span class="material-symbols-outlined text-lg"><i class="fa-solid fa-phone"></i></span>
-                    <span class="material-symbols-outlined text-lg">email</span>
-                  </div>
-                </div>
-                <button class="mt-2 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1193d4] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                  <span class="truncate">Contact Agent</span>
-                </button>
+            
+            @if (filteredAgents().length === 0) {
+              <div class="flex flex-col items-center justify-center h-64 text-center">
+                <span class="material-symbols-outlined text-6xl text-[#e7eff3] dark:text-gray-700 mb-4">search_off</span>
+                <h3 class="text-lg font-bold text-[#0d171b] dark:text-white">لا توجد نتائج</h3>
+                <p class="text-[#4c809a] dark:text-gray-400">جرب تغيير خيارات البحث أو الفلتر</p>
               </div>
-              <!-- كارت وكيل 2 -->
-              <div class="flex flex-col gap-4 text-center pb-4 rounded-xl border border-solid border-[#e7eff3] bg-[#f6f7f8] p-4 transition-shadow hover:shadow-lg">
-                <div class="px-4">
-                  <div class="w-32 h-32 mx-auto bg-center bg-no-repeat aspect-square bg-cover rounded-full" data-alt="Profile picture of Maria Garcia" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAhX-3QnpmzjT6AcyIPNmjNvxuJ2kDI5Gw3Tl79KfqA4JrhO72AW1UZSynb-XgnKmJnCcG9XStC6zxdFtk4ql9s2ivQEmZzeVHVCQxNBeGwrAmVQC-I7AkWj7V7wG9yvX7oyNgxj4VhTLyhuKQEiKUpPHaKXOBpP2bj4YVjde5ocxWmr7y8tyIfEkWeg7A9EQi8a-T324mCxplbbNMTiUdNUGuodGh4DrOeSeyBcxy2N8zsZYblKo-h6g_tYzeaH91q-CY3VSbFo-Q");'></div>
-                </div>
-                <div>
-                  <p class="text-[#0d171b] text-lg font-bold leading-normal">Maria Garcia</p>
-                  <p class="text-yellow-500 text-sm font-normal leading-normal my-1">⭐ 4.9 <span class="text-[#4c809a]">(45 Properties)</span></p>
-                  <div class="flex justify-center items-center gap-3 text-[#4c809a] mt-2">
-                    <span class="material-symbols-outlined text-lg"><i class="fa-solid fa-phone"></i></span>
-                    <span class="material-symbols-outlined text-lg">email</span>
+            } @else {
+              <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                @for (agent of filteredAgents(); track agent.id) {
+                  <div class="group flex flex-col gap-4 text-center rounded-2xl bg-white dark:bg-gray-800 border border-[#e7eff3] dark:border-gray-700 p-6 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer relative overflow-hidden"
+                       [routerLink]="['/agent', agent.id]">
+                    
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#1193d4] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                    <div class="px-4">
+                      <div class="w-32 h-32 mx-auto bg-center bg-no-repeat aspect-square bg-cover rounded-full border-4 border-[#f6f7f8] dark:border-gray-700 shadow-sm group-hover:border-[#1193d4]/20 transition-colors" 
+                           [style.background-image]="'url(' + agent.image + ')'"></div>
+                    </div>
+                    
+                    <div>
+                      <div class="flex items-center justify-center gap-1 mb-1">
+                        <h3 class="text-[#0d171b] dark:text-white text-lg font-bold group-hover:text-[#1193d4] transition-colors">{{ agent.name }}</h3>
+                        <span class="material-symbols-outlined text-[#1193d4] text-lg" title="موثوق">verified</span>
+                      </div>
+                      
+                      <p class="text-[#4c809a] dark:text-gray-400 text-sm font-medium mb-2">{{ agent.role }}</p>
+                      
+                      <div class="flex items-center justify-center gap-2 text-sm bg-[#f6f7f8] dark:bg-gray-700 py-2 rounded-lg">
+                        <span class="flex items-center gap-1 text-yellow-500 font-bold">
+                          {{ agent.rating }} <span class="material-symbols-outlined text-sm font-variation-filled">star</span>
+                        </span>
+                        <span class="text-[#e7eff3] dark:text-gray-600">|</span>
+                        <span class="text-[#0d171b] dark:text-gray-200 font-medium">{{ agent.propertiesCount }} عقار</span>
+                      </div>
+                    </div>
+
+                    <div class="mt-auto flex gap-2">
+                      <button (click)="$event.stopPropagation(); contactAgent(agent.id)" 
+                              class="flex-1 flex items-center justify-center gap-2 rounded-xl h-10 bg-[#1193d4] text-white text-sm font-bold hover:bg-[#0f82bc] transition-colors">
+                        <span class="material-symbols-outlined text-lg">chat</span> تواصل
+                      </button>
+                      <button class="w-10 h-10 flex items-center justify-center rounded-xl border border-[#e7eff3] dark:border-gray-600 text-[#4c809a] dark:text-gray-400 hover:bg-[#e7eff3] dark:hover:bg-gray-700 hover:text-[#1193d4] transition-colors">
+                        <span class="material-symbols-outlined text-lg">call</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <button class="mt-2 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1193d4] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                  <span class="truncate">Contact Agent</span>
-                </button>
+                }
               </div>
-              <!-- كارت وكيل 3 -->
-               <div class="flex flex-col gap-4 text-center pb-4 rounded-xl border border-solid border-[#e7eff3] bg-[#f6f7f8] p-4 transition-shadow hover:shadow-lg">
-                <div class="px-4">
-                  <div class="w-32 h-32 mx-auto bg-center bg-no-repeat aspect-square bg-cover rounded-full" data-alt="Profile picture of David Smith" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBDAEvAqDcy8oAuQZdaEghanv3aDQYp_AQihW1RQB3wc095q2sgxhpnwIVAY-P2Po-xqob-cm_9eloGQtkq7RiYX4ledolQci9ar5A-AJdRd7xUpcqIS9pSVpLEJCFiYOZ_B0qE9pmTVh1sSDx8xqxnKPxG1lXu2XVtCtALVRXrmBJf70FQTD9P4tQq9OdQKLXzwcuH-xJhCT4jEJvN3Sg9-dP1h9nJgoxbvc-1o8sM60L4dEbwLR8ILnAlZeO2RdyfSJLOGv0YNvk");'></div>
-                </div>
-                <div>
-                  <p class="text-[#0d171b] text-lg font-bold leading-normal">David Smith</p>
-                  <p class="text-yellow-500 text-sm font-normal leading-normal my-1">⭐ 4.7 <span class="text-[#4c809a]">(28 Properties)</span></p>
-                  <div class="flex justify-center items-center gap-3 text-[#4c809a] mt-2">
-                    <span class="material-symbols-outlined text-lg"><i class="fa-solid fa-phone"></i></span>
-                    <span class="material-symbols-outlined text-lg">email</span>
-                  </div>
-                </div>
-                <button class="mt-2 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1193d4] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                  <span class="truncate">Contact Agent</span>
-                </button>
-              </div>
-               <!-- كارت وكيل 4 -->
-              <div class="flex flex-col gap-4 text-center pb-4 rounded-xl border border-solid border-[#e7eff3] bg-[#f6f7f8] p-4 transition-shadow hover:shadow-lg">
-                <div class="px-4">
-                  <div class="w-32 h-32 mx-auto bg-center bg-no-repeat aspect-square bg-cover rounded-full" data-alt="Profile picture of Sophia Williams" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBTotdJExMLhQ-qXonHpsB0nEL0xyDie6H9QEXBc497bu9YDN2LS42nV3QpqveGIrAkubmRJGTcCPj8t-arZ93SpX2CJ3JZOw-QHRmnEwHSe6aebhKlu9R7KXbZeFXfVxWx0kSpqGYCcsPaQNfJSkLLFfc6YAdQ6zC1HBOKqnZt7meVU9IUU5g2IPEkvedDBvPr8jEkNdND1HoTT0TPbF0ty3k1yzD5B5k3K-n0smnLdJeTR0NlurxBJfPy3rzrVuGhqMxnHv2Y51Y");'></div>
-                </div>
-                <div>
-                  <p class="text-[#0d171b] text-lg font-bold leading-normal">Sophia Williams</p>
-                  <p class="text-yellow-500 text-sm font-normal leading-normal my-1">⭐ 5.0 <span class="text-[#4c809a]">(55 Properties)</span></p>
-                  <div class="flex justify-center items-center gap-3 text-[#4c809a] mt-2">
-                    <span class="material-symbols-outlined text-lg"><i class="fa-solid fa-phone"></i></span>
-                    <span class="material-symbols-outlined text-lg">email</span>
-                  </div>
-                </div>
-                <button class="mt-2 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1193d4] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                  <span class="truncate">Contact Agent</span>
-                </button>
-              </div>
-              <!-- كارت وكيل 5 -->
-               <div class="flex flex-col gap-4 text-center pb-4 rounded-xl border border-solid border-[#e7eff3] bg-[#f6f7f8] p-4 transition-shadow hover:shadow-lg">
-                <div class="px-4">
-                  <div class="w-32 h-32 mx-auto bg-center bg-no-repeat aspect-square bg-cover rounded-full" data-alt="Profile picture of James Brown" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBsKTzc2oKAV6NRfSP_VKM3460bWVSdbgXP82W-B5_rX0KUtCvEAqfwDPWDc9Tpvv9uwoJr3jM-gqp_gHNSJwTYIVPPtSY0NagZkggwjOrH0VJY3ur5ObD_ChaXBvUO2S2JhlQwoOSR7tIcnJ_7_VxMjRLvSamMDTs7Ec2oIQ9bsnVPJKgXqLS3lHVpaMuY_hBVcH1kiccU1aHkZA6_i7pSJDGi5atc_yl_8RRyYgWaPcn1ULZurQuY1uL0_8QfDy9f9QkP_cPuMcE");'></div>
-                </div>
-                <div>
-                  <p class="text-[#0d171b] text-lg font-bold leading-normal">James Brown</p>
-                  <p class="text-yellow-500 text-sm font-normal leading-normal my-1">⭐ 4.6 <span class="text-[#4c809a]">(22 Properties)</span></p>
-                  <div class="flex justify-center items-center gap-3 text-[#4c809a] mt-2">
-                    <span class="material-symbols-outlined text-lg"><i class="fa-solid fa-phone"></i></span>
-                    <span class="material-symbols-outlined text-lg">email</span>
-                  </div>
-                </div>
-                <button class="mt-2 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1193d4] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                  <span class="truncate">Contact Agent</span>
-                </button>
-              </div>
-              <!-- كارت وكيل 6 -->
-              <div class="flex flex-col gap-4 text-center pb-4 rounded-xl border border-solid border-[#e7eff3] bg-[#f6f7f8] p-4 transition-shadow hover:shadow-lg">
-                <div class="px-4">
-                  <div class="w-32 h-32 mx-auto bg-center bg-no-repeat aspect-square bg-cover rounded-full" data-alt="Profile picture of Emily Jones" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAU2tAqg414ARDl2Y3pItWx0ao4GZLZBaxG5m7MxRtbeX8o5DMWr1tpFbnsrhoN6vWU2MOarjXf59F33FAoJ9Ch9Xwmuw6mctJgpEqt_62yC1BKSCcbeVO4_OZRKZXx8nvN5li_Ynw8dWnjUdGJEhbQJGjVRa0zswza9OMlo_c0JCR5gADOlkLTU4TrIgeINRUfqA9NPecLXFzO-JsxwTBFOr7s9K3__p3tz01gsWZR5AMOj1Px6c_zwKrW19fZ3APiDN5ZE3nKry4");'></div>
-                </div>
-                <div>
-                  <p class="text-[#0d171b] text-lg font-bold leading-normal">Emily Jones</p>
-                  <p class="text-yellow-500 text-sm font-normal leading-normal my-1">⭐ 4.9 <span class="text-[#4c809a]">(38 Properties)</span></p>
-                  <div class="flex justify-center items-center gap-3 text-[#4c809a] mt-2">
-                    <span class="material-symbols-outlined text-lg"><i class="fa-solid fa-phone"></i></span>
-                    <span class="material-symbols-outlined text-lg">email</span>
-                  </div>
-                </div>
-                <button class="mt-2 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#1193d4] text-slate-50 text-sm font-bold leading-normal tracking-[0.015em]">
-                  <span class="truncate">Contact Agent</span>
-                </button>
-              </div>
+            }
+
+            <div class="flex items-center justify-center gap-2 mt-10">
+              <button (click)="onPageChange(currentPage() - 1)" 
+                      [disabled]="currentPage() === 1"
+                      class="flex w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-[#e7eff3] dark:border-gray-700 text-[#0d171b] dark:text-white hover:bg-[#f6f7f8] dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                <span class="material-symbols-outlined">chevron_right</span>
+              </button>
+              
+              <button (click)="onPageChange(1)" 
+                      [class]="currentPage() === 1 ? 'bg-[#1193d4] text-white border-[#1193d4]' : 'bg-white dark:bg-gray-800 text-[#0d171b] dark:text-white border-[#e7eff3] dark:border-gray-700 hover:bg-[#f6f7f8] dark:hover:bg-gray-700'"
+                      class="flex w-10 h-10 items-center justify-center rounded-full text-sm font-bold border transition-all shadow-sm">
+                1
+              </button>
+              <button (click)="onPageChange(2)" 
+                      [class]="currentPage() === 2 ? 'bg-[#1193d4] text-white border-[#1193d4]' : 'bg-white dark:bg-gray-800 text-[#0d171b] dark:text-white border-[#e7eff3] dark:border-gray-700 hover:bg-[#f6f7f8] dark:hover:bg-gray-700'"
+                      class="flex w-10 h-10 items-center justify-center rounded-full text-sm font-bold border transition-all shadow-sm">
+                2
+              </button>
+              
+              <button (click)="onPageChange(currentPage() + 1)" 
+                      class="flex w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-gray-800 border border-[#e7eff3] dark:border-gray-700 text-[#0d171b] dark:text-white hover:bg-[#f6f7f8] dark:hover:bg-gray-700 transition-colors">
+                <span class="material-symbols-outlined">chevron_left</span>
+              </button>
             </div>
-            <!-- Pagination -->
-            <div class="flex items-center justify-center p-4 mt-8">
-              <a class="flex size-10 items-center justify-center" href="#">
-                <span class="material-symbols-outlined text-[#0d171b]">chevron_left</span>
-              </a>
-              <a class="text-sm font-bold leading-normal tracking-[0.015em] flex size-10 items-center justify-center text-slate-50 rounded-full bg-[#1193d4]" href="#">1</a>
-              <a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-[#0d171b] rounded-full" href="#">2</a>
-              <a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-[#0d171b] rounded-full" href="#">3</a>
-              <span class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-[#0d171b] rounded-full">...</span>
-              <a class="text-sm font-normal leading-normal flex size-10 items-center justify-center text-[#0d171b] rounded-full" href="#">10</a>
-              <a class="flex size-10 items-center justify-center" href="#">
-                <span class="material-symbols-outlined text-[#0d171b]">chevron_right</span>
-              </a>
-            </div>
+
           </div>
         </div>
       </div>

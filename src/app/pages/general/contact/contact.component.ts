@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-contact',
@@ -10,48 +11,70 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './contact.component.scss'
 })
 export class ContactComponent {
-  // بيانات النموذج (Plain Object for ngModel)
-  formData = {
-    name: '',
-    email: '',
-    phone: '',
-    subject: 'general',
-    message: '',
-    agreeToPrivacy: false
-  };
+  private toast = inject(ToastService);
+  private platformId = inject(PLATFORM_ID);
 
-  // حالات التحميل والإرسال (Signals for UI)
+  // Form Signals
+  name = signal('');
+  email = signal('');
+  phone = signal('');
+  subject = signal('general');
+  message = signal('');
+  agreeToPrivacy = signal(false);
+
+  // UI States
   isSubmitting = signal(false);
-  isSent = signal(false);
 
-  onSubmit() {
-    if (!this.formData.agreeToPrivacy) {
-      alert('يرجى الموافقة على سياسة الخصوصية أولاً.');
+  // منع كتابة الحروف نهائياً
+  restrictToNumbers(event: any) {
+    const input = event.target;
+    // السماح فقط بالأرقام 0-9
+    input.value = input.value.replace(/[^0-9]/g, '');
+    this.phone.set(input.value);
+  }
+
+  onSubmit(form: any) {
+    // 1. التحقق من صلاحية النموذج
+    if (form.invalid) {
+      this.toast.show('توجد أخطاء في البيانات، يرجى مراجعة الحقول الحمراء', 'error');
+      // إظهار رسائل الخطأ لجميع الحقول
+      Object.keys(form.controls).forEach(key => {
+        form.controls[key].markAsTouched();
+      });
       return;
     }
 
-    this.isSubmitting.set(true);
+    // 2. التحقق من صحة الرقم المصري يدوياً لزيادة التأكيد
+    const phonePattern = /^01[0125][0-9]{8}$/;
+    if (!phonePattern.test(this.phone())) {
+      this.toast.show('رقم الهاتف غير صحيح', 'error');
+      return;
+    }
 
-    // محاكاة إرسال البيانات للسيرفر
+    // 3. التحقق من الخصوصية
+    if (!this.agreeToPrivacy()) {
+      this.toast.show('يجب الموافقة على سياسة الخصوصية', 'error');
+      return;
+    }
+
+    // محاكاة الإرسال
+    this.isSubmitting.set(true);
+    
     setTimeout(() => {
-      console.log('Contact Form Data:', this.formData);
-      
       this.isSubmitting.set(false);
-      this.isSent.set(true);
+      this.toast.show('تم الإرسال بنجاح!', 'success');
       
-      // إعادة تعيين النموذج بعد 3 ثواني وإخفاء رسالة النجاح
-      setTimeout(() => {
-        this.isSent.set(false);
-        // Reset form data
-        this.formData = {
-          name: '',
-          email: '',
-          phone: '',
-          subject: 'general',
-          message: '',
-          agreeToPrivacy: false
-        };
-      }, 3000);
+      // تصفير النموذج
+      form.resetForm();
+      this.subject.set('general');
     }, 1500);
+  }
+
+  openMap() {
+    if (isPlatformBrowser(this.platformId)) {
+      // رابط خرائط جوجل (القاهرة - الدقي)
+      const url = 'https://www.google.com/maps/search/?api=1&query=Dokki,Cairo,Egypt';
+      window.open(url, '_blank');
+    }
   }
 }

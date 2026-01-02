@@ -1,0 +1,24 @@
+/* تنسيقات خاصة تظهر فقط داخل ملف الـ PDF */
+.pdf-logo {
+  display: block !important; /* إظهار اللوجو في الـ PDF */
+}
+
+/* إجبار النصوص على أن تكون سوداء والخلفية بيضاء داخل الـ PDF */
+#privacy-content-for-pdf {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  
+  .pdf-heading, .pdf-bold {
+    color: #000000 !important;
+    font-weight: bold !important;
+  }
+  
+  p, li, strong {
+     color: #212529 !important;
+  }
+  
+  /* إزالة تأثيرات الوضع الليلي إن وجدت أثناء التوليد */
+  &.dark\:bg-gray-800 {
+      background-color: #ffffff !important;
+  }
+}
