@@ -1,13 +1,15 @@
-import { Component, signal, ViewChild, ElementRef, afterNextRender, inject } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef, afterNextRender, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChatbotService } from '../../../../core/services/chatbot/chatbot.service'; // تأكد من المسار
+import { Router } from '@angular/router';
+import { ChatbotService, ChatResponse, Property } from '../../../../core/services/chatbot/chatbot.service';
+import { UserService } from '../../../../core/services/user.service';
 
 interface Message {
   id: number;
   text: string;
   sender: 'user' | 'bot';
-  type: 'text' | 'property';
+  type: 'text' | 'property' | 'question';
   data?: any;
   time: string;
 }
@@ -23,9 +25,15 @@ export class ChatbotComponent {
 
   // يجب أن تكون public لتُستخدم في الـ HTML
   public chatbotService = inject(ChatbotService);
+  private router = inject(Router);
+  private userService = inject(UserService);
+
+  // صورة المستخدم
+  userAvatar = computed(() => this.userService.getProfileImage());
 
   isTyping = signal(false);
   inputText = signal('');
+  apiError = signal<string | null>(null);
 
   messages = signal<Message[]>([
     {
@@ -47,6 +55,8 @@ export class ChatbotComponent {
   constructor() {
     afterNextRender(() => {
       this.scrollToBottom();
+      // فحص الاتصال عند البداية
+      this.chatbotService.checkConnection();
     });
   }
 
@@ -54,20 +64,27 @@ export class ChatbotComponent {
     this.chatbotService.toggle();
   }
 
-  sendMessage(text: string = this.inputText()) {
+  async sendMessage(text: string = this.inputText()) {
     if (!text.trim()) return;
 
     this.addMessage(text, 'user');
     this.inputText.set('');
     this.isTyping.set(true);
+    this.apiError.set(null);
 
-    setTimeout(() => {
+    try {
+      const response = await this.chatbotService.sendMessage(text);
       this.isTyping.set(false);
-      this.handleBotResponse(text);
-    }, 1500);
+      this.handleApiResponse(response);
+    } catch (e: any) {
+      this.isTyping.set(false);
+      const errorMessage = e?.error?.detail || e?.message || 'حدث خطأ في الاتصال';
+      this.apiError.set(errorMessage);
+      this.addMessage('❌ ' + errorMessage, 'bot');
+    }
   }
 
-  private addMessage(text: string, sender: 'user' | 'bot', type: 'text' | 'property' = 'text', data?: any) {
+  private addMessage(text: string, sender: 'user' | 'bot', type: 'text' | 'property' | 'question' = 'text', data?: any) {
     this.messages.update(msgs => [...msgs, {
       id: Date.now(),
       text,
@@ -79,18 +96,59 @@ export class ChatbotComponent {
     this.scrollToBottom();
   }
 
-  private handleBotResponse(userText: string) {
-    if (userText.includes('شقة') || userText.includes('إيجار')) {
-      this.addMessage('وجدنا لك بعض الخيارات المميزة بناءً على طلبك:', 'bot');
-      this.addMessage('', 'bot', 'property', {
-        title: 'شقة مودرن في التجمع الخامس',
-        price: '12,500,000 ج.م',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDBPLZkooCW_VeFTrupwlgxhBxoWjSz1Sc004mIXj4zMUlDHeINeFQDTiGDcgCNdRVmNwXvXtlxrF5UljFOpDRARyznYhS7PvtV70KqH2mrZ_RHTVZkedrHYCZZC0gKVWOSUuWgREFWgYtfU_5hUPn_tYml10L27a4cRt6m_t-hDNbSgC_3RrpqoCexPgwwQZ9GlDVgTF5UXIVHvg4FHsQkTtLVvNi34tmjsYvBu18wW_vtk2SjTMcjfNNRSZEBtw9yLIpBj1RuFRk',
-        specs: '4 غرف • 5 حمام • 450 م²'
-      });
-    } else {
-      this.addMessage('فهمت، هل يمكنك تزويدي بمزيد من التفاصيل؟', 'bot');
+  private handleApiResponse(response: ChatResponse) {
+    // إضافة رسالة البوت
+    if (response.message) {
+      this.addMessage(response.message, 'bot');
     }
+
+    // إضافة السؤال إذا وجد
+    if (response.question) {
+      this.addMessage(response.question, 'bot', 'question');
+    }
+
+    // عرض العقارات
+    if (response.properties && response.properties.length > 0) {
+      // إضافة ملخص في الرسائل
+      const propertySummary = response.properties.slice(0, 3).map((p: Property) =>
+        `🏠 ${p.type || 'عقار'} في ${p.city || '?'} - ${(p.price || 0).toLocaleString()} جنيه`
+      ).join('\n');
+      this.addMessage('أفضل النتائج:\n' + propertySummary, 'bot');
+
+      // إضافة كارت لأول عقار
+      const firstProp = response.properties[0];
+      const propertyImage = 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1000&auto=format&fit=crop';
+      this.addMessage('', 'bot', 'property', {
+        id: firstProp.id || 1,
+        title: `${firstProp.type || 'عقار'} في ${firstProp.city || ''}`,
+        price: `${(firstProp.price || 0).toLocaleString()} جنيه`,
+        image: propertyImage,
+        specs: `${firstProp.bedrooms || '-'} غرف • ${firstProp.bathrooms || '-'} حمام • ${firstProp.size_sqm || '-'} م²`,
+        fullProperty: { ...firstProp, displayImage: propertyImage } // تخزين العقار مع الصورة
+      });
+    } else if (response.type === 'results' || response.type === 'fallback') {
+      this.addMessage('⚠️ لم يتم العثور على عقارات مطابقة', 'bot');
+    }
+  }
+
+  async clearSession() {
+    await this.chatbotService.clearSession();
+    this.messages.set([{
+      id: Date.now(),
+      text: 'تم مسح المحادثة. ابدأ من جديد! 🔄',
+      sender: 'bot',
+      type: 'text',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }]);
+  }
+
+  viewPropertyDetails(propertyData: any) {
+    // تخزين بيانات العقار في الـ service
+    if (propertyData.fullProperty) {
+      this.chatbotService.setSelectedProperty(propertyData.fullProperty);
+    }
+    this.chatbotService.close();
+    this.router.navigate(['/property', propertyData.id || 1]);
   }
 
   private scrollToBottom() {

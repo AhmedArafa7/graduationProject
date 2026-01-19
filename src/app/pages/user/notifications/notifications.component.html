@@ -1,0 +1,97 @@
+<div class="flex min-h-screen font-display" dir="rtl">
+  
+  <!-- Sidebar -->
+  <app-agent-sidebar [currentPage]="'notifications'" />
+
+  <!-- Main Content -->
+  <main class="ml-64 flex-1 p-8 bg-background-light dark:bg-background-dark min-h-screen">
+    
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Header -->
+      <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <div>
+          <h1 class="text-3xl font-black text-text-primary dark:text-white">الإشعارات</h1>
+          @if (unreadCount() > 0) {
+            <p class="text-text-secondary dark:text-gray-400 mt-1">لديك {{ unreadCount() }} إشعارات غير مقروءة</p>
+          }
+        </div>
+        <button (click)="markAllAsRead()" 
+                class="flex items-center gap-2 px-4 h-10 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-lg">done_all</span>
+          تعليم الكل كمقروء
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex gap-3 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <button (click)="setFilter('all')" 
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 cursor-pointer transition-colors"
+                [ngClass]="activeFilter() === 'all' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-800 text-text-primary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'">
+          <p class="text-sm font-medium">الكل</p>
+        </button>
+        <button (click)="setFilter('messages')" 
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 cursor-pointer transition-colors"
+                [ngClass]="activeFilter() === 'messages' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-800 text-text-primary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'">
+          <p class="text-sm font-medium">الرسائل</p>
+        </button>
+        <button (click)="setFilter('property')" 
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 cursor-pointer transition-colors"
+                [ngClass]="activeFilter() === 'property' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-800 text-text-primary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'">
+          <p class="text-sm font-medium">تحديثات العقارات</p>
+        </button>
+        <button (click)="setFilter('system')" 
+                class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 cursor-pointer transition-colors"
+                [ngClass]="activeFilter() === 'system' ? 'bg-primary text-white' : 'bg-white dark:bg-gray-800 text-text-primary dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'">
+          <p class="text-sm font-medium">النظام</p>
+        </button>
+      </div>
+
+      <!-- Notifications List -->
+      <div class="space-y-4">
+        @for (notification of notifications(); track notification.id) {
+          <div class="flex items-center gap-4 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-300 relative border border-border-color dark:border-gray-700">
+            
+            <!-- Unread Indicator -->
+            @if (!notification.read) {
+              <div class="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-1 bg-accent rounded-l-full"></div>
+            }
+            
+            <!-- Icon -->
+            <div class="flex items-center justify-center rounded-full shrink-0 size-12"
+                 [ngClass]="getIconColor(notification.type)">
+              <span class="material-symbols-outlined text-2xl">{{ notification.icon }}</span>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-grow min-w-0">
+              <p class="text-text-primary dark:text-white text-base font-medium leading-normal"
+                 [class.font-bold]="!notification.read">
+                {{ notification.message }}
+              </p>
+              <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
+                {{ formatTime(notification.time) }}
+              </p>
+            </div>
+            
+            <!-- Dismiss Button -->
+            <button (click)="dismissNotification(notification.id)" 
+                    class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0 cursor-pointer">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        } @empty {
+          <!-- Empty State -->
+          <div class="text-center py-20">
+            <div class="flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 mx-auto size-24 mb-4">
+              <span class="material-symbols-outlined text-5xl">notifications_off</span>
+            </div>
+            <p class="text-xl font-bold text-text-primary dark:text-white">لا توجد إشعارات</p>
+            <p class="text-gray-500 dark:text-gray-400">قائمتك فارغة!</p>
+          </div>
+        }
+      </div>
+
+    </div>
+  </main>
+</div>

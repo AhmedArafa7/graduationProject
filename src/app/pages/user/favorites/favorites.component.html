@@ -1,0 +1,77 @@
+<div class="flex min-h-screen font-display" dir="rtl">
+  
+  <!-- Sidebar -->
+  <app-agent-sidebar [currentPage]="'favorites'" />
+
+  <!-- Main Content -->
+  <main class="ml-64 flex-1 p-8 bg-background-light dark:bg-background-dark min-h-screen">
+    
+    <!-- Header -->
+    <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+      <h1 class="text-3xl md:text-4xl font-black text-text-primary dark:text-white">المفضلة</h1>
+      <p class="text-text-secondary dark:text-gray-400">{{ favoritesCount() }} عقار محفوظ</p>
+    </div>
+
+    <!-- Property Grid -->
+    @if (favorites().length > 0) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @for (property of favorites(); track property.id) {
+          <div class="flex flex-col bg-card-background dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 group cursor-pointer">
+            
+            <!-- Property Image -->
+            <div class="relative">
+              <img [src]="property.image" [alt]="property.location" class="w-full aspect-[4/3] object-cover" />
+              
+              <!-- Remove Button -->
+              <button (click)="removeFromFavorites(property.id)"
+                      class="absolute top-3 left-3 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 text-red-500 hover:bg-black/60 transition-colors cursor-pointer"
+                      title="إزالة من المفضلة">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+              </button>
+
+              <!-- Type Badge -->
+              <span class="absolute bottom-3 right-3 px-3 py-1 text-xs font-bold text-white rounded-full bg-green-600">
+                للبيع
+              </span>
+            </div>
+
+            <!-- Property Info -->
+            <div class="p-4 flex flex-col flex-1" [routerLink]="['/property', property.id]">
+              <p class="text-xl font-bold text-text-primary dark:text-white">{{ property.price }}</p>
+              <p class="text-text-secondary dark:text-gray-400 text-sm mt-1">{{ property.location }}</p>
+              
+              <!-- Features -->
+              <div class="mt-4 pt-4 border-t border-border-color dark:border-gray-700 flex items-center justify-between text-text-secondary dark:text-gray-400 text-sm">
+                <div class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-lg">bed</span>
+                  <span>{{ property.beds }} غرف</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-lg">bathtub</span>
+                  <span>{{ property.baths }} حمام</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-lg">straighten</span>
+                  <span>{{ property.area }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="flex flex-col items-center justify-center py-20 text-center">
+        <span class="material-symbols-outlined text-6xl text-primary mb-4">favorite</span>
+        <h2 class="text-2xl font-bold text-text-primary dark:text-white mb-2">عقاراتك المفضلة</h2>
+        <p class="text-text-secondary dark:text-gray-400 max-w-sm mb-6">لم تقم بإضافة أي عقارات للمفضلة بعد. ابدأ بالبحث واحفظ العقارات التي تعجبك!</p>
+        <a routerLink="/search" 
+           class="flex items-center justify-center gap-2 rounded-lg h-12 px-6 bg-primary text-white text-base font-bold shadow-md hover:bg-primary/90 transition-colors">
+          <span class="material-symbols-outlined">search</span>
+          ابدأ البحث
+        </a>
+      </div>
+    }
+
+  </main>
+</div>

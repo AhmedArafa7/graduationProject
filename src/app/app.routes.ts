@@ -92,7 +92,51 @@ export const routes: Routes = [
     ]
   },
 
-  // 2. صفحات المصادقة (Auth Pages) - بدون الهيدر الرئيسي
+  // 2. صفحات لوحة التحكم (Dashboard Pages) - بدون الهيدر الرئيسي، مع Sidebar
+  // صفحة الملف الشخصي
+  { 
+    path: 'profile', 
+    title: 'ملفي الشخصي',
+    loadComponent: () => import('./pages/user/profile/profile.component').then(m => m.ProfileComponent) 
+  },
+  // لوحة تحكم الوكيل
+  { 
+    path: 'agent-dashboard', 
+    title: 'لوحة تحكم الوكيل',
+    loadComponent: () => import('./pages/agent/agent-dashboard/agent-dashboard.component').then(m => m.AgentDashboardComponent) 
+  },
+  // إضافة عقار جديد
+  { 
+    path: 'add-property', 
+    title: 'إضافة عقار جديد',
+    loadComponent: () => import('./pages/agent/add-property/add-property.component').then(m => m.AddPropertyComponent) 
+  },
+  // تعديل عقار
+  { 
+    path: 'edit-property/:id', 
+    title: 'تعديل العقار',
+    loadComponent: () => import('./pages/agent/edit-property/edit-property.component').then(m => m.EditPropertyComponent) 
+  },
+  // صفحة الرسائل
+  { 
+    path: 'messages', 
+    title: 'رسائلي',
+    loadComponent: () => import('./pages/user/messages/messages.component').then(m => m.MessagesComponent) 
+  },
+  // صفحة المفضلة
+  { 
+    path: 'favorites', 
+    title: 'المفضلة',
+    loadComponent: () => import('./pages/user/favorites/favorites.component').then(m => m.FavoritesComponent) 
+  },
+  // صفحة الإشعارات
+  { 
+    path: 'notifications', 
+    title: 'الإشعارات',
+    loadComponent: () => import('./pages/user/notifications/notifications.component').then(m => m.NotificationsComponent) 
+  },
+
+  // 3. صفحات المصادقة (Auth Pages) - بدون الهيدر الرئيسي
   {
     path: 'auth',
     children: [

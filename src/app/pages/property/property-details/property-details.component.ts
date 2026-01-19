@@ -1,9 +1,13 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, computed, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { Title } from '@angular/platform-browser';
+import { ChatbotService, Property as ChatProperty } from '../../../core/services/chatbot/chatbot.service';
+import { PropertyService } from '../../../core/services/property.service';
+import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
+
 
 @Component({
   selector: 'app-property-details',
@@ -15,6 +19,11 @@ export class PropertyDetailsComponent implements OnInit {
   private toast = inject(ToastService);
   private titleService = inject(Title);
   private route = inject(ActivatedRoute);
+  private platformId = inject(PLATFORM_ID);
+  private chatbotService = inject(ChatbotService);
+  private propertyService = inject(PropertyService);
+  private agentPropertiesService = inject(AgentPropertiesService);
+
 
   // --- UI States ---
   isDescriptionExpanded = signal(false);
@@ -47,7 +56,7 @@ export class PropertyDetailsComponent implements OnInit {
         { icon: 'kitchen', label: 'مطبخ مجهز' },
       ],
       images: [
-        'https://images.unsplash.com/photo-1600596542815-e32cb51813b9?q=80&w=1000&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1000&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1000&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1000&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1000&auto=format&fit=crop'
@@ -165,14 +174,103 @@ export class PropertyDetailsComponent implements OnInit {
   }
 
   loadProperty(id: number) {
-    // البحث في قاعدة البيانات الوهمية
-    const foundProperty = this.mockProperties.find(p => p.id === id);
+    // فحص إذا كان هناك عقار مختار من الشات بوت
+    const chatProperty = this.chatbotService.selectedProperty();
     
-    if (foundProperty) {
-      this.property = foundProperty;
+    if (chatProperty) {
+      // عرض بيانات العقار من الشات بوت
+      this.property = {
+        id: chatProperty.id || id,
+        title: `${chatProperty.type || 'عقار'} في ${chatProperty.city || ''}`,
+        location: chatProperty.city || 'غير محدد',
+        type: chatProperty.payment_option === 'rent' ? 'إيجار' : 'بيع',
+        refCode: `API-${chatProperty.id || id}`,
+        price: chatProperty.price || 0,
+        area: chatProperty.size_sqm || 0,
+        beds: chatProperty.bedrooms || 0,
+        baths: chatProperty.bathrooms || 0,
+        floor: chatProperty.floor || 'غير محدد',
+        description: `${chatProperty.type || 'عقار'} مميز في ${chatProperty.city || ''} بمساحة ${chatProperty.size_sqm || 0} متر مربع. يحتوي على ${chatProperty.bedrooms || 0} غرف نوم و ${chatProperty.bathrooms || 0} حمام. ${chatProperty.furnished === 'yes' ? 'مفروش بالكامل.' : ''}`,
+        amenities: [
+          { icon: 'home', label: chatProperty.type || 'عقار' },
+          { icon: 'location_city', label: chatProperty.city || 'غير محدد' },
+          ...(chatProperty.furnished === 'yes' ? [{ icon: 'chair', label: 'مفروش' }] : [])
+        ],
+        images: [
+          (chatProperty as any).displayImage || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1000&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1000&auto=format&fit=crop',
+          'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1000&auto=format&fit=crop'
+        ]
+      };
+      // مسح العقار المختار بعد العرض
+      this.chatbotService.clearSelectedProperty();
     } else {
-      // لو الايدي مش موجود، ارجع للأول (fallback)
-      this.property = this.mockProperties[0];
+      // 0. البحث في AgentPropertiesService أولاً (العقارات المضافة من الوكيل)
+      const agentProperty = this.agentPropertiesService.getPropertyById(id);
+      
+      if (agentProperty) {
+        // تحويل بيانات AgentProperty لصيغة هذا الـ component
+        const amenitiesList: { icon: string; label: string }[] = [];
+        if (agentProperty.amenities) {
+          if (agentProperty.amenities.pool) amenitiesList.push({ icon: 'pool', label: 'مسبح' });
+          if (agentProperty.amenities.garage) amenitiesList.push({ icon: 'local_parking', label: 'جراج' });
+          if (agentProperty.amenities.gym) amenitiesList.push({ icon: 'fitness_center', label: 'صالة رياضية' });
+          if (agentProperty.amenities.garden) amenitiesList.push({ icon: 'park', label: 'حديقة' });
+          if (agentProperty.amenities.balcony) amenitiesList.push({ icon: 'balcony', label: 'بلكونة' });
+          if (agentProperty.amenities.security) amenitiesList.push({ icon: 'security', label: 'أمن 24/7' });
+          if (agentProperty.amenities.ac) amenitiesList.push({ icon: 'air', label: 'تكييف' });
+          if (agentProperty.amenities.petFriendly) amenitiesList.push({ icon: 'pets', label: 'يسمح بالحيوانات' });
+        }
+        
+        this.property = {
+          id: agentProperty.id,
+          title: agentProperty.address,
+          location: agentProperty.address,
+          type: agentProperty.status === 'للإيجار' ? 'إيجار' : 'بيع',
+          refCode: `AGT-${agentProperty.id}`,
+          price: agentProperty.priceValue ?? null,
+          area: agentProperty.area ?? null,
+          beds: agentProperty.bedrooms ?? null,
+          baths: agentProperty.bathrooms ?? null,
+          floor: agentProperty.floor !== undefined && agentProperty.floor !== null ? `الطابق ${agentProperty.floor}` : 'غير محدد',
+          description: agentProperty.description || 'لا يوجد وصف',
+          amenities: amenitiesList.length > 0 ? amenitiesList : [{ icon: 'home', label: 'عقار سكني' }],
+          images: agentProperty.images && agentProperty.images.length > 0 
+            ? agentProperty.images 
+            : [agentProperty.image]
+        };
+      } else {
+        // 1. البحث في PropertyService (العقارات المشتركة)
+        const serviceProperty = this.propertyService.getPropertyById(id);
+        
+        if (serviceProperty) {
+          this.property = {
+            id: serviceProperty.id,
+            title: serviceProperty.title,
+            location: `${serviceProperty.address}، ${serviceProperty.city}`,
+            type: serviceProperty.type === 'sale' ? 'بيع' : 'إيجار',
+            refCode: `BYT-${serviceProperty.id}`,
+            price: serviceProperty.priceValue,
+            area: serviceProperty.areaValue,
+            beds: serviceProperty.beds,
+            baths: serviceProperty.baths,
+            floor: 'غير محدد',
+            description: serviceProperty.description,
+            amenities: serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
+            images: serviceProperty.images
+          };
+        } else {
+          // 2. البحث في قاعدة البيانات الوهمية
+          const foundProperty = this.mockProperties.find(p => p.id === id);
+          
+          if (foundProperty) {
+            this.property = foundProperty;
+          } else {
+            // لو الايدي مش موجود، ارجع للأول (fallback)
+            this.property = this.mockProperties[0];
+          }
+        }
+      }
     }
 
     // تحديث الحالة
@@ -185,7 +283,9 @@ export class PropertyDetailsComponent implements OnInit {
     this.displayedSimilarProperties = this.mockProperties.filter(p => p.id !== this.property.id);
     
     // الصعود للأعلى
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   // --- Actions ---
@@ -222,6 +322,8 @@ export class PropertyDetailsComponent implements OnInit {
   }
 
   contactAgent(method: 'call' | 'whatsapp') {
+    if (!isPlatformBrowser(this.platformId)) return;
+    
     if (method === 'call') {
       window.open(`tel:${this.agent.phone}`, '_self');
     } else {
@@ -232,6 +334,8 @@ export class PropertyDetailsComponent implements OnInit {
   }
 
   shareProperty() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    
     if (navigator.share) {
       navigator.share({
         title: this.property.title,
@@ -245,7 +349,9 @@ export class PropertyDetailsComponent implements OnInit {
   }
 
   printPage() {
-    window.print();
+    if (isPlatformBrowser(this.platformId)) {
+      window.print();
+    }
   }
 
   // منطق زر الإبلاغ الجديد

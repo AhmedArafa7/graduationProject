@@ -66,22 +66,46 @@
           <div class="flex flex-col items-center gap-2">
             <span class="material-symbols-outlined text-3xl text-primary">paid</span>
             <span class="text-xs text-text-secondary dark:text-gray-400">السعر</span>
-            <span class="font-bold text-text-primary dark:text-white">{{ property.price | number }} ج.م</span>
+            <span class="font-bold text-text-primary dark:text-white">
+              @if (property.price !== null && property.price !== undefined) {
+                {{ property.price | number }} ج.م
+              } @else {
+                غير محدد
+              }
+            </span>
           </div>
           <div class="flex flex-col items-center gap-2">
             <span class="material-symbols-outlined text-3xl text-primary">aspect_ratio</span>
             <span class="text-xs text-text-secondary dark:text-gray-400">المساحة</span>
-            <span class="font-bold text-text-primary dark:text-white">{{ property.area }} م²</span>
+            <span class="font-bold text-text-primary dark:text-white">
+              @if (property.area !== null && property.area !== undefined) {
+                {{ property.area }} م²
+              } @else {
+                غير محدد
+              }
+            </span>
           </div>
           <div class="flex flex-col items-center gap-2">
             <span class="material-symbols-outlined text-3xl text-primary">bed</span>
             <span class="text-xs text-text-secondary dark:text-gray-400">الغرف</span>
-            <span class="font-bold text-text-primary dark:text-white">{{ property.beds }}</span>
+            <span class="font-bold text-text-primary dark:text-white">
+              @if (property.beds !== null && property.beds !== undefined) {
+                {{ property.beds }}
+              } @else {
+                غير محدد
+              }
+            </span>
           </div>
           <div class="flex flex-col items-center gap-2">
             <span class="material-symbols-outlined text-3xl text-primary">bathtub</span>
             <span class="text-xs text-text-secondary dark:text-gray-400">الحمامات</span>
-            <span class="font-bold text-text-primary dark:text-white">{{ property.baths }}</span>
+            <span class="font-bold text-text-primary dark:text-white">
+              @if (property.baths !== null && property.baths !== undefined) {
+                {{ property.baths }}
+              } @else {
+                غير محدد
+              }
+            </span>
           </div>
           <div class="flex flex-col items-center gap-2">
             <span class="material-symbols-outlined text-3xl text-primary">layers</span>

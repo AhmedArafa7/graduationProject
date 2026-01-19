@@ -1,0 +1,330 @@
+<div class="flex min-h-screen font-display" dir="rtl">
+  
+  <!-- Sidebar -->
+  <app-agent-sidebar [currentPage]="'properties'" />
+
+  <!-- Main Content -->
+  <main class="ml-64 flex-1 p-8 bg-background-light dark:bg-background-dark min-h-screen">
+    
+    <!-- Header -->
+    <div class="max-w-4xl mx-auto">
+      <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black text-text-primary dark:text-white">إضافة عقار جديد</h1>
+          <p class="text-text-secondary dark:text-gray-400 mt-2">أكمل الخطوات لإضافة عقارك على Baytology</p>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="bg-card-background dark:bg-gray-800 rounded-xl shadow-lg border border-border-color dark:border-gray-700">
+        <div class="p-6 md:p-8">
+          
+          <!-- Progress -->
+          <div class="flex flex-col gap-4 mb-8">
+            <div class="flex justify-between items-center">
+              <p class="text-text-primary dark:text-white text-lg font-medium">
+                @switch (currentStep()) {
+                  @case (1) { الخطوة 1: المعلومات الأساسية }
+                  @case (2) { الخطوة 2: الموقع }
+                  @case (3) { الخطوة 3: المرافق }
+                  @case (4) { الخطوة 4: الصور }
+                }
+              </p>
+              <span class="text-text-secondary">{{ currentStep() }}/{{ totalSteps }}</span>
+            </div>
+            <div class="rounded-full bg-gray-200 dark:bg-gray-700 h-2">
+              <div class="h-2 rounded-full bg-primary transition-all duration-300" [style.width.%]="progressPercentage"></div>
+            </div>
+          </div>
+
+          <!-- Step 1: Basic Info -->
+          @if (currentStep() === 1) {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              
+              <!-- Title -->
+              <div class="md:col-span-2">
+                <label class="block text-text-primary dark:text-white font-medium mb-2">عنوان العقار <span class="text-red-500">*</span></label>
+                <input [(ngModel)]="form.title" type="text" placeholder="مثال: شقة فاخرة في الزمالك"
+                       [ngClass]="{'border-red-500': hasError('title')}"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              <!-- Property Type -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">نوع العقار</label>
+                <select [(ngModel)]="form.propertyType"
+                        class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white outline-none focus:ring-2 focus:ring-primary/50">
+                  @for (type of propertyTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- Status -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">الحالة</label>
+                <select [(ngModel)]="form.status"
+                        class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white outline-none focus:ring-2 focus:ring-primary/50">
+                  @for (status of statusOptions; track status) {
+                    <option [value]="status">{{ status }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- Price -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">السعر (جنيه) <span class="text-red-500">*</span></label>
+                <input [(ngModel)]="form.price" type="number" placeholder="مثال: 500000"
+                       [ngClass]="{'border-red-500': hasError('price')}"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              <!-- Area -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">المساحة (م²) <span class="text-red-500">*</span></label>
+                <input [(ngModel)]="form.area" type="number" placeholder="مثال: 150"
+                       [ngClass]="{'border-red-500': hasError('area')}"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              <!-- Bedrooms -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">عدد الغرف <span class="text-red-500">*</span></label>
+                <input [(ngModel)]="form.bedrooms" type="number" placeholder="مثال: 3"
+                       [ngClass]="{'border-red-500': hasError('bedrooms')}"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              <!-- Bathrooms -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">عدد الحمامات <span class="text-red-500">*</span></label>
+                <input [(ngModel)]="form.bathrooms" type="number" placeholder="مثال: 2"
+                       [ngClass]="{'border-red-500': hasError('bathrooms')}"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary" />
+              </div>
+
+              <!-- Floor -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">رقم الطابق</label>
+                <input [(ngModel)]="form.floor" type="number" placeholder="مثال: 5"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+
+              <!-- Room Dimensions -->
+              <div class="md:col-span-2">
+                <label class="block text-text-primary dark:text-white font-medium mb-2">أبعاد الغرف</label>
+                <div class="space-y-4">
+                  @for (room of form.roomDimensions; track $index; let i = $index) {
+                    <div class="flex items-center gap-4 flex-wrap">
+                      <input [(ngModel)]="room.name" type="text" placeholder="اسم الغرفة (مثال: غرفة المعيشة)"
+                             class="flex-1 min-w-[200px] h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+                      <div class="flex items-center gap-2">
+                        <input [(ngModel)]="room.length" type="number" placeholder="الطول"
+                               class="w-24 h-14 px-3 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+                        <span class="text-text-secondary">×</span>
+                        <input [(ngModel)]="room.width" type="number" placeholder="العرض"
+                               class="w-24 h-14 px-3 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+                        <span class="text-text-secondary">م</span>
+                      </div>
+                      @if (form.roomDimensions.length > 1) {
+                        <button (click)="removeRoom(i)" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer">
+                          <span class="material-symbols-outlined">delete</span>
+                        </button>
+                      }
+                    </div>
+                  }
+                  <button (click)="addRoom()" class="flex items-center gap-2 text-primary font-bold text-sm cursor-pointer">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>إضافة غرفة أخرى</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div class="md:col-span-2">
+                <label class="block text-text-primary dark:text-white font-medium mb-2">الوصف</label>
+                <textarea [(ngModel)]="form.description" rows="4" placeholder="أدخل وصفاً تفصيلياً للعقار..."
+                          class="w-full px-4 py-3 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50 resize-y min-h-36"></textarea>
+              </div>
+            </div>
+          }
+
+          <!-- Step 2: Location -->
+          @if (currentStep() === 2) {
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              
+              <!-- Interactive Map -->
+              <div class="md:col-span-2">
+                <p class="text-text-secondary text-sm mb-2">اضغط على الخريطة لتحديد موقع العقار</p>
+                <div id="leaflet-map" class="w-full h-80 rounded-lg z-0"></div>
+              </div>
+
+              <!-- Latitude -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">خط العرض</label>
+                <input [(ngModel)]="form.latitude" type="text" placeholder="مثال: 30.0444"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+
+              <!-- Longitude -->
+              <div>
+                <label class="block text-text-primary dark:text-white font-medium mb-2">خط الطول</label>
+                <input [(ngModel)]="form.longitude" type="text" placeholder="مثال: 31.2357"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+
+              <!-- Location ID -->
+              <div class="md:col-span-2">
+                <label class="block text-text-primary dark:text-white font-medium mb-2">معرف الموقع</label>
+                <input [(ngModel)]="form.locationId" type="text" placeholder="يتم إنشاؤه تلقائياً أو أدخله يدوياً"
+                       class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+              </div>
+            </div>
+          }
+
+          <!-- Step 3: Amenities -->
+          @if (currentStep() === 3) {
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              
+              <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-border-color dark:border-gray-600 transition-colors"
+                     [ngClass]="{'bg-sky-100 dark:bg-sky-900/30 border-primary': form.amenities.pool}">
+                <input [(ngModel)]="form.amenities.pool" type="checkbox" class="form-checkbox h-5 w-5 rounded text-primary" />
+                <span class="mr-3 text-sm font-medium text-text-primary dark:text-white">مسبح</span>
+              </label>
+
+              <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-border-color dark:border-gray-600 transition-colors"
+                     [ngClass]="{'bg-sky-100 dark:bg-sky-900/30 border-primary': form.amenities.garage}">
+                <input [(ngModel)]="form.amenities.garage" type="checkbox" class="form-checkbox h-5 w-5 rounded text-primary" />
+                <span class="mr-3 text-sm font-medium text-text-primary dark:text-white">جراج</span>
+              </label>
+
+              <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-border-color dark:border-gray-600 transition-colors"
+                     [ngClass]="{'bg-sky-100 dark:bg-sky-900/30 border-primary': form.amenities.gym}">
+                <input [(ngModel)]="form.amenities.gym" type="checkbox" class="form-checkbox h-5 w-5 rounded text-primary" />
+                <span class="mr-3 text-sm font-medium text-text-primary dark:text-white">صالة رياضية</span>
+              </label>
+
+              <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-border-color dark:border-gray-600 transition-colors"
+                     [ngClass]="{'bg-sky-100 dark:bg-sky-900/30 border-primary': form.amenities.garden}">
+                <input [(ngModel)]="form.amenities.garden" type="checkbox" class="form-checkbox h-5 w-5 rounded text-primary" />
+                <span class="mr-3 text-sm font-medium text-text-primary dark:text-white">حديقة</span>
+              </label>
+
+              <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-border-color dark:border-gray-600 transition-colors"
+                     [ngClass]="{'bg-sky-100 dark:bg-sky-900/30 border-primary': form.amenities.balcony}">
+                <input [(ngModel)]="form.amenities.balcony" type="checkbox" class="form-checkbox h-5 w-5 rounded text-primary" />
+                <span class="mr-3 text-sm font-medium text-text-primary dark:text-white">بلكونة</span>
+              </label>
+
+              <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-border-color dark:border-gray-600 transition-colors"
+                     [ngClass]="{'bg-sky-100 dark:bg-sky-900/30 border-primary': form.amenities.security}">
+                <input [(ngModel)]="form.amenities.security" type="checkbox" class="form-checkbox h-5 w-5 rounded text-primary" />
+                <span class="mr-3 text-sm font-medium text-text-primary dark:text-white">أمن 24 ساعة</span>
+              </label>
+
+              <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-border-color dark:border-gray-600 transition-colors"
+                     [ngClass]="{'bg-sky-100 dark:bg-sky-900/30 border-primary': form.amenities.ac}">
+                <input [(ngModel)]="form.amenities.ac" type="checkbox" class="form-checkbox h-5 w-5 rounded text-primary" />
+                <span class="mr-3 text-sm font-medium text-text-primary dark:text-white">تكييف</span>
+              </label>
+
+              <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-border-color dark:border-gray-600 transition-colors"
+                     [ngClass]="{'bg-sky-100 dark:bg-sky-900/30 border-primary': form.amenities.petFriendly}">
+                <input [(ngModel)]="form.amenities.petFriendly" type="checkbox" class="form-checkbox h-5 w-5 rounded text-primary" />
+                <span class="mr-3 text-sm font-medium text-text-primary dark:text-white">يسمح بالحيوانات</span>
+              </label>
+            </div>
+          }
+
+          <!-- Step 4: Images -->
+          @if (currentStep() === 4) {
+            <div class="flex flex-col gap-8">
+              
+              <!-- Upload Area -->
+              <div>
+                <label class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-background-light dark:bg-gray-700 border-border-color dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                  <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <span class="material-symbols-outlined text-4xl text-text-secondary mb-2">cloud_upload</span>
+                    <p class="text-sm text-text-secondary"><span class="font-semibold">اضغط للرفع</span> أو اسحب وأفلت</p>
+                    <p class="text-xs text-text-secondary mt-1">PNG, JPG, WEBP (الحد الأقصى 5MB)</p>
+                  </div>
+                  <input (change)="onFileSelected($event)" type="file" class="hidden" accept="image/*" multiple />
+                </label>
+              </div>
+
+              <!-- Uploaded Images -->
+              @if (form.images.length > 0) {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  @for (img of form.images; track $index; let i = $index) {
+                    <div class="border rounded-lg p-4 bg-background-light dark:bg-gray-700 border-border-color dark:border-gray-600">
+                      <div class="relative">
+                        <img [src]="img.preview" [alt]="img.altText || 'صورة العقار'" class="w-full h-48 object-cover rounded-md mb-4" />
+                        <button (click)="removeImage(i)" 
+                                class="absolute top-2 left-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 cursor-pointer">
+                          <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
+                      </div>
+                      <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-text-primary dark:text-white">حالة التحليل</p>
+                        <span class="inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full text-xs font-medium"
+                              [class.bg-green-100]="img.status === 'مكتمل'"
+                              [class.text-green-800]="img.status === 'مكتمل'"
+                              [class.dark:bg-green-900]="img.status === 'مكتمل'"
+                              [class.dark:text-green-200]="img.status === 'مكتمل'"
+                              [class.bg-yellow-100]="img.status !== 'مكتمل'"
+                              [class.text-yellow-800]="img.status !== 'مكتمل'"
+                              [class.dark:bg-yellow-900]="img.status !== 'مكتمل'"
+                              [class.dark:text-yellow-200]="img.status !== 'مكتمل'">
+                          <span class="material-symbols-outlined text-sm">
+                            {{ img.status === 'مكتمل' ? 'check_circle' : 'hourglass_top' }}
+                          </span>
+                          {{ img.status }}
+                        </span>
+                      </div>
+                      <div class="flex flex-col gap-1">
+                        <p class="text-sm font-medium text-text-primary dark:text-white">الوصف المقترح (AI)</p>
+                        <p class="text-sm text-text-secondary">{{ img.altText || 'جاري التحليل...' }}</p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Navigation Buttons -->
+          <div class="flex justify-between gap-4 pt-8 mt-8 border-t border-border-color dark:border-gray-700">
+            @if (currentStep() > 1) {
+              <button (click)="prevStep()" 
+                      class="flex items-center gap-2 px-6 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 text-text-primary dark:text-white font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                <span class="material-symbols-outlined">arrow_forward</span>
+                السابق
+              </button>
+            } @else {
+              <button (click)="saveDraft()" 
+                      class="flex items-center gap-2 px-6 h-12 rounded-lg bg-gray-200 dark:bg-gray-700 text-text-primary dark:text-white font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                حفظ كمسودة
+              </button>
+            }
+
+            @if (currentStep() < totalSteps) {
+              <button (click)="nextStep()" 
+                      class="flex items-center gap-2 px-6 h-12 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 transition-colors cursor-pointer">
+                التالي
+                <span class="material-symbols-outlined">arrow_back</span>
+              </button>
+            } @else {
+              <button (click)="submitForm()" 
+                      class="flex items-center gap-2 px-6 h-12 rounded-lg bg-primary text-white font-bold hover:bg-primary/90 transition-colors cursor-pointer">
+                إكمال الإضافة
+                <span class="material-symbols-outlined">check</span>
+              </button>
+            }
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>

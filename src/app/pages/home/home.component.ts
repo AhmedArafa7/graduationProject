@@ -106,7 +106,7 @@ export class HomeComponent {
     { id: 102, name: 'فاطمة السيد', rating: 4.8, propertiesCount: 95, image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop' },
     { id: 103, name: 'يوسف علي', rating: 4.8, propertiesCount: 88, image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop' },
     { id: 104, name: 'نور حسن', rating: 4.7, propertiesCount: 82, image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop' },
-    { id: 105, name: 'مريم عادل', rating: 4.7, propertiesCount: 75, image: 'https://images.unsplash.com/photo-1598550874175-4d7112ee7e89?q=80&w=200&auto=format&fit=crop' },
+    { id: 105, name: 'مريم عادل', rating: 4.7, propertiesCount: 75, image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop' },
     { id: 106, name: 'خالد إبراهيم', rating: 4.6, propertiesCount: 68, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop' }
   ];
 

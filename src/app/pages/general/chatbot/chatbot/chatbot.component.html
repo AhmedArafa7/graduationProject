@@ -8,7 +8,23 @@
   <button (click)="toggleChat()" 
           class="relative flex items-center justify-center w-16 h-16 bg-secondary hover:bg-secondary/90 text-white rounded-full shadow-2xl transition-transform hover:scale-110 active:scale-95">
     @if (!chatbotService.isOpen()) {
-      <span class="material-symbols-outlined text-3xl animate-bounce-slow">smart_toy</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="80%" height="80%">
+  
+  <defs>
+    <linearGradient id="trendyMix" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00c6ff; stop-opacity:1" />
+      <stop offset="33%" style="stop-color:#9600ff; stop-opacity:1" />
+      <stop offset="66%" style="stop-color:#ff0078; stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffb700; stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <path d="M493.667 229.267C508.369 309.65 547.369 384.411 607.51 444.843C667.652 505.275 742.028 544.396 822.126 559.008C742.028 573.621 667.652 612.741 607.51 673.173C547.369 733.605 508.369 808.367 493.667 888.75C478.964 808.367 439.964 733.605 379.823 673.173C319.682 612.741 245.306 573.621 165.208 559.008C245.306 544.396 319.682 505.275 379.823 444.843C439.964 384.411 478.964 309.65 493.667 229.267Z" fill="url(#trendyMix)"/>
+  
+  <path d="M872.791 77.902C879.591 115.091 897.634 149.678 925.457 177.635C953.28 205.592 987.689 223.691 1024.74 230.451C987.689 237.211 953.28 255.31 925.457 283.267C897.634 311.224 879.591 345.811 872.791 383C865.991 345.811 847.948 311.224 820.125 283.267C792.303 255.31 757.893 237.211 720.842 230.451C757.893 223.691 792.303 205.592 820.125 177.635C847.948 149.678 865.991 115.091 872.791 77.902Z" fill="url(#trendyMix)"/>
+  
+  <path d="M872.791 792.322C879.591 829.511 897.634 864.098 925.457 892.055C953.28 920.012 987.689 938.111 1024.74 944.871C987.689 951.631 953.28 969.73 925.457 997.687C897.634 1025.64 879.591 1060.23 872.791 1097.42C865.991 1060.23 847.948 1025.64 820.125 997.687C792.303 969.73 757.893 951.631 720.842 944.871C757.893 938.111 792.303 920.012 820.125 892.055C847.948 864.098 865.991 829.511 872.791 792.322Z" fill="url(#trendyMix)"/>
+</svg>
     } @else {
       <span class="material-symbols-outlined text-3xl">close</span>
     }
@@ -23,7 +39,23 @@
   <header class="flex items-center justify-between p-4 bg-gradient-to-r from-primary to-[#4e5da7] text-white flex-shrink-0">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm">
-        <span class="material-symbols-outlined text-2xl">smart_toy</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="80%" height="80%">
+  
+  <defs>
+    <linearGradient id="trendyMix" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00c6ff; stop-opacity:1" />
+      <stop offset="33%" style="stop-color:#9600ff; stop-opacity:1" />
+      <stop offset="66%" style="stop-color:#ff0078; stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffb700; stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <path d="M493.667 229.267C508.369 309.65 547.369 384.411 607.51 444.843C667.652 505.275 742.028 544.396 822.126 559.008C742.028 573.621 667.652 612.741 607.51 673.173C547.369 733.605 508.369 808.367 493.667 888.75C478.964 808.367 439.964 733.605 379.823 673.173C319.682 612.741 245.306 573.621 165.208 559.008C245.306 544.396 319.682 505.275 379.823 444.843C439.964 384.411 478.964 309.65 493.667 229.267Z" fill="url(#trendyMix)"/>
+  
+  <path d="M872.791 77.902C879.591 115.091 897.634 149.678 925.457 177.635C953.28 205.592 987.689 223.691 1024.74 230.451C987.689 237.211 953.28 255.31 925.457 283.267C897.634 311.224 879.591 345.811 872.791 383C865.991 345.811 847.948 311.224 820.125 283.267C792.303 255.31 757.893 237.211 720.842 230.451C757.893 223.691 792.303 205.592 820.125 177.635C847.948 149.678 865.991 115.091 872.791 77.902Z" fill="url(#trendyMix)"/>
+  
+  <path d="M872.791 792.322C879.591 829.511 897.634 864.098 925.457 892.055C953.28 920.012 987.689 938.111 1024.74 944.871C987.689 951.631 953.28 969.73 925.457 997.687C897.634 1025.64 879.591 1060.23 872.791 1097.42C865.991 1060.23 847.948 1025.64 820.125 997.687C792.303 969.73 757.893 951.631 720.842 944.871C757.893 938.111 792.303 920.012 820.125 892.055C847.948 864.098 865.991 829.511 872.791 792.322Z" fill="url(#trendyMix)"/>
+</svg>
       </div>
       <div>
         <h2 class="text-base font-bold">مساعد Baytology</h2>
@@ -47,7 +79,23 @@
       @if (msg.sender === 'bot') {
         <div class="flex items-end gap-3 animate-fadeIn">
           <div class="bg-primary/10 dark:bg-primary/20 text-primary dark:text-white w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
-            <span class="material-symbols-outlined text-lg">smart_toy</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="80%" height="80%">
+  
+  <defs>
+    <linearGradient id="trendyMix" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00c6ff; stop-opacity:1" />
+      <stop offset="33%" style="stop-color:#9600ff; stop-opacity:1" />
+      <stop offset="66%" style="stop-color:#ff0078; stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffb700; stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <path d="M493.667 229.267C508.369 309.65 547.369 384.411 607.51 444.843C667.652 505.275 742.028 544.396 822.126 559.008C742.028 573.621 667.652 612.741 607.51 673.173C547.369 733.605 508.369 808.367 493.667 888.75C478.964 808.367 439.964 733.605 379.823 673.173C319.682 612.741 245.306 573.621 165.208 559.008C245.306 544.396 319.682 505.275 379.823 444.843C439.964 384.411 478.964 309.65 493.667 229.267Z" fill="url(#trendyMix)"/>
+  
+  <path d="M872.791 77.902C879.591 115.091 897.634 149.678 925.457 177.635C953.28 205.592 987.689 223.691 1024.74 230.451C987.689 237.211 953.28 255.31 925.457 283.267C897.634 311.224 879.591 345.811 872.791 383C865.991 345.811 847.948 311.224 820.125 283.267C792.303 255.31 757.893 237.211 720.842 230.451C757.893 223.691 792.303 205.592 820.125 177.635C847.948 149.678 865.991 115.091 872.791 77.902Z" fill="url(#trendyMix)"/>
+  
+  <path d="M872.791 792.322C879.591 829.511 897.634 864.098 925.457 892.055C953.28 920.012 987.689 938.111 1024.74 944.871C987.689 951.631 953.28 969.73 925.457 997.687C897.634 1025.64 879.591 1060.23 872.791 1097.42C865.991 1060.23 847.948 1025.64 820.125 997.687C792.303 969.73 757.893 951.631 720.842 944.871C757.893 938.111 792.303 920.012 820.125 892.055C847.948 864.098 865.991 829.511 872.791 792.322Z" fill="url(#trendyMix)"/>
+</svg>
           </div>
           <div class="flex flex-col gap-1 max-w-[80%]">
             <span class="text-[10px] text-text-secondary dark:text-gray-500 mr-1">Baytology</span>
@@ -67,10 +115,16 @@
                   <p class="text-xs text-text-secondary dark:text-gray-400 mt-1 flex items-center gap-1">
                     <span class="material-symbols-outlined text-[10px]">info</span> {{ msg.data.specs }}
                   </p>
-                  <button class="w-full mt-3 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors">
+                  <button (click)="viewPropertyDetails(msg.data)" class="w-full mt-3 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors cursor-pointer">
                     التفاصيل
                   </button>
                 </div>
+              </div>
+            }
+            
+            @if (msg.type === 'question') {
+              <div class="px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-2xl rounded-br-none text-sm leading-relaxed shadow-sm">
+                {{ msg.text }}
               </div>
             }
             
@@ -88,7 +142,7 @@
             <span class="text-[10px] text-text-secondary dark:text-gray-500 mt-1 ml-1">{{ msg.time }}</span>
           </div>
           <div class="bg-gray-200 dark:bg-gray-700 w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-white dark:border-gray-600">
-            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3OjpZpC0y-nrmeaDuj5SN0y4rP2t_vDFHLJf75APiFJgDGG7n-Da9M31SA44K2xNJ7L-0p6_pHrRXCoGDWDQYLwa95oLWk5twu02uXBG9ZRt_Aw5ItWuwF9pWC3fC5L9uPp8_hipUAmU8w66lZawijSdfqqPdM4usxUOEaNAVvon0VWun5YeQw5KWZDwuaA87r8PZzj7_a3Xxlm2NY1EDWsVnhcnNZzXMDChEAq2bnHxMBMD8dcG0BrZdnI5E_tWEZczmkEJyIjQ" class="w-full h-full object-cover" alt="User">
+            <img [src]="userAvatar()" class="w-full h-full object-cover" alt="User">
           </div>
         </div>
       }
@@ -98,7 +152,23 @@
     @if (isTyping()) {
       <div class="flex items-end gap-3 animate-fadeIn">
         <div class="bg-primary/10 dark:bg-primary/20 text-primary dark:text-white w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-lg">smart_toy</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="80%" height="80%">
+  
+  <defs>
+    <linearGradient id="trendyMix" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00c6ff; stop-opacity:1" />
+      <stop offset="33%" style="stop-color:#9600ff; stop-opacity:1" />
+      <stop offset="66%" style="stop-color:#ff0078; stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffb700; stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <path d="M493.667 229.267C508.369 309.65 547.369 384.411 607.51 444.843C667.652 505.275 742.028 544.396 822.126 559.008C742.028 573.621 667.652 612.741 607.51 673.173C547.369 733.605 508.369 808.367 493.667 888.75C478.964 808.367 439.964 733.605 379.823 673.173C319.682 612.741 245.306 573.621 165.208 559.008C245.306 544.396 319.682 505.275 379.823 444.843C439.964 384.411 478.964 309.65 493.667 229.267Z" fill="url(#trendyMix)"/>
+  
+  <path d="M872.791 77.902C879.591 115.091 897.634 149.678 925.457 177.635C953.28 205.592 987.689 223.691 1024.74 230.451C987.689 237.211 953.28 255.31 925.457 283.267C897.634 311.224 879.591 345.811 872.791 383C865.991 345.811 847.948 311.224 820.125 283.267C792.303 255.31 757.893 237.211 720.842 230.451C757.893 223.691 792.303 205.592 820.125 177.635C847.948 149.678 865.991 115.091 872.791 77.902Z" fill="url(#trendyMix)"/>
+  
+  <path d="M872.791 792.322C879.591 829.511 897.634 864.098 925.457 892.055C953.28 920.012 987.689 938.111 1024.74 944.871C987.689 951.631 953.28 969.73 925.457 997.687C897.634 1025.64 879.591 1060.23 872.791 1097.42C865.991 1060.23 847.948 1025.64 820.125 997.687C792.303 969.73 757.893 951.631 720.842 944.871C757.893 938.111 792.303 920.012 820.125 892.055C847.948 864.098 865.991 829.511 872.791 792.322Z" fill="url(#trendyMix)"/>
+</svg>
         </div>
         <div class="px-4 py-3 bg-background-light dark:bg-gray-800 rounded-2xl rounded-br-none shadow-sm border border-border-color dark:border-gray-700">
           <div class="flex gap-1">

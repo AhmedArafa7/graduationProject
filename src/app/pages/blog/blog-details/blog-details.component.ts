@@ -68,9 +68,9 @@ export class BlogDetailsComponent implements OnInit {
   sendPost() {
     if (isPlatformBrowser(this.platformId)) {
       const subject = encodeURIComponent(this.article()?.title || 'مقال مميز من Baytology');
-      const body = encodeURIComponent(`شاهد هذا المقال المميز: ${window.location.href}`);
+      const body = encodeURIComponent(`شاهد هذا المقال المميز:\n\n${window.location.href}`);
       // فتح تطبيق البريد الافتراضي
-      window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
     }
   }
 }

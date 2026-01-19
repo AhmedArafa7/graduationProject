@@ -143,10 +143,11 @@
           <div class="flex flex-col gap-5">
             @for (pop of popularPosts; track pop.id) {
               <a [routerLink]="['/blog', pop.id]" class="flex gap-4 group items-center cursor-pointer">
-                <div class="w-20 h-20 rounded-lg bg-cover bg-center flex-shrink-0 overflow-hidden">
-                  <div class="w-full h-full transition-transform duration-300 group-hover:scale-110" [style.background-image]="'url(' + pop.image + ')'"></div>
+                <div class="w-20 h-20 rounded-lg flex-shrink-0 overflow-hidden shadow-sm border border-border-color dark:border-gray-600">
+                  <img [src]="pop.image" [alt]="pop.title" 
+                       class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110">
                 </div>
-                <div>
+                <div class="flex-1 min-w-0">
                   <span class="text-xs text-text-secondary dark:text-gray-400 mb-1 block">{{ pop.date }}</span>
                   <h5 class="text-sm font-bold text-text-primary dark:text-white leading-snug group-hover:text-primary transition-colors line-clamp-2">
                     {{ pop.title }}
@@ -184,7 +185,7 @@
             <h4 class="text-xl font-bold mb-2">النشرة العقارية</h4>
             <p class="text-white/80 text-sm mb-6 leading-relaxed">اشترك ليصلك أحدث أخبار السوق ونصائح الاستثمار أسبوعياً.</p>
             <div class="flex flex-col gap-3">
-              <input [(ngModel)]="email" type="email" class="w-full h-11 px-4 rounded-lg border-0 bg-white/10 text-white placeholder:text-white/60 text-sm focus:ring-2 focus:ring-secondary backdrop-blur-sm" placeholder="البريد الإلكتروني">
+              <input [ngModel]="email()" (ngModelChange)="email.set($event)" type="email" class="w-full h-11 px-4 rounded-lg border-0 bg-white/10 text-white placeholder:text-white/60 text-sm focus:ring-2 focus:ring-secondary backdrop-blur-sm" placeholder="البريد الإلكتروني">
               <button (click)="subscribe()" class="w-full h-11 bg-secondary hover:bg-secondary/90 text-white font-bold text-sm rounded-lg transition-transform hover:scale-105 shadow-md cursor-pointer">
                 اشترك الآن
               </button>

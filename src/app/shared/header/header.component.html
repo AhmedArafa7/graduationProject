@@ -16,10 +16,25 @@
 
     <div class="flex items-center gap-3 font-display">
       @if (isLoggedIn()) {
-        <button class="flex items-center justify-center rounded-full h-10 w-10 bg-background-light dark:bg-gray-800 text-text-secondary hover:bg-gray-200 transition-colors">
-          <span class="material-symbols-outlined">notifications</span>
-        </button>
-        <div class="size-10 rounded-full overflow-hidden border border-border-color cursor-pointer" [style.backgroundImage]="'url(' + userAvatar() + ')'" style="background-size: cover; background-position: center;"></div>
+        <a routerLink="/notifications" class="relative flex items-center justify-center rounded-full h-10 w-10 bg-background-light dark:bg-gray-800 text-text-secondary hover:bg-gray-200 transition-colors"
+                [class.animate-bounce]="hasNewNotification()"
+                [class.text-primary]="unreadCount() > 0">
+          <span class="material-symbols-outlined" [class.fill-icon]="unreadCount() > 0">
+            {{ unreadCount() > 0 ? 'notifications_active' : 'notifications' }}
+          </span>
+          @if (unreadCount() > 0) {
+            <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full px-1 border-2 border-white dark:border-gray-800">
+              {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+            </span>
+          }
+        </a>
+        
+        <!-- User Avatar - رابط مباشر للـ Profile -->
+        <a routerLink="/profile" 
+           class="size-10 rounded-full overflow-hidden border-2 border-border-color hover:border-primary cursor-pointer transition-colors" 
+           [style.backgroundImage]="'url(' + userAvatar() + ')'" 
+           style="background-size: cover; background-position: center;">
+        </a>
       } @else {
         <a routerLink="/auth/login" class="hidden sm:flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-6 bg-primary/10 text-primary dark:text-white text-sm font-bold hover:bg-primary/20 transition-colors">
            تسجيل الدخول
