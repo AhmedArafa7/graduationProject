@@ -1,6 +1,7 @@
 import { Component, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
 import { UserService } from '../../../core/services/user.service';
 import { MessagesService, Conversation, Message } from '../../../core/services/messages.service';
@@ -14,6 +15,7 @@ import { MessagesService, Conversation, Message } from '../../../core/services/m
 export class MessagesComponent implements OnInit {
   private userService = inject(UserService);
   private messagesService = inject(MessagesService);
+  private route = inject(ActivatedRoute);
   
   userAvatar = computed(() => this.userService.getProfileImage());
   
@@ -30,11 +32,24 @@ export class MessagesComponent implements OnInit {
   });
 
   ngOnInit() {
-    // اختيار أول محادثة بشكل افتراضي
-    const convs = this.conversations();
-    if (convs.length > 0) {
-      this.selectedConversation.set(convs[0]);
-    }
+    // التحقق من query parameter لفتح محادثة محددة
+    this.route.queryParams.subscribe(params => {
+      const chatId = params['chat'];
+      const convs = this.conversations();
+      
+      if (chatId) {
+        const targetConv = convs.find(c => c.id === Number(chatId));
+        if (targetConv) {
+          this.selectConversation(targetConv);
+          return;
+        }
+      }
+      
+      // اختيار أول محادثة بشكل افتراضي
+      if (convs.length > 0) {
+        this.selectedConversation.set(convs[0]);
+      }
+    });
   }
 
   selectConversation(conv: Conversation) {

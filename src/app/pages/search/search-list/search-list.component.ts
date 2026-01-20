@@ -112,7 +112,7 @@ export class SearchListComponent {
       type: 'فيلا',
       tags: ['مميز', 'جديد'],
       agentType: 'وكيل عقاري',
-      agentImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwsPA9c31HBt2vXqoZ00tYJx2RIr9cHIYSdSmV9fxvyKziuR0dz2LFsmx8OhGV1sL_n1Yus1lK9363sWb3gWqUfBbpIXA0sDejx5rBJljOwbQ0S3ekK6IeiRe8jm7282x_rMXb30iaeN7mvFh8bZf5SFkOieg4XzCetPe68ao1xbc4A8Owyu8nGpmsWyu0LTbZ-ykOto0Zi0JbclcntcDQ-T4WpLwji4G5tthQ94W4E8o0T0e-2F-I27Cc1qsq9sVbNp4JH8m3tZs',
+      agentImage: '/hijab_fatima.png',
       mapPosition: { top: '40%', left: '60%' },
       aiAnalysis: { status: 'fair', percentage: 60, label: 'سعر عادل' }
     },
@@ -129,7 +129,7 @@ export class SearchListComponent {
       type: 'شقة',
       tags: ['مقترح بالذكاء الاصطناعي'],
       agentType: 'المالك',
-      agentImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwsPA9c31HBt2vXqoZ00tYJx2RIr9cHIYSdSmV9fxvyKziuR0dz2LFsmx8OhGV1sL_n1Yus1lK9363sWb3gWqUfBbpIXA0sDejx5rBJljOwbQ0S3ekK6IeiRe8jm7282x_rMXb30iaeN7mvFh8bZf5SFkOieg4XzCetPe68ao1xbc4A8Owyu8nGpmsWyu0LTbZ-ykOto0Zi0JbclcntcDQ-T4WpLwji4G5tthQ94W4E8o0T0e-2F-I27Cc1qsq9sVbNp4JH8m3tZs',
+      agentImage: '/Ahmed_Arafa.jpg',
       mapPosition: { top: '55%', left: '70%' },
       aiAnalysis: { status: 'high', percentage: 85, label: 'سعر مرتفع قليلاً' }
     },
@@ -145,7 +145,7 @@ export class SearchListComponent {
       type: 'تاون هاوس',
       tags: [],
       agentType: 'وكيل عقاري',
-      agentImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwsPA9c31HBt2vXqoZ00tYJx2RIr9cHIYSdSmV9fxvyKziuR0dz2LFsmx8OhGV1sL_n1Yus1lK9363sWb3gWqUfBbpIXA0sDejx5rBJljOwbQ0S3ekK6IeiRe8jm7282x_rMXb30iaeN7mvFh8bZf5SFkOieg4XzCetPe68ao1xbc4A8Owyu8nGpmsWyu0LTbZ-ykOto0Zi0JbclcntcDQ-T4WpLwji4G5tthQ94W4E8o0T0e-2F-I27Cc1qsq9sVbNp4JH8m3tZs',
+      agentImage: '/hijab_aya.png',
       mapPosition: { top: '60%', left: '20%' },
       aiAnalysis: { status: 'low', percentage: 30, label: 'سعر لقطة' }
     },
@@ -161,7 +161,7 @@ export class SearchListComponent {
       type: 'شاليه',
       tags: ['استثمار جيد'],
       agentType: 'المالك',
-      agentImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAwsPA9c31HBt2vXqoZ00tYJx2RIr9cHIYSdSmV9fxvyKziuR0dz2LFsmx8OhGV1sL_n1Yus1lK9363sWb3gWqUfBbpIXA0sDejx5rBJljOwbQ0S3ekK6IeiRe8jm7282x_rMXb30iaeN7mvFh8bZf5SFkOieg4XzCetPe68ao1xbc4A8Owyu8nGpmsWyu0LTbZ-ykOto0Zi0JbclcntcDQ-T4WpLwji4G5tthQ94W4E8o0T0e-2F-I27Cc1qsq9sVbNp4JH8m3tZs',
+      agentImage: '/Omar_Elpeltage.png',
       mapPosition: { top: '80%', left: '80%' },
       aiAnalysis: { status: 'fair', percentage: 55, label: 'سعر عادل' }
     }

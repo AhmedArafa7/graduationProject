@@ -66,7 +66,7 @@ export class MessagesService {
     {
       id: 2,
       name: 'سلمى أحمد',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+      avatar: '/hijab_salma.png',
       lastMessage: 'أنا مهتمة بالعقار اللي عرضته',
       time: 'أمس',
       unread: false,
@@ -198,5 +198,62 @@ export class MessagesService {
       })
     );
     this.saveToStorage();
+  }
+
+  // بدء محادثة مع وكيل محدد
+  startChatWithAgent(agentName: string, agentImage: string, propertyTitle: string): number {
+    // البحث عن محادثة موجودة مع نفس الوكيل
+    const existingConvo = this.conversationsSignal().find(c => c.name === agentName);
+    
+    if (existingConvo) {
+      // إضافة رسالة ترحيبية جديدة
+      const welcomeMsg: Message = {
+        id: Date.now(),
+        text: `مرحباً! أستفسر عن العقار: ${propertyTitle}`,
+        sender: 'user',
+        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+      };
+      
+      this.conversationsSignal.update(list =>
+        list.map(c => {
+          if (c.id === existingConvo.id) {
+            return {
+              ...c,
+              messages: [...c.messages, welcomeMsg],
+              lastMessage: welcomeMsg.text,
+              time: 'الآن',
+              unread: false
+            };
+          }
+          return c;
+        })
+      );
+      this.saveToStorage();
+      return existingConvo.id;
+    }
+
+    // إنشاء محادثة جديدة
+    const newId = Date.now();
+    const newConvo: Conversation = {
+      id: newId,
+      name: agentName,
+      avatar: agentImage,
+      lastMessage: `مرحباً! أستفسر عن العقار: ${propertyTitle}`,
+      time: 'الآن',
+      unread: false,
+      online: true,
+      messages: [
+        {
+          id: Date.now(),
+          text: `مرحباً! أستفسر عن العقار: ${propertyTitle}`,
+          sender: 'user',
+          time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+        }
+      ]
+    };
+
+    this.conversationsSignal.update(list => [newConvo, ...list]);
+    this.saveToStorage();
+    return newId;
   }
 }

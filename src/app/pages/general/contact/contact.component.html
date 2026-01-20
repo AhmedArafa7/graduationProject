@@ -76,13 +76,13 @@
             <label class="block text-text-primary dark:text-white text-base font-medium mb-2">الموضوع</label>
             <div class="relative">
               <select [ngModel]="subject()" (ngModelChange)="subject.set($event)" name="subject" 
-                      class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all cursor-pointer outline-none"
+                      class="w-full h-14 px-8 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all cursor-pointer outline-none"
                       style="-webkit-appearance: none; -moz-appearance: none; appearance: none;">
                 <option value="general">استفسار عام</option>
                 <option value="support">دعم فني</option>
                 <option value="partnership">شراكة</option>
               </select>
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">expand_more</span>
+              
             </div>
           </div>
 

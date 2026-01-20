@@ -66,8 +66,8 @@
             <button (click)="toggleFavorite($event, prop.id)" 
                     class="absolute top-4 left-4 z-20 p-2 rounded-full bg-white/80 backdrop-blur hover:bg-white transition-all shadow-sm group/fav">
               <span class="material-symbols-outlined text-xl transition-all duration-300"
-                    [class]="favorites().includes(prop.id) ? 'text-red-500' : 'text-gray-500 group-hover/fav:text-red-500'">
-                {{ favorites().includes(prop.id) ? 'favorite' : 'favorite_border' }}
+                    [class]="isFavorite(prop.id) ? 'text-red-500' : 'text-gray-500 group-hover/fav:text-red-500'">
+                {{ isFavorite(prop.id) ? 'favorite' : 'favorite_border' }}
               </span>
             </button>
 

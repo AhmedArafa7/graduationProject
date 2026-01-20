@@ -54,8 +54,10 @@
               <div>
                 <div class="flex justify-between items-start mb-1">
                   <h3 class="text-sm font-bold text-text-primary dark:text-white line-clamp-1">{{ prop.title }}</h3>
-                  <button class="text-text-secondary hover:text-red-500 transition-colors">
-                    <span class="material-symbols-outlined text-lg">favorite</span>
+                  <button (click)="toggleFavorite($event, prop.id)" 
+                          class="transition-colors"
+                          [class]="isFavorite(prop.id) ? 'text-red-500' : 'text-text-secondary hover:text-red-500'">
+                    <span class="material-symbols-outlined text-lg" [class.font-variation-filled]="isFavorite(prop.id)">favorite</span>
                   </button>
                 </div>
                 <p class="text-xs text-text-secondary dark:text-gray-400 flex items-center gap-1 mb-2">
@@ -75,51 +77,9 @@
       </div>
     </div>
 
+    <!-- Leaflet Map Container -->
     <div class="flex-1 relative bg-gray-200 dark:bg-gray-900 overflow-hidden">
-      <div class="absolute inset-0 bg-cover bg-center opacity-80 dark:opacity-60" 
-           style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD_2plKoLCMr8_hOq6j4nR_grHncHoEI1jXzESJeL8Y9EL6hFysMG2uSK3Mtk-5cCdYJsVhXIXeA0QVg6vmUv5ZCGR8oOPeeIeq3zpqWkZ_dZTfp1AVKlBc32kSYUqq07i50I0gAYUEX1QKDJiCI22WYH9HmKeAP2xVF02Bs2E3eWOr0hXbxWdql8mUPcdbxduotXY6gR94Gn9MQz2-DU2ijjGKgGfL1GAq6tRFmBXRSS8uLn48Yr9UoV0E_j3a1qkRgO9xmmUs0q8'); filter: grayscale(20%);">
-      </div>
-      
-      @for (prop of properties; track prop.id) {
-        <div 
-          class="absolute transform -translate-x-1/2 -translate-y-full transition-all duration-300 cursor-pointer z-10 group"
-          [style.top]="prop.mapPosition.top"
-          [style.left]="prop.mapPosition.left"
-          [style.z-index]="hoveredPropertyId() === prop.id ? 50 : 10"
-        >
-          <div 
-            (mouseenter)="onCardHover(prop.id)"
-            (mouseleave)="onCardHover(null)"
-            [class]="hoveredPropertyId() === prop.id ? 'bg-secondary scale-110' : 'bg-primary hover:bg-secondary'"
-            class="text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-lg border-2 border-white dark:border-gray-800 relative flex items-center gap-1 transition-colors"
-          >
-            <span>{{ prop.price }}</span>
-            
-            <div [class]="hoveredPropertyId() === prop.id ? 'border-t-secondary' : 'border-t-primary group-hover:border-t-secondary'"
-                 class="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent transition-colors">
-            </div>
-          </div>
-
-          <div [class.opacity-100]="hoveredPropertyId() === prop.id"
-               [class.visible]="hoveredPropertyId() === prop.id"
-               class="opacity-0 invisible absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden transition-all duration-200 pointer-events-none">
-            <div class="h-24 bg-cover bg-center" [style.background-image]="'url(' + prop.image + ')'"></div>
-            <div class="p-2 text-center">
-              <p class="font-bold text-text-primary dark:text-white text-xs truncate">{{ prop.title }}</p>
-              <p class="text-primary font-bold text-xs mt-1">{{ prop.price }} ج.م</p>
-            </div>
-          </div>
-        </div>
-      }
-
-      <div class="absolute bottom-6 right-6 flex flex-col gap-2">
-        <button class="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg shadow-md flex items-center justify-center text-text-secondary hover:text-primary">
-          <span class="material-symbols-outlined">add</span>
-        </button>
-        <button class="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg shadow-md flex items-center justify-center text-text-secondary hover:text-primary">
-          <span class="material-symbols-outlined">remove</span>
-        </button>
-      </div>
+      <div id="search-leaflet-map" class="absolute inset-0 z-0"></div>
     </div>
 
   </div>

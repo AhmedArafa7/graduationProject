@@ -1,12 +1,14 @@
-import { Component, signal, computed, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, PLATFORM_ID, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { Title } from '@angular/platform-browser';
 import { ChatbotService, Property as ChatProperty } from '../../../core/services/chatbot/chatbot.service';
 import { PropertyService } from '../../../core/services/property.service';
 import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
+import { MessagesService } from '../../../core/services/messages.service';
+import * as L from 'leaflet';
 
 
 @Component({
@@ -15,14 +17,17 @@ import { AgentPropertiesService } from '../../../core/services/agent-properties.
   templateUrl: './property-details.component.html',
   styleUrl: './property-details.component.scss'
 })
-export class PropertyDetailsComponent implements OnInit {
+export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   private toast = inject(ToastService);
   private titleService = inject(Title);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
   private chatbotService = inject(ChatbotService);
   private propertyService = inject(PropertyService);
   private agentPropertiesService = inject(AgentPropertiesService);
+  private messagesService = inject(MessagesService);
+  private locationMap: L.Map | null = null;
 
 
   // --- UI States ---
@@ -115,7 +120,7 @@ export class PropertyDetailsComponent implements OnInit {
       description: 'بنتهاوس بإطلالة بانورامية على المدينة...',
       amenities: [{ icon: 'deck', label: 'رووف خاص' }],
       images: [
-        'https://images.unsplash.com/photo-1512915990742-6651ac3579be?q=80&w=1000&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1000&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1600607687644-c7171b42498b?q=80&w=1000&auto=format&fit=crop'
       ]
     }
@@ -148,7 +153,7 @@ export class PropertyDetailsComponent implements OnInit {
     id: 1,
     name: 'فاطمة السيد',
     title: 'استشاري عقاري أول',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop',
+    image: '/hijab_fatima.png',
     experience: '5+',
     deals: 82,
     rating: 4.9,
@@ -285,7 +290,84 @@ export class PropertyDetailsComponent implements OnInit {
     // الصعود للأعلى
     if (isPlatformBrowser(this.platformId)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      // تحديث الخريطة بعد فترة قصيرة
+      setTimeout(() => this.initLocationMap(), 300);
     }
+  }
+
+  ngAfterViewInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => this.initLocationMap(), 500);
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.locationMap) {
+      this.locationMap.remove();
+      this.locationMap = null;
+    }
+  }
+
+  // خريطة إحداثيات المناطق
+  private locationCoords: { [key: string]: [number, number] } = {
+    'الزمالك': [30.0609, 31.2193],
+    'المعادي': [29.9604, 31.2577],
+    'التجمع الخامس': [30.0131, 31.4306],
+    'الشيخ زايد': [30.0174, 30.9728],
+    'القاهرة الجديدة': [30.0289, 31.4523],
+    'وسط البلد': [30.0444, 31.2357],
+    'مصر الجديدة': [30.0912, 31.3260],
+    'المهندسين': [30.0571, 31.2073],
+    'الدقي': [30.0392, 31.2125],
+    '6 أكتوبر': [29.9772, 30.9345],
+    'العاصمة الإدارية': [30.0171, 31.7500]
+  };
+
+  private initLocationMap() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    
+    const mapElement = document.getElementById('property-location-map');
+    if (!mapElement) return;
+
+    // إزالة الخريطة القديمة
+    if (this.locationMap) {
+      this.locationMap.remove();
+      this.locationMap = null;
+    }
+
+    // البحث عن الإحداثيات
+    let coords: [number, number] = [30.0444, 31.2357]; // القاهرة افتراضياً
+    const location = this.property?.location || '';
+    
+    for (const [area, coord] of Object.entries(this.locationCoords)) {
+      if (location.includes(area)) {
+        coords = coord;
+        break;
+      }
+    }
+
+    // إنشاء الخريطة
+    this.locationMap = L.map('property-location-map').setView(coords, 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(this.locationMap);
+
+    // إصلاح مشكلة أيقونة الـ marker
+    const customIcon = L.icon({
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+
+    // إضافة marker
+    L.marker(coords, { icon: customIcon }).addTo(this.locationMap)
+      .bindPopup(`<b>${this.property?.title || 'الموقع'}</b><br>${location}`)
+      .openPopup();
   }
 
   // --- Actions ---
@@ -331,6 +413,16 @@ export class PropertyDetailsComponent implements OnInit {
       const url = `https://wa.me/${this.agent.phone}?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
     }
+  }
+
+  // فتح محادثة مع الوكيل
+  openChatWithAgent() {
+    const conversationId = this.messagesService.startChatWithAgent(
+      this.agent.name,
+      this.agent.image,
+      this.property.title
+    );
+    this.router.navigate(['/user/messages'], { queryParams: { chat: conversationId } });
   }
 
   shareProperty() {

@@ -182,13 +182,8 @@
       <div class="bg-card-background dark:bg-background-dark rounded-xl p-6 border border-border-color dark:border-gray-700 shadow-sm print:break-inside-avoid">
         <h2 class="text-xl font-bold text-text-primary dark:text-white mb-4">الموقع</h2>
         <div class="h-80 bg-gray-200 rounded-lg overflow-hidden relative">
-           <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1748&auto=format&fit=crop');"></div>
-           <div class="absolute inset-0 flex items-center justify-center bg-black/10">
-             <span class="bg-white text-text-primary px-4 py-2 rounded-lg shadow-lg font-bold text-sm flex items-center gap-2 animate-bounce">
-               <span class="material-symbols-outlined text-primary">location_on</span>
-               {{ property.location }}
-             </span>
-           </div>
+           <!-- Leaflet Map Container -->
+           <div id="property-location-map" class="absolute inset-0 z-10"></div>
         </div>
       </div>
 
@@ -254,6 +249,9 @@
             <button (click)="contactAgent('whatsapp')" class="flex items-center justify-center gap-2 h-11 w-full rounded-lg bg-secondary text-white font-bold text-sm hover:bg-secondary/90 transition-colors">
               <span class="material-symbols-outlined text-lg">chat</span> واتساب
             </button>
+            <button (click)="openChatWithAgent()" class="flex items-center justify-center gap-2 h-11 w-full rounded-lg border-2 border-primary text-primary font-bold text-sm hover:bg-primary/10 transition-colors">
+              <span class="material-symbols-outlined text-lg">message</span> محادثة
+            </button>
           </div>
         </div>
 
@@ -307,7 +305,7 @@
             <div>
               <label class="text-sm font-medium text-text-secondary dark:text-gray-400 block mb-1">مدة القرض</label>
               <select [ngModel]="loanTerm()" (ngModelChange)="loanTerm.set($event)"
-                      class="w-full rounded-lg border-border-color dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-primary focus:border-primary h-10 px-3 text-sm">
+                      class="form-select w-full rounded-lg ps-8 border-border-color dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-primary focus:border-primary h-10 px-3 text-sm">
                 <option [value]="5">5 سنوات</option>
                 <option [value]="10">10 سنوات</option>
                 <option [value]="15">15 سنة</option>
