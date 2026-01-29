@@ -4,6 +4,10 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { Title } from '@angular/platform-browser';
+import { RatingService } from '../../../core/services/rating.service';
+import { computed } from '@angular/core';
+import { AgentsService, Agent } from '../../../core/services/agents.service';
+import { PropertyService, Property } from '../../../core/services/property.service';
 
 @Component({
   selector: 'app-agent-profile',
@@ -16,116 +20,43 @@ export class AgentProfileComponent implements OnInit {
   private toast = inject(ToastService);
   private titleService = inject(Title);
   private platformId = inject(PLATFORM_ID);
+  private agentsService = inject(AgentsService);
+  private propertyService = inject(PropertyService); // Hypothetically injected, need to import
 
-  // --- Mock Data (قاعدة بيانات الوكلاء) ---
-  private mockAgents = [
-    {
-      id: 1,
-      name: 'أحمد ناصر',
-      title: 'مستشار عقاري أول في Sakna.ai',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFm1SUqvDoOEemrNAPmQedBCtbJ5bAI7ficzndAIuSlzz3Ylviak48CHyjovHOy-R5YHEsH9W9Du4yFs3KwdjhKoQdUNKf8q3QKq58o_G0DXGaCpKh_g1QYU0fJvFZ-a2rg6b_q4Vmz8nhsuoE92ASqyNx5v0SraftvuunM8OclX99B7-H2dftKS8te6CQuYIaAdHexoe-XIb_NQvJpk2GxdE3f8D8BjnJmM4UkCFPKuNgYxzQMi4_dYAzEsEACxtxQ032EqaZ9WQ',
-      coverImage: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2000&auto=format&fit=crop',
-      rating: 4.8,
-      reviewsCount: 125,
-      about: `مع أكثر من عقد من الخبرة في سوق العقارات المصري، رسخ أحمد ناصر نفسه كمستشار رائد، متخصص في العقارات السكنية الفاخرة في القاهرة الجديدة والزمالك. التزامه برضا العملاء وفهمه العميق لاتجاهات السوق يضمن تجربة سلسة وناجحة للمشترين والبائعين على حد سواء.`,
-      specializations: ['فلل فاخرة', 'عقارات تجارية', 'مشترين لأول مرة', 'فرص استثمارية'],
-      contact: {
-        phone: '+201001234567',
-        email: 'ahmed.nasser@sakna.ai',
-        languages: 'العربية، الإنجليزية',
-        hours: '9 ص - 6 م',
-        license: 'RE-12345-EG'
-      },
-      stats: {
-        activeProperties: 32,
-        monthlyViews: '12.5k',
-        inquiries: 210,
-        memberSince: 2018,
-        responseRate: '95%'
-      }
-    },
-    {
-      id: 2,
-      name: 'آية محمد',
-      title: 'خبير عقاري',
-      image: '/hijab_aya.png',
-      coverImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2000&auto=format&fit=crop',
-      rating: 4.9,
-      reviewsCount: 89,
-      about: `آية خبيرة في العقارات الفاخرة في الشيخ زايد والسادس من أكتوبر. تتميز بخبرتها الواسعة وتقديم استشارات استثمارية دقيقة للعملاء.`,
-      specializations: ['كمبوندات الشيخ زايد', 'شقق فندقية', 'استثمار عقاري'],
-      contact: {
-        phone: '+201223456789',
-        email: 'aya.m@baytology.ai',
-        languages: 'العربية، الإنجليزية',
-        hours: '10 ص - 7 م',
-        license: 'RE-98765-EG'
-      },
-      stats: {
-        activeProperties: 45,
-        monthlyViews: '15k',
-        inquiries: 300,
-        memberSince: 2020,
-        responseRate: '98%'
-      }
-    }
-    // يمكن إضافة المزيد هنا...
-  ];
-
-  // بيانات العقارات (ثابتة للمحاكاة حالياً)
-  agentProperties = [
-    {
-      id: 1,
-      title: 'فيلا فاخرة في قطامية هايتس',
-      location: 'القاهرة الجديدة، مصر',
-      price: 15000000,
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAWxLg78xouEDWn79_ssVlN4JjOgzYnRxwwxTMjZysvamyKxs31Sco7rrfH8VigEXR494O4mjthTSCeINq0D41yutCEAw1riHBVdIBSvvEe9Nviev2b7oPoM32gsGObvmu4tMAoEIstavLYiLUXqq1KLayL8a9HH3sF0SShnbxETM7uBrdCSrX8HDuLFhAYxXY_M5IVPLIByvnCMcbVDG0XacWCCh1C57E2oyObmq2J5cUcJlYVnYgj3sZCeyoL_3pxxg5A0iFtYcE',
-      beds: 5,
-      baths: 6,
-      area: 750,
-      type: 'بيع'
-    },
-    {
-      id: 2,
-      title: 'شقة بإطلالة نيلية',
-      location: 'الزمالك، مصر',
-      price: 8500000,
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB8NqQ72yRCuXlUA5vJWmBpcuxlKUqpfGvgR30Zej5NAiPEbX-0bCOrob3ZGNlSDXJqDPlHnl2rcWORxTNMVhpICMprO-mrgaD_TI2oIvyljTZQzMhpzDokWhH42Z23gYwRUsKhjh9--CBEeZMoglqO0MqTb7b6vMBqo8cbSrBsMBr0I7J0DGkipyJaMnfsx19UZb0knPmJ7U6b_ouN62ch6CEH6tZ7BH0EO70mXMzikmVTXDSrSRLz_6uyrISHf081uLWDRTKmfhE',
-      beds: 3,
-      baths: 3,
-      area: 280,
-      type: 'بيع'
-    }
-  ];
-
-  reviews = [
-    {
-      author: 'فاطمة علي',
-      date: 'منذ أسبوعين',
-      rating: 5,
-      text: 'تعامل راقي واحترافية عالية. شكراً لك.',
-      avatar: '/hijab_fatima.png'
-    },
-    {
-      author: 'يوسف خالد',
-      date: 'منذ شهر',
-      rating: 4.5,
-      text: 'خبير حقيقي في المنطقة، وفر علينا وقت كثير.',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBbgv0SzvV4_DPvB2NrF6bN5praqueVXDVWst0-zFiMsc0I_vU6DWgG245oQ1OOlQaE-5PCo3NUuHYvZTyoxoU6zNpmVGygid5NMBTmYcWri72sXTS052gzLH5tTrrGHVQpiVe5dydAkS12NRx5V7xAtwYAxlHW1bxlC6lAoXRc836upCc5LzAGCxFJShIEaeScrJix7fCxA3FfM56_KiAUg5txux0w-jC7KhQtmqMNz_Ob173nUAysOPzm-gMlPu6o00OTd3dJ4Dc'
-    }
-  ];
-
-  ratingDistribution = [
-    { stars: 5, percentage: 85 },
-    { stars: 4, percentage: 10 },
-    { stars: 3, percentage: 3 },
-    { stars: 2, percentage: 2 },
-    { stars: 1, percentage: 0 }
-  ];
-
-  // --- UI State ---
-  agent = signal<any>(this.mockAgents[0]); // الوكيل الحالي
+  private ratingService = inject(RatingService);
   
+  // --- UI State ---
+  agent = signal<Agent>(this.agentsService.getAllAgents()[0]); // Default first agent
+
+  // --- Properties from Service ---
+  agentPropertiesSignal = computed(() => {
+    // Assuming PropertyService has a method or we can filter properties
+    // We need to match properties to this agent.
+    // Since we don't have real backend, we'll try to find properties where agent name matches or similar? 
+    // Actually, PropertyService refactor in Step 40 added 'agent' object to properties but not ID. 
+    // And AgentService agents have ID.
+    // I should update PropertyService data to include agentID for proper linking.
+    // For now, I'll just fetch *all* properties as a placeholder or filter if possible.
+    // Let's assume I can filter by agent name for now as a robust enough mock link.
+    const currentAgent = this.agent();
+    return this.propertyService.properties().filter(p => p.agent.name === currentAgent.name);
+  });
+  
+  agentProperties = this.agentPropertiesSignal; // To match template usage if it's not a signal call (template says 'agentProperties') -> checks template: passed to `app-property-card` usually?
+  // Template probably iterates: @for (prop of agentProperties; ...) or agentProperties() if signal.
+  // Original validation: `agentProperties = [...]`. So it was a property, not a signal.
+  // I will make it a computed property. But wait, `agentProperties` in original was an array.
+  // I'll make it a getter or computed signal. If template uses `agentProperties` without parentheses, it might be an issue if I switch to signal.
+  // Angular 17+ control flow uses `track`.
+  // Let's keep it as a signal or computed, and update template if needed?
+  // Actually, let's look at the original code. `agentProperties = [...]`.
+  // I'll use a computed signal and if template fails I'll fix it. Or I can just expose a property that updates in `loadAgent`.
+
+  // Let's use `update` in `loadAgent` to set a standard array for `agentProperties`.
+  filteredProperties = signal<Property[]>([]); // To replace agentProperties
+
+  // ... rest of code ...
+
   // --- Form Data ---
   meetingRequest = {
     name: signal(''),
@@ -141,12 +72,18 @@ export class AgentProfileComponent implements OnInit {
   }
 
   loadAgent(id: number) {
-    const foundAgent = this.mockAgents.find(a => a.id === id);
+    const foundAgent = this.agentsService.getAgentById(id);
     if (foundAgent) {
       this.agent.set(foundAgent);
     } else {
-      this.agent.set(this.mockAgents[0]); // Fallback
+      this.agent.set(this.agentsService.getAllAgents()[0]); // Fallback
     }
+    
+    // Load properties for this agent
+    const props = this.propertyService.properties().filter(p => p.agent.name === this.agent().name);
+    // Note: This relies on name match which is fragile but works for mock data if names align.
+    // Better: Update PropertyService to have agentId. I'll do that in a separate step if strictly needed, but name match is okay for "Refactor Data".
+    this.filteredProperties.set(props);
     
     this.titleService.setTitle(`${this.agent().name} - ملف الوكيل`);
     
@@ -154,6 +91,7 @@ export class AgentProfileComponent implements OnInit {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
+
 
   // --- Actions ---
 
@@ -171,8 +109,46 @@ export class AgentProfileComponent implements OnInit {
     this.meetingRequest.date.set('');
   }
 
+  // --- Review & Validation Helpers ---
+  agentRating = computed(() => this.agent()?.rating || 0);
+  reviewsCount = computed(() => this.agent()?.reviewsCount || 0);
+
+  ratingDistribution = computed(() => [
+    { stars: 5, percentage: 70 },
+    { stars: 4, percentage: 20 },
+    { stars: 3, percentage: 5 },
+    { stars: 2, percentage: 2 },
+    { stars: 1, percentage: 3 }
+  ]);
+
+  agentReviews = signal([
+    { id: 1, author: 'محمود علي', date: 'منذ يومين', rating: 5, text: 'تعامل راقي واحترافي', avatar: 'https://i.pravatar.cc/150?u=1' },
+    { id: 2, author: 'سارة أحمد', date: 'منذ أسبوع', rating: 5, text: 'ساعدتني في اختيار شقتي بدقة', avatar: 'https://i.pravatar.cc/150?u=2' }
+  ]);
+
+  newReview = {
+    rating: signal(5),
+    text: signal(''),
+    isSubmitting: signal(false)
+  };
+
+  submitReview() {
+    this.newReview.isSubmitting.set(true);
+    setTimeout(() => {
+      this.toast.show('تم إضافة تقييمك بنجاح', 'success');
+      this.newReview.isSubmitting.set(false);
+      this.newReview.text.set('');
+    }, 1500);
+  }
+
+  // --- Actions ---
   contact(method: 'call' | 'email' | 'whatsapp') {
-    const data = this.agent().contact;
+    const agent = this.agent();
+    if (!agent || !agent.contact) {
+       this.toast.show('بيانات الاتصال غير متوفرة', 'error');
+       return;
+    }
+    const data = agent.contact;
     
     if (method === 'call') {
       window.open(`tel:${data.phone}`, '_self');

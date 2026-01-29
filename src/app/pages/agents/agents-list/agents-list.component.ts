@@ -3,6 +3,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
+import { MessagesService } from '../../../core/services/messages.service';
+import { AgentsService } from '../../../core/services/agents.service';
 
 @Component({
   selector: 'app-agents-list',
@@ -13,7 +15,9 @@ import { ToastService } from '../../../core/services/toast.service';
 export class AgentsListComponent {
   private router = inject(Router);
   private toast = inject(ToastService);
-  private platformId = inject(PLATFORM_ID); // لحل مشكلة window
+  private platformId = inject(PLATFORM_ID);
+  private messagesService = inject(MessagesService);
+  private agentsService = inject(AgentsService); // Service Injection
 
   // --- Filters State ---
   searchQuery = signal('');
@@ -24,69 +28,17 @@ export class AgentsListComponent {
   // --- Pagination ---
   currentPage = signal(1);
 
-  // --- Mock Data ---
-  agents = [
-    {
-      id: 1,
-      name: 'أحمد ناصر',
-      role: 'مستشار عقاري أول',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAFm1SUqvDoOEemrNAPmQedBCtbJ5bAI7ficzndAIuSlzz3Ylviak48CHyjovHOy-R5YHEsH9W9Du4yFs3KwdjhKoQdUNKf8q3QKq58o_G0DXGaCpKh_g1QYU0fJvFZ-a2rg6b_q4Vmz8nhsuoE92ASqyNx5v0SraftvuunM8OclX99B7-H2dftKS8te6CQuYIaAdHexoe-XIb_NQvJpk2GxdE3f8D8BjnJmM4UkCFPKuNgYxzQMi4_dYAzEsEACxtxQ032EqaZ9WQ',
-      rating: 4.8,
-      propertiesCount: 32,
-      location: 'القاهرة الجديدة',
-      specialty: 'Residential'
-    },
-    {
-      id: 2,
-      name: 'آية محمد',
-      role: 'خبير عقاري',
-      image: '/hijab_aya.png',
-      rating: 4.9,
-      propertiesCount: 45,
-      location: 'الشيخ زايد',
-      specialty: 'Luxury'
-    },
-    {
-      id: 3,
-      name: 'محمد خالد',
-      role: 'وسيط تجاري',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBDAEvAqDcy8oAuQZdaEghanv3aDQYp_AQihW1RQB3wc095q2sgxhpnwIVAY-P2Po-xqob-cm_9eloGQtkq7RiYX4ledolQci9ar5A-AJdRd7xUpcqIS9pSVpLEJCFiYOZ_B0qE9pmTVh1sSDx8xqxnKPxG1lXu2XVtCtALVRXrmBJf70FQTD9P4tQq9OdQKLXzwcuH-xJhCT4jEJvN3Sg9-dP1h9nJgoxbvc-1o8sM60L4dEbwLR8ILnAlZeO2RdyfSJLOGv0YNvk',
-      rating: 4.7,
-      propertiesCount: 28,
-      location: 'المعادي',
-      specialty: 'Commercial'
-    },
-    {
-      id: 4,
-      name: 'هند السيد',
-      role: 'مستشار استثمار',
-      image: '/hijab_hend.png',
-      rating: 5.0,
-      propertiesCount: 55,
-      location: 'العاصمة الإدارية',
-      specialty: 'Luxury'
-    },
-    {
-      id: 5,
-      name: 'عمرو حسين',
-      role: 'وكيل عقاري',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBsKTzc2oKAV6NRfSP_VKM3460bWVSdbgXP82W-B5_rX0KUtCvEAqfwDPWDc9Tpvv9uwoJr3jM-gqp_gHNSJwTYIVPPtSY0NagZkggwjOrH0VJY3ur5ObD_ChaXBvUO2S2JhlQwoOSR7tIcnJ_7_VxMjRLvSamMDTs7Ec2oIQ9bsnVPJKgXqLS3lHVpaMuY_hBVcH1kiccU1aHkZA6_i7pSJDGi5atc_yl_8RRyYgWaPcn1ULZurQuY1uL0_8QfDy9f9QkP_cPuMcE',
-      rating: 4.6,
-      propertiesCount: 22,
-      location: 'وسط البلد',
-      specialty: 'Residential'
-    },
-    {
-      id: 6,
-      name: 'رنا أحمد',
-      role: 'مدير مبيعات',
-      image: '/hijab_rana.png',
-      rating: 4.9,
-      propertiesCount: 38,
-      location: 'الساحل الشمالي',
-      specialty: 'Residential'
-    }
-  ];
+  // --- Data from Service ---
+  // Mapping 'title' to 'role' to match template if needed, or simply using the service objects
+  // The template likely uses 'agent.name', 'agent.image', 'agent.location', 'agent.rating', etc.
+  // We added 'title' in service, template was using 'role'. Let's map it or update template?
+  // Easier to map here for minimal template changes, or just rely on similarity.
+  // Agent interface has 'title', Component had 'role'. Let's map title->role.
+  
+  agents = this.agentsService.getAllAgents().map(a => ({
+    ...a,
+    role: a.title 
+  }));
 
   // --- Filter Logic ---
   filteredAgents = computed(() => {
@@ -118,8 +70,14 @@ export class AgentsListComponent {
     this.toast.show('تم إعادة تعيين الفلاتر', 'info');
   }
 
-  contactAgent(id: number) {
-    this.router.navigate(['/messages'], { queryParams: { with: id } });
+  contactAgent(agent: { id: number; name: string; image: string }) {
+    // إنشاء أو فتح محادثة مع الوكيل
+    const conversationId = this.messagesService.startChatWithAgent(
+      agent.name,
+      agent.image,
+      'استفسار عن العقارات المتاحة'
+    );
+    this.router.navigate(['/messages'], { queryParams: { chat: conversationId } });
   }
 
   applyFilters() {

@@ -108,12 +108,12 @@
               
               <div class="relative cursor-pointer" [routerLink]="['/property', prop.id]">
                 <div class="w-full bg-center bg-no-repeat aspect-video bg-cover group-hover:scale-105 transition-transform duration-500" 
-                     [style.background-image]="'url(' + prop.image + ')'">
+                     [style.background-image]="'url(' + prop.images[0] + ')'">
                 </div>
                 
                 <div class="absolute top-3 right-3 flex gap-2">
-                  @for (tag of prop.tags; track tag) {
-                    <span class="text-xs font-bold px-2 py-1 rounded-full bg-secondary text-white shadow-sm">{{tag}}</span>
+                  @if (prop.tag) {
+                    <span class="text-xs font-bold px-2 py-1 rounded-full bg-secondary text-white shadow-sm">{{prop.tag}}</span>
                   }
                 </div>
                 
@@ -132,39 +132,41 @@
                   <p class="text-primary font-bold text-lg whitespace-nowrap">{{prop.price}} ج.م</p>
                 </div>
                 
-                <p class="text-text-secondary dark:text-gray-400 text-sm flex items-center gap-1">
-                  <span class="material-symbols-outlined text-base">location_on</span> {{prop.location}}
-                </p>
+                <div class="text-text-secondary dark:text-gray-400 text-sm flex items-center gap-1">
+                  <span class="material-symbols-outlined text-base">location_on</span> {{prop.city}}، {{prop.address}}
+                </div>
                 
                 <div class="flex items-center gap-4 text-text-secondary dark:text-gray-400 text-sm border-t border-b border-border-color dark:border-gray-700 py-2 my-1">
                   <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">bed</span> {{prop.beds}} غرف</span>
                   <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">bathtub</span> {{prop.baths}} حمام</span>
-                  <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">square_foot</span> {{prop.area}} م²</span>
+                  <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">square_foot</span> {{prop.area}}</span>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                  <label class="text-text-secondary dark:text-gray-400 text-xs font-medium flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm text-primary">analytics</span> تحليل السعر
-                  </label>
-                  <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                    <div class="h-1.5 rounded-full" 
-                         [style.width.%]="prop.aiAnalysis.percentage"
-                         [class]="prop.aiAnalysis.status === 'fair' ? 'bg-green-500' : (prop.aiAnalysis.status === 'high' ? 'bg-orange-500' : 'bg-blue-500')">
+                @if (prop.aiAnalysis) {
+                  <div class="flex flex-col gap-2">
+                    <label class="text-text-secondary dark:text-gray-400 text-xs font-medium flex items-center gap-1">
+                      <span class="material-symbols-outlined text-sm text-primary">analytics</span> تحليل السعر
+                    </label>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                      <div class="h-1.5 rounded-full" 
+                           [style.width.%]="prop.aiAnalysis.percentage"
+                           [class]="prop.aiAnalysis.status === 'fair' ? 'bg-green-500' : (prop.aiAnalysis.status === 'high' ? 'bg-orange-500' : 'bg-blue-500')">
+                      </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-text-secondary dark:text-gray-400">
+                      <span>منخفض</span>
+                      <span [class]="prop.aiAnalysis.status === 'fair' ? 'text-green-600 font-bold' : ''">{{prop.aiAnalysis.label}}</span>
+                      <span>مرتفع</span>
                     </div>
                   </div>
-                  <div class="flex justify-between text-xs text-text-secondary dark:text-gray-400">
-                    <span>منخفض</span>
-                    <span [class]="prop.aiAnalysis.status === 'fair' ? 'text-green-600 font-bold' : ''">{{prop.aiAnalysis.label}}</span>
-                    <span>مرتفع</span>
-                  </div>
-                </div>
+                }
               </div>
 
               <div class="p-4 border-t border-border-color dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
                 <div class="flex items-center gap-2">
                   <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border border-gray-200" 
-                       [style.background-image]="'url(' + prop.agentImage + ')'"></div>
-                  <span class="text-text-secondary dark:text-gray-400 text-sm font-medium">{{prop.agentType}}</span>
+                       [style.background-image]="'url(' + prop.agent.avatar + ')'"></div>
+                  <span class="text-text-secondary dark:text-gray-400 text-sm font-medium">{{prop.agent.title}}</span>
                 </div>
                 <button [routerLink]="['/property', prop.id]" class="px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">التفاصيل</button>
               </div>

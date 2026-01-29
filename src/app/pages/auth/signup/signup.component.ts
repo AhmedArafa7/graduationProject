@@ -118,28 +118,30 @@ export class SignupComponent {
 
     this.isSubmitting.set(true);
 
-    // محاكاة الاتصال بالسيرفر
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-      
-      // تقسيم الاسم إلى أول وأخير
-      const nameParts = this.name().trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      
-      // حفظ بيانات المستخدم في الـ UserService
-      this.userService.registerUser({
-        firstName,
-        lastName,
-        email: this.email(),
-        phone: this.phone(),
-        profileImage: this.profileImage(),
-        userType: this.userType()
-      });
-      
-      this.toast.show('تم إنشاء الحساب بنجاح! جاري تحويلك...', 'success');
-      this.router.navigate(['/profile']);
-    }, 1500);
+    // تقسيم الاسم إلى أول وأخير
+    const nameParts = this.name().trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    // إرسال طلب التسجيل
+    this.userService.registerUser({
+      firstName,
+      lastName,
+      email: this.email(),
+      phone: this.phone(),
+      profileImage: this.profileImage(),
+      userType: this.userType()
+    }).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.toast.show('تم إنشاء الحساب بنجاح! جاري تحويلك...', 'success');
+        this.router.navigate(['/profile']);
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        this.toast.show('حدث خطأ أثناء التسجيل', 'error');
+      }
+    });
   }
 
   socialLogin(provider: string) {

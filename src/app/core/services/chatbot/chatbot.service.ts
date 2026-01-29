@@ -9,6 +9,8 @@ export interface ChatResponse {
   filters?: Record<string, any>;
   properties?: Property[];
   type?: string;
+  properties_count?: number;
+  attribute?: string;
 }
 
 export interface Property {

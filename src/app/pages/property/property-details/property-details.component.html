@@ -179,6 +179,87 @@
         </div>
       </div>
 
+      <!-- Reviews Section -->
+      <div class="bg-card-background dark:bg-background-dark rounded-xl p-6 md:p-8 border border-border-color dark:border-gray-700 shadow-sm print:hidden">
+        <h2 class="text-xl font-bold text-text-primary dark:text-white mb-8 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">rate_review</span> التقييمات والمراجعات
+        </h2>
+        
+        <div class="flex flex-col md:flex-row gap-8 md:items-center mb-10 pb-8 border-b border-border-color dark:border-gray-700">
+          <div class="flex flex-col items-center justify-center min-w-[150px]">
+            <p class="text-text-primary dark:text-white text-6xl font-black mb-2">{{ propertyRating() }}</p>
+            <div class="flex gap-1 text-yellow-500 mb-2">
+              @for (star of [1,2,3,4,5]; track star) {
+                <span class="material-symbols-outlined fill-current">
+                  {{ star <= propertyRating() ? 'star' : (star - 0.5 <= propertyRating() ? 'star_half' : 'star_border') }}
+                </span>
+              }
+            </div>
+            <p class="text-text-secondary dark:text-gray-400 text-sm font-medium">{{ reviewsCount() }} مراجعة</p>
+          </div>
+          
+          <div class="flex-1 w-full space-y-3">
+            @for (dist of ratingDistribution(); track dist.stars) {
+              <div class="flex items-center gap-4 text-sm">
+                <span class="font-bold text-text-primary dark:text-white w-3">{{ dist.stars }}</span>
+                <div class="flex-1 h-2.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-yellow-400 rounded-full" [style.width.%]="dist.percentage"></div>
+                </div>
+                <span class="text-text-secondary dark:text-gray-400 w-10 text-left">{{ dist.percentage }}%</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Add Review Form -->
+        <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 mb-8 border border-border-color dark:border-gray-700">
+          <h4 class="font-bold text-text-primary dark:text-white mb-4">أضف تقييمك لهذا العقار</h4>
+          <div class="flex gap-2 mb-4">
+            @for (star of [1,2,3,4,5]; track star) {
+              <button (click)="newReview.rating.set(star)" class="text-2xl transition-transform hover:scale-110 focus:outline-none"
+                      [class.text-yellow-400]="star <= newReview.rating()"
+                      [class.text-gray-300]="star > newReview.rating()">
+                ★
+              </button>
+            }
+          </div>
+          <textarea [ngModel]="newReview.text()" (ngModelChange)="newReview.text.set($event)" 
+                    class="w-full p-3 rounded-lg border border-border-color dark:border-gray-600 bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:ring-2 focus:ring-primary/50 outline-none resize-none mb-3"
+                    rows="3" placeholder="ما رأيك في هذا العقار؟ شارك تجربتك..."></textarea>
+          <div class="flex justify-end">
+            <button (click)="submitReview()" 
+                    [disabled]="newReview.isSubmitting()"
+                    class="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              {{ newReview.isSubmitting() ? 'جاري النشر...' : 'نشر التقييم' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-8">
+          @for (review of propertyReviews(); track review.id) {
+            <div class="flex gap-4 animate-fadeIn">
+              <img class="w-12 h-12 rounded-full border border-gray-200 object-cover" [src]="review.avatar" alt="User avatar"/>
+              <div>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
+                  <h4 class="font-bold text-text-primary dark:text-white text-base">{{ review.author }}</h4>
+                  <span class="text-xs text-text-secondary dark:text-gray-500">{{ review.date }}</span>
+                </div>
+                <div class="flex gap-0.5 text-yellow-500 mb-2">
+                  @for (star of [1,2,3,4,5]; track star) {
+                    <span class="material-symbols-outlined !text-sm">
+                      {{ star <= review.rating ? 'star' : 'star_border' }}
+                    </span>
+                  }
+                </div>
+                <p class="text-text-secondary dark:text-gray-300 text-sm leading-relaxed">{{ review.text }}</p>
+              </div>
+            </div>
+          } @empty {
+            <p class="text-center text-text-secondary py-8">لا توجد تقييمات لهذا العقار بعد.</p>
+          }
+        </div>
+      </div>
+
       <div class="bg-card-background dark:bg-background-dark rounded-xl p-6 border border-border-color dark:border-gray-700 shadow-sm print:break-inside-avoid">
         <h2 class="text-xl font-bold text-text-primary dark:text-white mb-4">الموقع</h2>
         <div class="h-80 bg-gray-200 rounded-lg overflow-hidden relative">
@@ -218,25 +299,25 @@
         <div class="bg-card-background dark:bg-background-dark rounded-xl p-6 border border-border-color dark:border-gray-700 shadow-sm print:border">
           <div class="flex items-center gap-4">
             <div class="w-16 h-16 bg-center bg-no-repeat bg-cover rounded-full border-2 border-primary/20" 
-                 [style.background-image]="'url(' + agent.image + ')'"></div>
+                 [style.background-image]="'url(' + property.agent.avatar + ')'"></div>
             <div>
-              <h3 class="text-lg font-bold text-text-primary dark:text-white">{{ agent.name }}</h3>
-              <p class="text-sm text-text-secondary dark:text-gray-400">{{ agent.title }}</p>
+              <h3 class="text-lg font-bold text-text-primary dark:text-white">{{ property.agent.name }}</h3>
+              <p class="text-sm text-text-secondary dark:text-gray-400">{{ property.agent.title }}</p>
             </div>
           </div>
           
           <div class="mt-4 flex justify-around text-center border-y border-border-color dark:border-gray-700 py-3">
             <div>
-              <p class="font-bold text-primary">{{ agent.experience }}</p>
+              <p class="font-bold text-primary">{{ property.agent.experience }}</p>
               <p class="text-xs text-text-secondary">سنوات خبرة</p>
             </div>
             <div>
-              <p class="font-bold text-primary">{{ agent.deals }}</p>
+              <p class="font-bold text-primary">{{ property.agent.deals }}</p>
               <p class="text-xs text-text-secondary">عقار مباع</p>
             </div>
             <div>
               <div class="flex items-center justify-center gap-1 font-bold text-primary">
-                {{ agent.rating }} <span class="material-symbols-outlined text-sm text-yellow-500 font-variation-filled">star</span>
+                {{ property.agent.rating }} <span class="material-symbols-outlined text-sm text-yellow-500 font-variation-filled">star</span>
               </div>
               <p class="text-xs text-text-secondary">تقييم</p>
             </div>

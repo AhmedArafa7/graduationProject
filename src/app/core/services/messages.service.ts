@@ -206,24 +206,11 @@ export class MessagesService {
     const existingConvo = this.conversationsSignal().find(c => c.name === agentName);
     
     if (existingConvo) {
-      // إضافة رسالة ترحيبية جديدة
-      const welcomeMsg: Message = {
-        id: Date.now(),
-        text: `مرحباً! أستفسر عن العقار: ${propertyTitle}`,
-        sender: 'user',
-        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
-      };
-      
+      // فقط فتح المحادثة الموجودة بدون إضافة رسالة
       this.conversationsSignal.update(list =>
         list.map(c => {
           if (c.id === existingConvo.id) {
-            return {
-              ...c,
-              messages: [...c.messages, welcomeMsg],
-              lastMessage: welcomeMsg.text,
-              time: 'الآن',
-              unread: false
-            };
+            return { ...c, unread: false };
           }
           return c;
         })
@@ -232,24 +219,17 @@ export class MessagesService {
       return existingConvo.id;
     }
 
-    // إنشاء محادثة جديدة
+    // إنشاء محادثة جديدة فارغة - المستخدم سيكتب رسالته بنفسه
     const newId = Date.now();
     const newConvo: Conversation = {
       id: newId,
       name: agentName,
       avatar: agentImage,
-      lastMessage: `مرحباً! أستفسر عن العقار: ${propertyTitle}`,
+      lastMessage: 'ابدأ المحادثة...',
       time: 'الآن',
       unread: false,
       online: true,
-      messages: [
-        {
-          id: Date.now(),
-          text: `مرحباً! أستفسر عن العقار: ${propertyTitle}`,
-          sender: 'user',
-          time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
-        }
-      ]
+      messages: [] // محادثة فارغة
     };
 
     this.conversationsSignal.update(list => [newConvo, ...list]);

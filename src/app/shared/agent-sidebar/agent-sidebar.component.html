@@ -1,5 +1,5 @@
 <!-- Sidebar Navigation -->
-<aside class="w-64 bg-primary text-white flex flex-col fixed h-full left-0 z-40">
+<aside class="w-64 bg-primary text-white flex flex-col fixed h-full right-0 z-40">
   <!-- Logo -->
   <a routerLink="/" class="flex items-center gap-3 p-6 border-b border-white/10 hover:bg-white/5 transition-colors">
     <img src="/Baytology_image.png" alt="Baytology Logo" class="h-10 w-10 rounded-full object-cover">
@@ -11,12 +11,6 @@
     
     <!-- للوكلاء فقط: لوحة التحكم وعقاراتي -->
     @if (isAgent()) {
-      <a routerLink="/agent-dashboard"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
-         [class]="currentPage() === 'overview' || currentPage() === 'properties' ? 'bg-white/20' : 'hover:bg-white/10'">
-        <span class="material-symbols-outlined">dashboard</span>
-        <p class="text-sm font-medium">لوحة التحكم</p>
-      </a>
 
       <a routerLink="/agent-dashboard"
          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"

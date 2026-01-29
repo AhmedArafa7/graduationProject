@@ -162,6 +162,18 @@ export class BlogService {
     }
   ];
 
+  // تصنيفات المدونة
+  private categories = [
+    { name: 'نصائح للبائعين', count: 12 },
+    { name: 'أخبار السوق', count: 8 },
+    { name: 'تصميم وديكور', count: 5 },
+    { name: 'تكنولوجيا العقارات', count: 3 }
+  ];
+
+  getCategories() {
+    return this.categories;
+  }
+  
   getAllPosts() {
     return this.posts;
   }

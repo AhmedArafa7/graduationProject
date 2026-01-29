@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { Observable, of, delay, tap } from 'rxjs';
 
 export interface UserData {
   firstName: string;
@@ -36,12 +37,17 @@ export class UserService {
   });
 
   // تسجيل مستخدم جديد
-  registerUser(data: Partial<UserData>) {
-    this.userData.update(current => ({
-      ...current,
-      ...data
-    }));
-    this.isLoggedIn.set(true);
+  registerUser(data: Partial<UserData>): Observable<boolean> {
+    return of(true).pipe(
+      delay(1500), // محاكاة وقت الاتصال
+      tap(() => {
+        this.userData.update(current => ({
+          ...current,
+          ...data
+        }));
+        this.isLoggedIn.set(true);
+      })
+    );
   }
 
   // تحديث بيانات المستخدم

@@ -4,7 +4,7 @@
   <app-agent-sidebar [currentPage]="'messages'" />
 
   <!-- Main Content -->
-  <main class="ml-64 flex-1 flex h-screen">
+  <main class="mr-64 flex-1 flex h-screen">
     
     <!-- Conversations List Panel -->
     <div class="w-[380px] border-l border-border-color dark:border-gray-700 bg-card-background dark:bg-gray-800 flex flex-col">
@@ -172,11 +172,13 @@
                     title="إرفاق ملف">
               <span class="material-symbols-outlined">attach_file</span>
             </button>
-            <input [ngModel]="newMessage()"
+            <input #messageInput
+                   [ngModel]="newMessage()"
                    (ngModelChange)="newMessage.set($event)"
                    (keyup.enter)="sendMessage()"
                    type="text"
                    placeholder="اكتب رسالتك..."
+                   autofocus
                    class="flex-1 h-11 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
             <button (click)="sendMessage()"
                     class="flex items-center justify-center rounded-lg h-11 w-11 bg-primary text-white hover:bg-primary/90 transition-colors cursor-pointer">

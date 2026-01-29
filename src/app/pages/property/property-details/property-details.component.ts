@@ -8,6 +8,7 @@ import { ChatbotService, Property as ChatProperty } from '../../../core/services
 import { PropertyService } from '../../../core/services/property.service';
 import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
 import { MessagesService } from '../../../core/services/messages.service';
+import { RatingService } from '../../../core/services/rating.service';
 import * as L from 'leaflet';
 
 
@@ -27,6 +28,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   private propertyService = inject(PropertyService);
   private agentPropertiesService = inject(AgentPropertiesService);
   private messagesService = inject(MessagesService);
+  private ratingService = inject(RatingService);
   private locationMap: L.Map | null = null;
 
 
@@ -36,98 +38,57 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   isReported = signal(false); // حالة زر الإبلاغ
   activeImage = signal(''); 
 
-  // --- Mock Database (قاعدة بيانات وهمية للتنقل) ---
-  private mockProperties = [
-    {
-      id: 1,
-      title: 'شقة مودرن بإطلالة على النيل',
-      location: 'الزمالك، القاهرة',
-      type: 'بيع',
-      refCode: 'SKN-84521',
-      price: 5250000,
-      area: 185,
-      beds: 3,
-      baths: 2,
-      floor: 'السابع',
-      description: `اكتشف حياة الرفاهية في هذه الشقة المذهلة كاملة التشطيب في قلب الزمالك...`,
-      amenities: [
-        { icon: 'local_parking', label: 'موقف خاص' },
-        { icon: 'balcony', label: 'شرفة' },
-        { icon: 'security', label: 'أمن 24/7' },
-        { icon: 'elevator', label: 'مصعد' },
-        { icon: 'pets', label: 'يسمح بالحيوانات' },
-        { icon: 'air', label: 'تكييف مركزي' },
-        { icon: 'view_stream', label: 'إطلالة نيلية' },
-        { icon: 'kitchen', label: 'مطبخ مجهز' },
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1000&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1000&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1000&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1000&auto=format&fit=crop'
-      ]
-    },
-    {
-      id: 2,
-      title: 'دوبلكس واسع في المعادي',
-      location: 'المعادي، القاهرة',
-      price: 4900000,
-      type: 'بيع',
-      refCode: 'SKN-99210',
-      area: 220,
-      beds: 4,
-      baths: 3,
-      floor: 'الثالث',
-      description: 'دوبلكس رائع بحديقة خاصة في أرقى مناطق المعادي...',
-      amenities: [
-         { icon: 'local_parking', label: 'موقف خاص' },
-         { icon: 'pool', label: 'حمام سباحة' }
-      ],
-      images: [
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000&auto=format&fit=crop'
-      ]
-    },
-    {
-      id: 3,
-      title: 'فيلا فاخرة في التجمع',
-      location: 'القاهرة الجديدة',
-      price: 15500000,
-      type: 'بيع',
-      refCode: 'SKN-77412',
-      area: 450,
-      beds: 5,
-      baths: 6,
-      floor: 'أرضي + أول',
-      description: 'فيلا مستقلة بتشطيب الترا لوكس وحمام سباحة...',
-      amenities: [{ icon: 'pool', label: 'حمام سباحة' }],
-      images: [
-        'https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=1000&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1580587771525-78b9dba3b91d?q=80&w=1000&auto=format&fit=crop'
-      ]
-    },
-    {
-      id: 4,
-      title: 'بنتهاوس مع رووف',
-      location: 'الشيخ زايد',
-      price: 8750000,
-      type: 'بيع',
-      refCode: 'SKN-33211',
-      area: 300,
-      beds: 3,
-      baths: 3,
-      floor: 'الرابع',
-      description: 'بنتهاوس بإطلالة بانورامية على المدينة...',
-      amenities: [{ icon: 'deck', label: 'رووف خاص' }],
-      images: [
-        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1000&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1600607687644-c7171b42498b?q=80&w=1000&auto=format&fit=crop'
-      ]
+  // --- Rating & Reviews ---
+  propertyReviews = computed(() => this.ratingService.getReviews(this.property.id, 'property')());
+  propertyRating = computed(() => this.ratingService.getAverageRating(this.property.id, 'property')());
+  reviewsCount = computed(() => this.ratingService.getReviewsCount(this.property.id, 'property')());
+  
+  ratingDistribution = computed(() => {
+    const reviews = this.propertyReviews();
+    const total = reviews.length;
+    if (total === 0) return [5, 4, 3, 2, 1].map(stars => ({ stars, percentage: 0 }));
+    
+    return [5, 4, 3, 2, 1].map(stars => ({
+      stars,
+      percentage: Math.round((reviews.filter(r => Math.round(r.rating) === stars).length / total) * 100)
+    }));
+  });
+
+  // --- New Review Form ---
+  newReview = {
+    rating: signal(5),
+    text: signal(''),
+    isSubmitting: signal(false)
+  };
+
+  submitReview() {
+    if (!this.newReview.text()) {
+      this.toast.show('يرجى كتابة تعليقك', 'error');
+      return;
     }
-  ];
+
+    this.newReview.isSubmitting.set(true);
+    
+    // Simulate API delay
+    setTimeout(() => {
+      this.ratingService.addReview(
+        this.property.id,
+        'property',
+        this.newReview.rating(),
+        this.newReview.text(),
+        'أنت (زائر)',
+        '/assets/images/user-placeholder.png'
+      );
+      
+      this.toast.show('تم إضافة تقييمك بنجاح!', 'success');
+      this.newReview.text.set('');
+      this.newReview.rating.set(5);
+      this.newReview.isSubmitting.set(false);
+    }, 800);
+  } 
 
   // الكائن الحالي المعروض (يتم تحديثه ديناميكياً)
-  property: any = this.mockProperties[0];
+  property: any; // Will be initialized in loadProperty
 
   // --- Mortgage Calculator ---
   mortgagePrice = signal(0);
@@ -149,17 +110,8 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   });
 
   // --- Agent & Similar ---
-  agent = {
-    id: 1,
-    name: 'فاطمة السيد',
-    title: 'استشاري عقاري أول',
-    image: '/hijab_fatima.png',
-    experience: '5+',
-    deals: 82,
-    rating: 4.9,
-    phone: '+201000000000'
-  };
-
+  // Agent will be loaded from property data
+  
   // نحتاج لعرض باقي العقارات في قسم "مشابهة" باستثناء العقار الحالي
   displayedSimilarProperties: any[] = [];
 
@@ -205,7 +157,10 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
           (chatProperty as any).displayImage || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1000&auto=format&fit=crop',
           'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1000&auto=format&fit=crop',
           'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1000&auto=format&fit=crop'
-        ]
+        ],
+        agent: {
+           name: 'System Agent', phone: '123456', avatar: '/assets/images/logo.png', title: 'AI Assistant'
+        }
       };
       // مسح العقار المختار بعد العرض
       this.chatbotService.clearSelectedProperty();
@@ -242,10 +197,13 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
           amenities: amenitiesList.length > 0 ? amenitiesList : [{ icon: 'home', label: 'عقار سكني' }],
           images: agentProperty.images && agentProperty.images.length > 0 
             ? agentProperty.images 
-            : [agentProperty.image]
+            : [agentProperty.image],
+          agent: {
+             name: 'الوكيل الحالي', phone: '', avatar: '/assets/images/user-placeholder.png', title: 'مالك العقار'
+          }
         };
       } else {
-        // 1. البحث في PropertyService (العقارات المشتركة)
+        // 1. البحث في PropertyService (Consolidated Source)
         const serviceProperty = this.propertyService.getPropertyById(id);
         
         if (serviceProperty) {
@@ -254,26 +212,24 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
             title: serviceProperty.title,
             location: `${serviceProperty.address}، ${serviceProperty.city}`,
             type: serviceProperty.type === 'sale' ? 'بيع' : 'إيجار',
-            refCode: `BYT-${serviceProperty.id}`,
+            refCode: serviceProperty.refCode || `BYT-${serviceProperty.id}`,
             price: serviceProperty.priceValue,
             area: serviceProperty.areaValue,
             beds: serviceProperty.beds,
             baths: serviceProperty.baths,
-            floor: 'غير محدد',
+            floor: serviceProperty.floor || 'غير محدد',
             description: serviceProperty.description,
-            amenities: serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
-            images: serviceProperty.images
+            amenities: serviceProperty.amenities || serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
+            images: serviceProperty.images,
+            agent: serviceProperty.agent
           };
         } else {
-          // 2. البحث في قاعدة البيانات الوهمية
-          const foundProperty = this.mockProperties.find(p => p.id === id);
-          
-          if (foundProperty) {
-            this.property = foundProperty;
-          } else {
-            // لو الايدي مش موجود، ارجع للأول (fallback)
-            this.property = this.mockProperties[0];
-          }
+           // Fallback if ID not found, load first one (Safeguard)
+           const first = this.propertyService.properties()[0];
+           if (first) {
+             this.loadProperty(first.id); // Recursively load first
+             return;
+           }
         }
       }
     }
@@ -284,8 +240,10 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     this.mortgagePrice.set(this.property.price); // تحديث سعر الحاسبة
     this.isReported.set(false); // إعادة تعيين زر الإبلاغ
     
-    // تحديث العقارات المشابهة (استبعاد الحالي)
-    this.displayedSimilarProperties = this.mockProperties.filter(p => p.id !== this.property.id);
+    // تحديث العقارات المشابهة (استبعاد الحالي البحث في الخدمة)
+    const allProps = this.propertyService.properties();
+    // Simple similarity: same city or random others
+    this.displayedSimilarProperties = allProps.filter(p => p.id !== this.property.id).slice(0, 3);
     
     // الصعود للأعلى
     if (isPlatformBrowser(this.platformId)) {
@@ -404,25 +362,27 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   contactAgent(method: 'call' | 'whatsapp') {
-    if (!isPlatformBrowser(this.platformId)) return;
+    if (!isPlatformBrowser(this.platformId) || !this.property.agent) return;
     
     if (method === 'call') {
-      window.open(`tel:${this.agent.phone}`, '_self');
+      window.open(`tel:${this.property.agent.phone}`, '_self');
     } else {
       const msg = `مرحباً، أستفسر عن العقار: ${this.property.title} (كود: ${this.property.refCode})`;
-      const url = `https://wa.me/${this.agent.phone}?text=${encodeURIComponent(msg)}`;
+      const url = `https://wa.me/${this.property.agent.phone}?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
     }
   }
 
   // فتح محادثة مع الوكيل
   openChatWithAgent() {
+    if (!this.property.agent) return;
+
     const conversationId = this.messagesService.startChatWithAgent(
-      this.agent.name,
-      this.agent.image,
+      this.property.agent.name,
+      this.property.agent.avatar,
       this.property.title
     );
-    this.router.navigate(['/user/messages'], { queryParams: { chat: conversationId } });
+    this.router.navigate(['/messages'], { queryParams: { chat: conversationId } });
   }
 
   shareProperty() {

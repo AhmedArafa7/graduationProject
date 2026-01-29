@@ -24,7 +24,7 @@ export class BlogListComponent implements OnInit {
 
   // Data
   allPosts = this.blogService.getAllPosts();
-  categories = ['الكل', 'نصائح للبائعين', 'استثمار عقاري', 'أخبار السوق', 'دليل المناطق', 'تكنولوجيا العقارات'];
+  categories = ['الكل', ...this.blogService.getCategories().map(c => c.name)];
   featuredPost = this.allPosts[0];
   popularPosts = [...this.allPosts].sort((a, b) => parseFloat(b.views) - parseFloat(a.views)).slice(0, 3);
 

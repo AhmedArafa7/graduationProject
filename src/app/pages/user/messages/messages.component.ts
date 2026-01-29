@@ -1,5 +1,5 @@
-import { Component, signal, inject, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject, computed, OnInit, ViewChild, ElementRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
@@ -16,6 +16,9 @@ export class MessagesComponent implements OnInit {
   private userService = inject(UserService);
   private messagesService = inject(MessagesService);
   private route = inject(ActivatedRoute);
+  private platformId = inject(PLATFORM_ID);
+  
+  @ViewChild('messageInput') messageInput!: ElementRef<HTMLInputElement>;
   
   userAvatar = computed(() => this.userService.getProfileImage());
   
@@ -52,6 +55,15 @@ export class MessagesComponent implements OnInit {
     });
   }
 
+  // تفعيل حقل الكتابة
+  private focusInput() {
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        this.messageInput?.nativeElement?.focus();
+      }, 100);
+    }
+  }
+
   selectConversation(conv: Conversation) {
     this.selectedConversation.set(conv);
     this.messagesService.markAsRead(conv.id);
@@ -60,6 +72,8 @@ export class MessagesComponent implements OnInit {
     if (updated) {
       this.selectedConversation.set(updated);
     }
+    // تفعيل حقل الكتابة
+    this.focusInput();
   }
 
   sendMessage() {

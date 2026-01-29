@@ -27,13 +27,7 @@ export class BlogDetailsComponent implements OnInit {
   searchQuery = signal(''); 
 
   // Sidebar Data
-  // يجب أن تتطابق الأسماء هنا مع الأسماء في BlogList لتفعيل الفلتر بشكل صحيح
-  categories = [
-    { name: 'نصائح للبائعين', count: 12 },
-    { name: 'أخبار السوق', count: 8 },
-    { name: 'تصميم وديكور', count: 5 }, // تأكد أن هذا التصنيف موجود في القائمة الرئيسية أو قم بتوحيد الأسماء
-    { name: 'تكنولوجيا العقارات', count: 3 }
-  ];
+  categories = this.blogService.getCategories();
   
   popularPosts = this.blogService.getAllPosts().slice(0, 3);
 

@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
+import { ContactService, ContactForm } from '../../../core/services/contact.service';
 
 @Component({
   selector: 'app-contact',
@@ -13,6 +14,7 @@ import { ToastService } from '../../../core/services/toast.service';
 export class ContactComponent {
   private toast = inject(ToastService);
   private platformId = inject(PLATFORM_ID);
+  private contactService = inject(ContactService);
 
   // Form Signals
   name = signal('');
@@ -57,17 +59,31 @@ export class ContactComponent {
       return;
     }
 
-    // محاكاة الإرسال
+    // إرسال الرسالة عبر الخدمة
     this.isSubmitting.set(true);
     
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-      this.toast.show('تم الإرسال بنجاح!', 'success');
-      
-      // تصفير النموذج
-      form.resetForm();
-      this.subject.set('general');
-    }, 1500);
+    const contactData: ContactForm = {
+      name: this.name(),
+      email: this.email(),
+      phone: this.phone(),
+      subject: this.subject(),
+      message: this.message()
+    };
+
+    this.contactService.sendMessage(contactData).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.toast.show('تم الإرسال بنجاح!', 'success');
+        
+        // تصفير النموذج
+        form.resetForm();
+        this.subject.set('general');
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        this.toast.show('حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً', 'error');
+      }
+    });
   }
 
   openMap() {
