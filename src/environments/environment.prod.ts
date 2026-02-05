@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.baytology.com/api' // Placeholder for future deployment
+  apiUrl: '/api' // Relative path for Vercel (Frontend & Backend on same domain)
 };
