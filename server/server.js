@@ -41,6 +41,7 @@ const UserSchema = new Schema({
     verified: { type: Boolean, default: false },
     socialLinks: { facebook: String, linkedin: String, twitter: String }
   },
+  isBanned: { type: Boolean, default: false },
   favorites: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -233,6 +234,51 @@ const AiLogSchema = new Schema({
 const AiLog = mongoose.model('AiLog', AiLogSchema);
 app.use('/api/ai/log', createCrudRoutes(AiLog));
 
+// Report Schema (Moderation)
+const ReportSchema = new Schema({
+  reporter: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  property: { type: Schema.Types.ObjectId, ref: 'Property', required: true },
+  reason: { type: String, required: true },
+  status: { type: String, enum: ['pending', 'resolved', 'dismissed'], default: 'pending' },
+  createdAt: { type: Date, default: Date.now }
+});
+const Report = mongoose.model('Report', ReportSchema);
+app.use('/api/reports', createCrudRoutes(Report));
+
+// Custom Moderation Routes
+const router = express.Router();
+
+// Admin: Get all reports with details
+router.get('/admin/reports', async (req, res) => {
+  try {
+    const reports = await Report.find()
+      .populate('reporter', 'firstName lastName email')
+      .populate('property', 'title _id')
+      .sort({ createdAt: -1 });
+    res.json(reports);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Admin: Delete Property & Resolve Report
+router.delete('/admin/property/:id', async (req, res) => {
+  try {
+    await Property.findByIdAndDelete(req.params.id);
+    // Auto-resolve related reports
+    await Report.updateMany({ property: req.params.id }, { status: 'resolved' });
+    res.json({ message: 'Property deleted and reports resolved' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Admin: Ban User
+router.post('/admin/ban/:id', async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.params.id, { isBanned: true });
+    res.json({ message: 'User banned successfully' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.use('/api', router);
+
 // Authentication Routes
 app.post('/api/auth/login', async (req, res) => {
   try {
@@ -240,6 +286,9 @@ app.post('/api/auth/login', async (req, res) => {
     const user = await User.findOne({ email, password }); // In prod: bcrypt.compare(password, user.password)
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    if (user.isBanned) {
+      return res.status(403).json({ error: 'This account has been banned due to policy violations.' });
     }
     // Return user info (excluding password)
     const { password: _, ...userData } = user.toObject();

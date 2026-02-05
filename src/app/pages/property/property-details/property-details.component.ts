@@ -3,12 +3,14 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
+import { UserService } from '../../../core/services/user.service';
 import { Title } from '@angular/platform-browser';
 import { ChatbotService, Property as ChatProperty } from '../../../core/services/chatbot/chatbot.service';
 import { PropertyService } from '../../../core/services/property.service';
 import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
 import { MessagesService } from '../../../core/services/messages.service';
 import { RatingService } from '../../../core/services/rating.service';
+import { ReportService } from '../../../core/services/report.service';
 import * as L from 'leaflet';
 
 
@@ -28,7 +30,9 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   private propertyService = inject(PropertyService);
   private agentPropertiesService = inject(AgentPropertiesService);
   private messagesService = inject(MessagesService);
+  private userService = inject(UserService);
   private ratingService = inject(RatingService);
+  private reportService = inject(ReportService);
   private locationMap: L.Map | null = null;
 
 
@@ -412,14 +416,31 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  // منطق زر الإبلاغ الجديد
+  // منطق زر الإبلاغ
   toggleReport() {
-    this.isReported.update(v => !v);
-    
+    const user = this.userService.userData(); // Quick access if public, else inject UserService
+    if (!user._id) {
+      this.toast.show('يجب عليك تسجيل الدخول للإبلاغ عن عقار', 'error');
+      return;
+    }
+
     if (this.isReported()) {
-      this.toast.show('تم إرسال البلاغ للمراجعة.', 'error');
-    } else {
-      this.toast.show('تم إلغاء الإبلاغ. لن يتم اتخاذ أي إجراء.', 'info');
+      this.toast.show('سبق لك الإبلاغ عن هذا العقار.', 'info');
+      return;
+    }
+
+    const reason = window.prompt('لماذا تريد الإبلاغ عن هذا العقار؟ (احتيال، بيانات خاطئة، صور غير لائقة...)');
+    if (reason) {
+      this.reportService.reportProperty(this.property.id, user._id, reason).subscribe({
+        next: () => {
+          this.isReported.set(true);
+          this.toast.show('تم استلام بلاغك وسيقوم فريقنا بمراجعته.', 'success');
+        },
+        error: (err) => {
+          console.error(err);
+          this.toast.show('حدث خطأ أثناء إرسال البلاغ.', 'error');
+        }
+      });
     }
   }
 }

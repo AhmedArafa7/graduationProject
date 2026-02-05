@@ -161,6 +161,11 @@ export const routes: Routes = [
 
 
   // 4. لوحة تحكم الأدمن (Admin Dashboard) - Layout منفصل
+  { 
+    path: 'admin/dashboard', 
+    title: 'لوحة تحكم المشرف',
+    loadComponent: () => import('./pages/admin/dashboard/dashboard.component').then(m => m.DashboardComponent) 
+  },
 
 
   // 5. صفحة الخطأ (404)

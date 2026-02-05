@@ -1,0 +1,84 @@
+<div class="container mx-auto px-4 py-8 font-display min-h-screen">
+  <h1 class="text-3xl font-bold text-text-primary dark:text-white mb-8 flex items-center gap-3">
+    <span class="material-symbols-outlined text-4xl text-red-600">admin_panel_settings</span>
+    لوحة تحكم المشرف (البلاغات)
+  </h1>
+
+  @if (isLoading()) {
+    <div class="text-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+      <p class="mt-4 text-text-secondary">جاري تحميل البلاغات...</p>
+    </div>
+  } @else {
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+      <div class="overflow-x-auto">
+        <table class="w-full text-right text-sm">
+          <thead class="bg-gray-50 dark:bg-gray-700/50 text-text-secondary dark:text-gray-300">
+            <tr>
+              <th class="p-4 font-bold">العقار</th>
+              <th class="p-4 font-bold">المبلغ</th>
+              <th class="p-4 font-bold">السبب</th>
+              <th class="p-4 font-bold">الحالة</th>
+              <th class="p-4 font-bold">التاريخ</th>
+              <th class="p-4 font-bold text-center">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-text-primary dark:text-white">
+            @for (report of reports(); track report._id) {
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                <td class="p-4">
+                  @if (report.property) {
+                    <div class="font-bold">{{ report.property.title }}</div>
+                    <div class="text-xs text-text-secondary">{{ report.property._id }}</div>
+                  } @else {
+                    <span class="text-red-500 italic">عقار محذوف</span>
+                  }
+                </td>
+                <td class="p-4">
+                  <div class="font-bold">{{ report.reporterName || report.reporter.firstName }}</div>
+                  <div class="text-xs text-text-secondary">{{ report.reporter.email }}</div>
+                </td>
+                <td class="p-4 max-w-xs truncate" [title]="report.reason">
+                  {{ report.reason }}
+                </td>
+                <td class="p-4">
+                  <span class="px-2 py-1 rounded-full text-xs font-bold"
+                        [class.bg-yellow-100]="report.status === 'pending'"
+                        [class.text-yellow-700]="report.status === 'pending'"
+                        [class.bg-green-100]="report.status === 'resolved'"
+                        [class.text-green-700]="report.status === 'resolved'">
+                    {{ report.status === 'pending' ? 'قيد المراجعة' : 'محلول' }}
+                  </span>
+                </td>
+                <td class="p-4 text-text-secondary">
+                  {{ report.createdAt | date:'short' }}
+                </td>
+                <td class="p-4 flex justify-center gap-2">
+                  @if (report.property) {
+                    <button (click)="deleteProperty(report.property._id)" 
+                            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="حذف العقار وحل البلاغ">
+                      <span class="material-symbols-outlined">delete_forever</span>
+                    </button>
+                    <button (click)="banUser(report.property.agent)" 
+                        class="p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        title="حظر صاحب العقار">
+                      <span class="material-symbols-outlined">block</span>
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="p-8 text-center text-text-secondary">
+                  <span class="material-symbols-outlined text-4xl mb-2 block">check_circle</span>
+                  لا يوجد بلاغات معلقة حالياً.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
