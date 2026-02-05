@@ -1,5 +1,7 @@
-import { Injectable, signal } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ContactForm {
   name: string;
@@ -13,10 +15,10 @@ export interface ContactForm {
   providedIn: 'root'
 })
 export class ContactService {
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/messages`;
 
-  sendMessage(data: ContactForm): Observable<boolean> {
-    // In a real app, this would be an HTTP POST request
-    console.log('Sending message:', data);
-    return of(true).pipe(delay(1500));
+  sendMessage(data: ContactForm): Observable<any> {
+    return this.http.post(this.apiUrl, data);
   }
 }

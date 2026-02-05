@@ -18,7 +18,7 @@ export interface RoomDimension {
 }
 
 export interface AgentProperty {
-  id: number;
+  id: string; // Changed to string
   image: string;
   address: string;
   price: string;
@@ -51,7 +51,7 @@ export class AgentPropertiesService {
   properties = this.propertiesSignal.asReadonly();
 
   // جلب عقار بالـ ID
-  getPropertyById(id: number): AgentProperty | undefined {
+  getPropertyById(id: string): AgentProperty | undefined {
     return this.propertiesSignal().find(p => p.id === id);
   }
 
@@ -59,7 +59,7 @@ export class AgentPropertiesService {
   addProperty(property: Omit<AgentProperty, 'id' | 'createdAt' | 'statusColor'>) {
     const newProperty: AgentProperty = {
       ...property,
-      id: Date.now(),
+      id: Date.now().toString(), // String ID
       createdAt: new Date().toISOString().split('T')[0],
       statusColor: this.getStatusColor(property.status)
     };
@@ -70,13 +70,13 @@ export class AgentPropertiesService {
   }
 
   // حذف عقار
-  deleteProperty(id: number) {
+  deleteProperty(id: string) {
     this.propertiesSignal.update(list => list.filter(p => p.id !== id));
     this.saveToStorage();
   }
 
   // تحديث عقار
-  updateProperty(id: number, updates: Partial<AgentProperty>) {
+  updateProperty(id: string, updates: Partial<AgentProperty>) {
     this.propertiesSignal.update(list => 
       list.map(p => {
         if (p.id === id) {
@@ -121,7 +121,7 @@ export class AgentPropertiesService {
     
     return [
       {
-        id: 1,
+        id: '1',
         image: 'https://images.unsplash.com/photo-1600596542815-e32cb51813b9?q=80&w=200&auto=format&fit=crop',
         address: 'شارع النيل، الزمالك، القاهرة',
         price: '1,200,000 جنيه',
@@ -138,7 +138,7 @@ export class AgentPropertiesService {
         amenities: { pool: false, garage: true, gym: false, garden: false, balcony: true, security: true, ac: true, petFriendly: false }
       },
       {
-        id: 2,
+        id: '2',
         image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=200&auto=format&fit=crop',
         address: 'شارع التسعين، التجمع الخامس',
         price: '850,000 جنيه',
@@ -153,7 +153,7 @@ export class AgentPropertiesService {
         floor: 3
       },
       {
-        id: 3,
+        id: '3',
         image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=200&auto=format&fit=crop',
         address: 'المعادي، القاهرة',
         price: '8,500 جنيه/شهر',
@@ -168,7 +168,7 @@ export class AgentPropertiesService {
         floor: 2
       },
       {
-        id: 4,
+        id: '4',
         image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=200&auto=format&fit=crop',
         address: 'الشيخ زايد، 6 أكتوبر',
         price: '2,100,000 جنيه',

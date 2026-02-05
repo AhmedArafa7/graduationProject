@@ -35,10 +35,8 @@ export class AgentsListComponent {
   // Easier to map here for minimal template changes, or just rely on similarity.
   // Agent interface has 'title', Component had 'role'. Let's map title->role.
   
-  agents = this.agentsService.getAllAgents().map(a => ({
-    ...a,
-    role: a.title 
-  }));
+  // --- Data from Service ---
+  agents = this.agentsService.agents;
 
   // --- Filter Logic ---
   filteredAgents = computed(() => {
@@ -47,11 +45,18 @@ export class AgentsListComponent {
     const spec = this.specialtyFilter();
     const rate = this.ratingFilter();
 
-    return this.agents.filter(agent => {
-      const matchesSearch = agent.name.toLowerCase().includes(query);
-      const matchesLoc = !loc || agent.location.toLowerCase().includes(loc);
-      const matchesSpec = spec === 'All' || agent.specialty === spec;
-      const matchesRate = agent.rating >= rate;
+    return this.agents().filter(agent => {
+      const fullName = `${agent.firstName} ${agent.lastName}`.toLowerCase();
+      const matchesSearch = fullName.includes(query);
+      
+      const agentCity = agent.city?.toLowerCase() || '';
+      const matchesLoc = !loc || agentCity.includes(loc);
+      
+      const agentSpec = agent.agentProfile?.specialization;
+      const matchesSpec = spec === 'All' || (agentSpec && agentSpec === spec);
+      
+      const agentRating = agent.agentProfile?.rating || 0;
+      const matchesRate = agentRating >= rate;
 
       return matchesSearch && matchesLoc && matchesSpec && matchesRate;
     });
@@ -70,11 +75,12 @@ export class AgentsListComponent {
     this.toast.show('تم إعادة تعيين الفلاتر', 'info');
   }
 
-  contactAgent(agent: { id: number; name: string; image: string }) {
+  contactAgent(agent: any) {
     // إنشاء أو فتح محادثة مع الوكيل
+    const fullName = `${agent.firstName} ${agent.lastName}`;
     const conversationId = this.messagesService.startChatWithAgent(
-      agent.name,
-      agent.image,
+      fullName,
+      agent.profileImage,
       'استفسار عن العقارات المتاحة'
     );
     this.router.navigate(['/messages'], { queryParams: { chat: conversationId } });

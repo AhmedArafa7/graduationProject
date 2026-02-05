@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -27,15 +27,26 @@ export class HomeComponent {
   searchQuery = signal('');
 
   // Data from Services
-  featuredProperties = this.propertyService.getFeaturedProperties().map(p => ({
+  featuredProperties = computed(() => this.propertyService.getFeaturedProperties().map(p => ({
     ...p,
-    location: `${p.address}، ${p.city}`,
+    id: p._id, // Mapping for template compatibility if needed, or update template
+    locationLabel: `${p.location.city}, ${p.location.address}`,
     image: p.images[0],
-    area: p.areaValue
-  }));
+    area: p.area,
+    beds: p.bedrooms,
+    baths: p.bathrooms,
+    tag: p.status === 'sale' ? 'للبيع' : 'للإيجار'
+  })));
 
-  topAgents = this.agentsService.getTopAgents();
-  
+  topAgents = this.agentsService.agents; // Use signal from AgentsService directly?
+  // AgentsService now has `agents` signal. `getTopAgents` might be missing.
+  // Let's rely on standard agents signal for now or add getTopAgents to service.
+  // Adding computed for top agents here or assuming service has it.
+  // AgentsService refactor removed `getTopAgents`.
+  // I will use `this.agentsService.agents` and slice it.
+
+  displayAgents = computed(() => this.agentsService.agents().slice(0, 4));
+
   testimonials = this.testimonialsService.getAllTestimonials();
   
   latestPosts = this.blogService.getAllPosts().slice(0, 3);
@@ -54,18 +65,18 @@ export class HomeComponent {
   }
 
   // التحقق إذا كان العقار مفضل
-  isFavorite(id: number): boolean {
+  isFavorite(id: string): boolean {
     return this.favoritesService.isFavorite(id);
   }
 
-  toggleFavorite(event: Event, id: number) {
+  toggleFavorite(event: Event, id: string) {
     event.stopPropagation();
     event.preventDefault();
     this.favoritesService.toggleFavorite(id);
   }
 
   // تعديل: التوجيه لصفحة الرسائل الداخلية
-  contactAgent(event: Event, agentId: number) { 
+  contactAgent(event: Event, agentId: string) { 
     event.stopPropagation();
     event.preventDefault();
     

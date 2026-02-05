@@ -2,13 +2,13 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { PropertyService, Property } from './property.service';
 
 export interface FavoriteProperty {
-  id: number;
+  id: string; // Changed to string
   image: string;
-  price: string;
+  price: number; // Changed to number
   address: string;
   beds: number;
   baths: number;
-  area: string;
+  area: number; // Changed to number
   type: 'sale' | 'rent';
 }
 
@@ -24,13 +24,13 @@ export class FavoritesService {
     : [];
   
   // IDs المفضلة
-  private favoriteIds = signal<number[]>(this.storedFavs);
+  private favoriteIds = signal<string[]>(this.storedFavs);
 
   // العقارات المفضلة (computed من PropertyService)
   favorites = computed(() => {
     const ids = this.favoriteIds();
     return this.propertyService.properties()
-      .filter(p => ids.includes(p.id))
+      .filter(p => ids.includes(p._id))
       .map(p => this.mapToFavorite(p));
   });
   
@@ -38,12 +38,12 @@ export class FavoritesService {
   count = computed(() => this.favoriteIds().length);
 
   // هل العقار في المفضلة؟
-  isFavorite(propertyId: number): boolean {
+  isFavorite(propertyId: string): boolean {
     return this.favoriteIds().includes(propertyId);
   }
 
   // إضافة للمفضلة
-  addToFavorites(propertyId: number) {
+  addToFavorites(propertyId: string) {
     if (!this.isFavorite(propertyId)) {
       this.favoriteIds.update(ids => [...ids, propertyId]);
       this.saveToStorage();
@@ -51,13 +51,13 @@ export class FavoritesService {
   }
 
   // إزالة من المفضلة
-  removeFromFavorites(propertyId: number) {
+  removeFromFavorites(propertyId: string) {
     this.favoriteIds.update(ids => ids.filter(id => id !== propertyId));
     this.saveToStorage();
   }
 
   // Toggle المفضلة
-  toggleFavorite(propertyId: number): boolean {
+  toggleFavorite(propertyId: string): boolean {
     if (this.isFavorite(propertyId)) {
       this.removeFromFavorites(propertyId);
       return false;
@@ -68,19 +68,19 @@ export class FavoritesService {
   }
 
   // جلب كل الـ IDs المفضلة
-  getFavoriteIds(): number[] {
+  getFavoriteIds(): string[] {
     return this.favoriteIds();
   }
 
   // تحويل Property إلى FavoriteProperty
   private mapToFavorite(p: Property): FavoriteProperty {
     return {
-      id: p.id,
+      id: p._id,
       image: p.images[0],
       price: p.price,
-      address: `${p.address}، ${p.city}`,
-      beds: p.beds,
-      baths: p.baths,
+      address: `${p.location.address || ''}، ${p.location.city || ''}`,
+      beds: p.bedrooms,
+      baths: p.bathrooms,
       area: p.area,
       type: p.type
     };

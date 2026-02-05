@@ -109,31 +109,35 @@
               </div>
             } @else {
               <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                @for (agent of filteredAgents(); track agent.id) {
+                @for (agent of filteredAgents(); track agent._id) {
                   <div class="group flex flex-col gap-4 text-center rounded-2xl bg-white dark:bg-gray-800 border border-[#e7eff3] dark:border-gray-700 p-6 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer relative overflow-hidden"
-                       [routerLink]="['/agent', agent.id]">
+                       [routerLink]="['/agent', agent._id]">
                     
                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#1193d4] to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                     <div class="px-4">
                       <div class="w-32 h-32 mx-auto bg-center bg-no-repeat aspect-square bg-cover rounded-full border-4 border-[#f6f7f8] dark:border-gray-700 shadow-sm group-hover:border-[#1193d4]/20 transition-colors" 
-                           [style.background-image]="'url(' + agent.image + ')'"></div>
+                           [style.background-image]="'url(' + (agent.profileImage || 'assets/images/default-avatar.png') + ')'"></div>
                     </div>
                     
                     <div>
                       <div class="flex items-center justify-center gap-1 mb-1">
-                        <h3 class="text-[#0d171b] dark:text-white text-lg font-bold group-hover:text-[#1193d4] transition-colors">{{ agent.name }}</h3>
-                        <span class="material-symbols-outlined text-[#1193d4] text-lg" title="موثوق">verified</span>
+                        <h3 class="text-[#0d171b] dark:text-white text-lg font-bold group-hover:text-[#1193d4] transition-colors">
+                          {{ agent.firstName }} {{ agent.lastName }}
+                        </h3>
+                        @if(agent.agentProfile.verified) {
+                          <span class="material-symbols-outlined text-[#1193d4] text-lg" title="موثوق">verified</span>
+                        }
                       </div>
                       
-                      <p class="text-[#4c809a] dark:text-gray-400 text-sm font-medium mb-2">{{ agent.role }}</p>
+                      <p class="text-[#4c809a] dark:text-gray-400 text-sm font-medium mb-2">{{ agent.agentProfile.title }}</p>
                       
                       <div class="flex items-center justify-center gap-2 text-sm bg-[#f6f7f8] dark:bg-gray-700 py-2 rounded-lg">
                         <span class="flex items-center gap-1 text-yellow-500 font-bold">
-                          {{ agent.rating }} <span class="material-symbols-outlined text-sm font-variation-filled">star</span>
+                          {{ agent.agentProfile.rating || 0 }} <span class="material-symbols-outlined text-sm font-variation-filled">star</span>
                         </span>
                         <span class="text-[#e7eff3] dark:text-gray-600">|</span>
-                        <span class="text-[#0d171b] dark:text-gray-200 font-medium">{{ agent.propertiesCount }} عقار</span>
+                        <span class="text-[#0d171b] dark:text-gray-200 font-medium">{{ agent.agentProfile.activeProperties || 0 }} عقار</span>
                       </div>
                     </div>
 

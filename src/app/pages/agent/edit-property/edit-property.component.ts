@@ -25,7 +25,8 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
   private map: L.Map | null = null;
   private marker: L.Marker | null = null;
 
-  propertyId = signal<number | null>(null);
+  propertyId = signal<string | null>(null);
+  isEditMode = signal(false);
   isLoading = signal(true);
   currentStep = signal(1);
   totalSteps = 4;
@@ -65,11 +66,14 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
-      const id = Number(params['id']);
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode.set(true);
       this.propertyId.set(id);
-      this.loadProperty(id);
-    });
+      this.loadProperty(id); // Call loadProperty with string ID
+    } else {
+      this.isLoading.set(false); // If no ID, it's a new property, not loading existing
+    }
   }
 
   ngAfterViewInit() {}
@@ -80,7 +84,8 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  loadProperty(id: number) {
+  loadProperty(id: string) { // Changed id type to string
+    // Assuming getPropertyById can handle string ID or needs to be updated in service
     const property = this.agentProperties.getPropertyById(id);
     
     if (property) {

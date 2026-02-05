@@ -1,12 +1,11 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
-import { ToastService } from '../../../core/services/toast.service';
 import { GlobalStateService } from '../../../core/services/global-state.service';
-
+import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
+ 
 // نفس بيانات صفحة البحث
-const ALL_PROPERTIES = [
+const ALL_PROPERTIES = [ 
   {
     id: 1,
     title: 'فيلا حديثة بإطلالة على النيل',
@@ -60,19 +59,23 @@ const ALL_PROPERTIES = [
   styleUrl: './favorites.component.scss'
 })
 export class FavoritesComponent {
-  private toast = inject(ToastService);
   private globalState = inject(GlobalStateService);
 
-  // استخدام GlobalStateService مباشرة
+  // سنقوم بجلب العقارات المفضلة من الـ Global State
+  // ومقارنتها مع قائمة العقارات الكاملة (أو جلب تفاصيلها من الباك اند)
+  // حالياً سنفترض وجود دالة لجلب التفاصيل
+
   favorites = computed(() => {
     const favoriteIds = this.globalState.favorites();
-    return ALL_PROPERTIES.filter(p => favoriteIds.includes(p.id));
+    // In a real app we would query backend for properties with these IDs
+    // For now returning mock empty or we need a PropertyService that has 'getAll' which is robust
+    // We will map the mock ALL_PROPERTIES to match IDs for now to show something
+    return ALL_PROPERTIES.filter(p => favoriteIds.includes(p.id.toString())); 
   });
-  
-  favoritesCount = computed(() => this.globalState.favorites().length);
 
-  removeFromFavorites(id: number) {
-    this.globalState.toggleFavorite(id);
-    this.toast.show('تم إزالة العقار من المفضلة', 'success');
+  favoritesCount = computed(() => this.favorites().length);
+
+  removeFromFavorites(id: number | string) {
+    this.globalState.toggleFavorite(id.toString());
   }
 }

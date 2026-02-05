@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { GlobalStateService, SearchFilters } from '../../../core/services/global-state.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { PropertyService } from '../../../core/services/property.service';
+import { OfflineAiService } from '../../../core/services/offline-ai.service';
 
 @Component({
   selector: 'app-search-list',
@@ -18,31 +19,116 @@ export class SearchListComponent {
   public globalState = inject(GlobalStateService);
   private toast = inject(ToastService);
   private propertyService = inject(PropertyService);
+  private offlineAi = inject(OfflineAiService);
 
   viewMode = signal<'grid' | 'list'>('grid');
   currentPage = signal(1);
   isLoading = signal(false);
+  
+  // Smart Search
+  smartSearchQuery = signal('');
+  aiAnalysisResult = signal<string | null>(null);
 
   // Local Filters
   localFilters: SearchFilters;
+
+  // Data Source
+  properties = this.propertyService.properties; 
 
   constructor() {
     // تحميل الفلاتر من الذاكرة العامة
     this.localFilters = { ...this.globalState.searchFilters() };
 
     this.route.queryParams.subscribe(params => {
+      // FIX: Do not force property type based on buy/rent param
+      /*
       if (params['type']) {
         this.localFilters.type = params['type'] === 'buy' ? 'شقة' : 'فيلا';
         this.applyFilters();
       }
+      */
+      // Instead, we should probably set a Listing Type filter if one existed.
+      // For now, removing this fixes the "Villa" default issue.
+      
+      if (params['debug_ai']) {
+        this.offlineAi.runDiagnostics();
+      }
     });
   }
 
-  setView(mode: 'grid' | 'list') {
-    this.viewMode.set(mode);
+  filteredProperties = computed(() => {
+    const filters = this.globalState.searchFilters();
+    const allProps = this.properties();
+    
+    return allProps.filter(prop => {
+      // Filter logic (Type)
+      if (filters && filters.type && filters.type !== 'all') {
+         const typeMap: {[key: string]: string} = {
+           'شقة': 'apartment',
+           'فيلا': 'villa',
+           'تاون هاوس': 'house',
+           'شاليه': 'chalet',
+           'دوبلكس': 'duplex',
+           'بنتهاوس': 'penthouse'
+         };
+         
+         const mappedType = typeMap[filters.type];
+         if (mappedType && prop.propertyType?.toLowerCase() !== mappedType.toLowerCase()) return false;
+      }
+
+      // Filter logic (Amenities)
+      if (filters.amenities.pool && !this.hasFeature(prop, 'pool', 'مسبح')) return false;
+      if (filters.amenities.garden && !this.hasFeature(prop, 'garden', 'حديقة')) return false;
+      if (filters.amenities.garage && !this.hasFeature(prop, 'garage', 'جراج')) return false;
+      if (filters.amenities.balcony && !this.hasFeature(prop, 'balcony', 'بلكونة')) return false;
+      
+      return true;
+    });
+  });
+
+  private hasFeature(prop: any, enKey: string, arKey: string): boolean {
+    if (!prop.features) return false;
+    return prop.features.some((f: string) => f.toLowerCase().includes(enKey) || f.includes(arKey));
   }
 
-  toggleFavorite(event: Event, id: number) {
+  onSmartSearch() {
+    const query = this.smartSearchQuery();
+    if (!query.trim()) return;
+
+    this.isLoading.set(true);
+    
+    // Simulate thinking time for "AI" effect
+    setTimeout(() => {
+      const analysis = this.offlineAi.analyze(query);
+      
+      // Merge found filters
+      if (analysis.filters) {
+        this.localFilters = {
+          ...this.localFilters,
+          ...analysis.filters,
+          // Merge amenities carefully
+          amenities: {
+            ...this.localFilters.amenities,
+            ...(analysis.filters.amenities || {})
+          }
+        };
+        
+        // Auto-apply
+        this.globalState.updateFilters(this.localFilters);
+        this.aiAnalysisResult = signal(`تم تحليل طلبك باستخدام: ${analysis.modelUsed} (ثقة: ${Math.round(analysis.confidence * 100)}%)`);
+        this.toast.show('تم تحديث الفلاتر بناءً على طلبك', 'success');
+      } else {
+        this.toast.show('لم أستطع فهم طلبك بدقة، حاول صيغة أخرى', 'info');
+      }
+      
+      this.isLoading.set(false);
+    }, 800);
+  }
+
+  // ... setView ...
+  
+  // ... rest of methods ...
+  toggleFavorite(event: Event, id: string) {
     event.stopPropagation();
     event.preventDefault();
     this.globalState.toggleFavorite(id);
@@ -60,13 +146,17 @@ export class SearchListComponent {
       this.globalState.updateFilters(this.localFilters);
       this.isLoading.set(false);
       this.toast.show('تم تحديث نتائج البحث', 'success');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }, 600);
   }
 
   resetFilters() {
     this.globalState.resetFilters();
     this.localFilters = { ...this.globalState.searchFilters() };
+    this.smartSearchQuery.set('');
+    this.aiAnalysisResult = signal(null);
     this.toast.show('تم إعادة تعيين الفلاتر', 'info');
   }
 
@@ -75,69 +165,28 @@ export class SearchListComponent {
     const current = this.globalState.searchFilters();
     const updatedFilters = { ...current };
 
-    // منطق الحذف حسب نوع الفلتر
     if (filterKey === 'type') {
       updatedFilters.type = 'شقة'; // العودة للافتراضي
     } else if (filterKey === 'pool') {
       updatedFilters.amenities = { ...current.amenities, pool: false };
     } else if (filterKey === 'garden') {
       updatedFilters.amenities = { ...current.amenities, garden: false };
+    } else if (filterKey === 'garage') {
+      updatedFilters.amenities = { ...current.amenities, garage: false };
+    } else if (filterKey === 'balcony') {
+      updatedFilters.amenities = { ...current.amenities, balcony: false };
     }
-    // يمكنك إضافة باقي الحالات هنا (جراج، شرفة، إلخ)
 
-    // 1. تحديث الحالة العامة
     this.globalState.updateFilters(updatedFilters);
-    
-    // 2. تحديث الفلاتر المحلية (عشان الـ Checkbox في السايدبار يتشال)
     this.localFilters = { ...updatedFilters };
-
     this.toast.show('تم إزالة الفلتر', 'info');
   }
 
   onPageChange(event: Event, page: number) {
     event.preventDefault();
     this.currentPage.set(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
-
-  // Data (Mock)
-  // Data Source
-  properties = this.propertyService.properties; // Use Signal from Service
-
-  filteredProperties = computed(() => {
-    const filters = this.globalState.searchFilters();
-    const allProps = this.properties();
-    
-    return allProps.filter(prop => {
-      // Filter logic (Type)
-      // Service uses 'apartment', 'villa', etc. GlobalState uses 'شقة', 'فيلا'.
-      // Need mapping or standardizing.
-      // GlobalState seems to use Arabic labels 'شقة', 'فيلا'.
-      // PropertyService uses 'apartment', 'villa' in propertyType, but also has distinct types?
-      // Let's check logic:
-      // filters.type is string.
-      // prop.propertyType is 'apartment' | 'villa' ...
-      
-      if (filters.type) {
-         const typeMap: {[key: string]: string} = {
-           'شقة': 'apartment',
-           'فيلا': 'villa',
-           'تاون هاوس': 'house',
-           'شاليه': 'chalet',
-           'دوبلكس': 'duplex',
-           'بنتهاوس': 'penthouse'
-         };
-         
-         const mappedType = typeMap[filters.type];
-         if (mappedType && prop.propertyType !== mappedType) return false;
-      }
-
-      // Filter logic (Amenities - Mock example)
-      // Here we check provided amenities in Property model
-      if (filters.amenities.pool && !prop.features.some(f => f.includes('مسبح') || f.includes('pool'))) return false;
-      if (filters.amenities.garden && !prop.features.some(f => f.includes('حديقة') || f.includes('garden'))) return false;
-      
-      return true;
-    });
-  });
 }

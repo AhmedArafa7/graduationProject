@@ -20,12 +20,12 @@ export class SearchMapComponent implements AfterViewInit, OnDestroy {
   private toast = inject(ToastService);
 
   searchQuery = signal('القاهرة');
-  hoveredPropertyId = signal<number | null>(null);
+  hoveredPropertyId = signal<string | null>(null);
 
   // بيانات العقارات مع إحداثيات حقيقية للقاهرة
   properties = [
     {
-      id: 1,
+      id: '1',
       title: 'فيلا حديثة بإطلالة على النيل',
       location: 'الزمالك، القاهرة',
       price: '15,000,000',
@@ -37,7 +37,7 @@ export class SearchMapComponent implements AfterViewInit, OnDestroy {
       lng: 31.2193
     },
     {
-      id: 2,
+      id: '2',
       title: 'شقة مريحة في وسط البلد',
       location: 'وسط البلد، القاهرة',
       price: '3,200,000',
@@ -49,7 +49,7 @@ export class SearchMapComponent implements AfterViewInit, OnDestroy {
       lng: 31.2357
     },
     {
-      id: 3,
+      id: '3',
       title: 'شقة في التجمع الخامس',
       location: 'التجمع الخامس، القاهرة',
       price: '5,500,000',
@@ -61,7 +61,7 @@ export class SearchMapComponent implements AfterViewInit, OnDestroy {
       lng: 31.4306
     },
     {
-      id: 4,
+      id: '4',
       title: 'بنتهاوس في الشيخ زايد',
       location: 'الشيخ زايد، الجيزة',
       price: '8,900,000',
@@ -126,7 +126,7 @@ export class SearchMapComponent implements AfterViewInit, OnDestroy {
   }
 
   // تفاعل عند الوقوف على الكارت
-  onCardHover(id: number | null) {
+  onCardHover(id: string | null) {
     this.hoveredPropertyId.set(id);
     
     // تسليط الضوء على الـ marker المناسب
@@ -139,16 +139,15 @@ export class SearchMapComponent implements AfterViewInit, OnDestroy {
   }
 
   // إضافة/إزالة من المفضلة
-  toggleFavorite(event: Event, id: number) {
+  toggleFavorite(event: MouseEvent, id: string) {
     event.stopPropagation();
-    event.preventDefault();
     this.favoritesService.toggleFavorite(id);
     const isFav = this.favoritesService.isFavorite(id);
-    this.toast.show(isFav ? 'تمت الإضافة للمفضلة' : 'تمت الإزالة من المفضلة', 'info');
+    this.toast.show(isFav ? 'تمت الإضافة للمفضلة' : 'تم الحذف من المفضلة', 'success');
   }
 
   // التحقق إذا كان العقار مفضل
-  isFavorite(id: number): boolean {
+  isFavorite(id: string) {
     return this.favoritesService.isFavorite(id);
   }
 }

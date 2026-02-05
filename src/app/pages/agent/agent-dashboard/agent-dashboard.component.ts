@@ -20,17 +20,19 @@ export class AgentDashboardComponent {
   // استخدام الخدمة المشتركة
   properties = this.agentPropertiesService.properties;
 
-  viewProperty(id: number) {
+  viewProperty(id: string) {
     this.router.navigate(['/property', id]);
   }
 
-  editProperty(id: number) {
-    this.router.navigate(['/edit-property', id]);
+  editProperty(id: string) {
+    this.router.navigate(['/agent/edit-property', id]);
   }
 
-  deleteProperty(id: number) {
-    this.agentPropertiesService.deleteProperty(id);
-    this.toast.show('تم حذف العقار بنجاح', 'success');
+  deleteProperty(id: string) {
+    if(confirm('هل أنت متأكد من حذف هذا العقار؟')) {
+      this.agentPropertiesService.deleteProperty(id);
+      this.toast.show('تم حذف العقار بنجاح', 'success');
+    }
   }
 
   addNewProperty() {

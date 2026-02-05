@@ -37,7 +37,8 @@ export class NotificationsComponent {
     this.notificationService.markAllAsRead();
   }
 
-  dismissNotification(id: number) {
+  dismissNotification(id: number | string | undefined) {
+    if (!id) return;
     this.notificationService.deleteNotification(id);
   }
 
@@ -51,7 +52,8 @@ export class NotificationsComponent {
     }
   }
 
-  formatTime(date: Date): string {
+  formatTime(date: Date | undefined): string {
+    if (!date) return '';
     const now = new Date();
     const diff = now.getTime() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);

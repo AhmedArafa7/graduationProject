@@ -6,29 +6,33 @@
       <span class="text-text-secondary dark:text-gray-400">/</span>
       <a routerLink="/agents" class="text-text-secondary dark:text-gray-400 font-medium hover:text-primary transition-colors">الوكلاء</a>
       <span class="text-text-secondary dark:text-gray-400">/</span>
-      <span class="text-text-primary dark:text-white font-medium">{{ agent().name }}</span>
+      <span class="text-text-primary dark:text-white font-medium">{{ fullName() }}</span>
     </div>
 
+    <!-- Cover & Profile Image -->
     <div class="relative mb-24">
       <div class="bg-cover bg-center flex flex-col justify-end overflow-hidden rounded-2xl min-h-[320px] shadow-sm"
-           [style.background-image]="'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 50%), url(' + agent().coverImage + ')'">
+           style="background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 50%), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2000&auto=format&fit=crop')">
       </div>
       <div class="absolute -bottom-16 left-8 md:left-16">
         <div class="relative group">
           <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-32 w-32 md:h-40 md:w-40 border-4 border-white dark:border-background-dark shadow-lg transition-transform group-hover:scale-105"
-               [style.background-image]="'url(' + agent().image + ')'">
+               [style.background-image]="'url(' + (agent()?.profileImage || '/assets/images/user-placeholder.png') + ')'">
           </div>
-          <div class="absolute bottom-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
-            <span class="material-symbols-outlined !text-sm">verified</span>
-            <span>معتمد</span>
-          </div>
+          @if (agent()?.agentProfile?.verified) {
+            <div class="absolute bottom-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
+              <span class="material-symbols-outlined !text-sm">verified</span>
+              <span>معتمد</span>
+            </div>
+          }
         </div>
       </div>
     </div>
 
     <div class="px-4 py-3 flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
-      <div class="flex-grow pt-2 md:pl-48"> <h1 class="text-text-primary dark:text-white text-3xl font-black mb-2">{{ agent().name }}</h1>
-        <p class="text-text-secondary dark:text-gray-400 text-lg font-medium">{{ agent().title }}</p>
+      <div class="flex-grow pt-2 md:pl-48"> 
+        <h1 class="text-text-primary dark:text-white text-3xl font-black mb-2">{{ fullName() }}</h1>
+        <p class="text-text-secondary dark:text-gray-400 text-lg font-medium">{{ agent()?.agentProfile?.title }}</p>
         
         <div class="flex flex-wrap items-center gap-4 mt-3">
           <div class="flex items-center gap-1 text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 px-2 py-1 rounded-lg">
@@ -44,12 +48,10 @@
           </div>
           
           <div class="flex gap-2">
-            @if (agent().specializations) {
-              @for (spec of agent().specializations!.slice(0, 2); track spec) {
-                 <span class="bg-primary/10 text-primary dark:bg-primary/20 dark:text-white text-xs font-bold px-3 py-1 rounded-full border border-primary/20">
-                   {{ spec }}
-                 </span>
-              }
+            @for (spec of agentSpecializations().slice(0, 2); track spec) {
+                <span class="bg-primary/10 text-primary dark:bg-primary/20 dark:text-white text-xs font-bold px-3 py-1 rounded-full border border-primary/20">
+                  {{ spec }}
+                </span>
             }
           </div>
         </div>
@@ -78,25 +80,27 @@
       </div>
     </div>
 
+    <!-- Stats Grid -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
       <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border-color dark:border-gray-700 text-center shadow-sm hover:-translate-y-1 transition-transform">
-        <p class="text-3xl font-black text-primary">{{ agent().stats?.activeProperties || 0 }}</p>
+        <p class="text-3xl font-black text-primary">{{ agent()?.agentProfile?.activeProperties || 0 }}</p>
         <p class="text-xs text-text-secondary dark:text-gray-400 font-bold mt-1">عقار نشط</p>
       </div>
+      <!-- Mock Stats -->
       <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border-color dark:border-gray-700 text-center shadow-sm hover:-translate-y-1 transition-transform">
-        <p class="text-3xl font-black text-text-primary dark:text-white">{{ agent().stats?.monthlyViews || 0 }}</p>
+        <p class="text-3xl font-black text-text-primary dark:text-white">1.2k</p>
         <p class="text-xs text-text-secondary dark:text-gray-400 font-bold mt-1">مشاهدة شهرية</p>
       </div>
       <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border-color dark:border-gray-700 text-center shadow-sm hover:-translate-y-1 transition-transform">
-        <p class="text-3xl font-black text-text-primary dark:text-white">{{ agent().stats?.inquiries || 0 }}</p>
+        <p class="text-3xl font-black text-text-primary dark:text-white">45</p>
         <p class="text-xs text-text-secondary dark:text-gray-400 font-bold mt-1">استفسار</p>
       </div>
       <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border-color dark:border-gray-700 text-center shadow-sm hover:-translate-y-1 transition-transform">
-        <p class="text-3xl font-black text-text-primary dark:text-white">{{ agent().stats?.memberSince || 2024 }}</p>
-        <p class="text-xs text-text-secondary dark:text-gray-400 font-bold mt-1">عضو منذ</p>
+        <p class="text-3xl font-black text-text-primary dark:text-white">{{ agent()?.agentProfile?.experience || 5 }} سنوات</p>
+        <p class="text-xs text-text-secondary dark:text-gray-400 font-bold mt-1">خبرة</p>
       </div>
       <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-border-color dark:border-gray-700 text-center shadow-sm hover:-translate-y-1 transition-transform">
-        <p class="text-3xl font-black text-green-600 dark:text-green-400">{{ agent().stats?.responseRate || '100%' }}</p>
+        <p class="text-3xl font-black text-green-600 dark:text-green-400">98%</p>
         <p class="text-xs text-text-secondary dark:text-gray-400 font-bold mt-1">سرعة الرد</p>
       </div>
     </div>
@@ -110,7 +114,7 @@
             <span class="material-symbols-outlined text-primary">person</span> نبذة عني
           </h2>
           <p class="text-text-secondary dark:text-gray-300 leading-loose text-sm md:text-base">
-            {{ agent().about }}
+            {{ agent()?.agentProfile?.bio || 'لا تتوفر نبذة عن الوكيل حالياً.' }}
           </p>
         </div>
 
@@ -119,7 +123,7 @@
             <span class="material-symbols-outlined text-primary">stars</span> التخصصات
           </h2>
           <div class="flex flex-wrap gap-3">
-            @for (spec of agent().specializations; track spec) {
+            @for (spec of agentSpecializations(); track spec) {
               <span class="bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white text-sm font-bold px-5 py-2.5 rounded-xl border border-border-color dark:border-gray-600 hover:border-primary transition-colors">
                 {{ spec }}
               </span>
@@ -128,36 +132,37 @@
         </div>
 
         <div>
-          <h2 class="text-2xl font-bold text-text-primary dark:text-white mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">apartment</span> عقارات الوكيل ({{ agent().stats?.activeProperties || 0 }})
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            @for (prop of agentProperties(); track prop.id) {
-              <div class="bg-white dark:bg-gray-800 rounded-2xl border border-border-color dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer" [routerLink]="['/property', prop.id]">
-                <div class="w-full h-56 bg-cover bg-center group-hover:scale-105 transition-transform duration-500 relative" 
-                     [style.background-image]="'url(' + prop.images[0] + ')'">
-                   <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-primary text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                     {{ prop.type === 'sale' ? 'بيع' : 'إيجار' }}
+           <h2 class="text-2xl font-bold text-text-primary dark:text-white mb-6 flex items-center gap-2">
+             <span class="material-symbols-outlined text-primary">apartment</span> عقارات الوكيل ({{ agentProperties().length }})
+           </h2>
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <!-- Use 'agentProperties()' computed signal -->
+             @for (prop of agentProperties(); track prop._id) {
+               <div class="bg-white dark:bg-gray-800 rounded-2xl border border-border-color dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer" [routerLink]="['/property', prop._id]">
+                 <div class="w-full h-56 bg-cover bg-center group-hover:scale-105 transition-transform duration-500 relative" 
+                      [style.background-image]="'url(' + prop.images[0] + ')'">
+                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-primary text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                      {{ prop.type === 'sale' ? 'بيع' : 'إيجار' }}
+                    </div>
+                 </div>
+                 <div class="p-5">
+                   <div class="flex justify-between items-start mb-2">
+                     <h3 class="text-base font-bold text-text-primary dark:text-white truncate flex-1">{{ prop.title }}</h3>
+                     <p class="text-primary font-bold whitespace-nowrap mr-2">{{ prop.price | number }} ج.م</p>
                    </div>
-                </div>
-                <div class="p-5">
-                  <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-base font-bold text-text-primary dark:text-white truncate flex-1">{{ prop.title }}</h3>
-                    <p class="text-primary font-bold whitespace-nowrap mr-2">{{ prop.priceValue | number }} ج.م</p>
-                  </div>
-                  <p class="text-xs text-text-secondary dark:text-gray-400 flex items-center gap-1 mb-4">
-                    <span class="material-symbols-outlined !text-sm">location_on</span>
-                    {{ prop.city }}
-                  </p>
-                  <div class="flex justify-between text-xs text-text-secondary dark:text-gray-400 pt-4 border-t border-border-color dark:border-gray-700">
-                    <span class="flex items-center gap-1"><span class="font-bold text-text-primary dark:text-white">{{ prop.beds }}</span> غرف</span>
-                    <span class="flex items-center gap-1"><span class="font-bold text-text-primary dark:text-white">{{ prop.baths }}</span> حمام</span>
-                    <span class="flex items-center gap-1"><span class="font-bold text-text-primary dark:text-white">{{ prop.areaValue }}</span> م²</span>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
+                   <p class="text-xs text-text-secondary dark:text-gray-400 flex items-center gap-1 mb-4">
+                     <span class="material-symbols-outlined !text-sm">location_on</span>
+                     {{ prop.location.city }}
+                   </p>
+                   <div class="flex justify-between text-xs text-text-secondary dark:text-gray-400 pt-4 border-t border-border-color dark:border-gray-700">
+                     <span class="flex items-center gap-1"><span class="font-bold text-text-primary dark:text-white">{{ prop.bedrooms }}</span> غرف</span>
+                     <span class="flex items-center gap-1"><span class="font-bold text-text-primary dark:text-white">{{ prop.bathrooms }}</span> حمام</span>
+                     <span class="flex items-center gap-1"><span class="font-bold text-text-primary dark:text-white">{{ prop.area }}</span> م²</span>
+                   </div>
+                 </div>
+               </div>
+             }
+           </div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl border border-border-color dark:border-gray-700 shadow-sm mt-4">
@@ -250,27 +255,27 @@
             <ul class="space-y-4 text-sm">
               <li class="flex justify-between items-center">
                 <span class="text-text-secondary dark:text-gray-400">اللغات</span>
-                <span class="font-bold text-text-primary dark:text-white">{{ agent().contact?.languages || 'العربية' }}</span>
+                <span class="font-bold text-text-primary dark:text-white">العربية, الإنجليزية</span>
               </li>
               <li class="flex justify-between items-center">
                 <span class="text-text-secondary dark:text-gray-400">ساعات العمل</span>
-                <span class="font-bold text-text-primary dark:text-white">{{ agent().contact?.hours || '9 ص - 5 م' }}</span>
+                <span class="font-bold text-text-primary dark:text-white">9 ص - 5 م</span>
               </li>
               <li class="flex justify-between items-center">
                 <span class="text-text-secondary dark:text-gray-400">رقم الترخيص</span>
-                <span class="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-primary">{{ agent().contact?.license || 'غير متوفر' }}</span>
+                <span class="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-primary">{{ agent()?.agentProfile?.licenseNumber || 'غير متوفر' }}</span>
               </li>
             </ul>
             
             <div class="mt-6 pt-6 border-t border-border-color dark:border-gray-700 space-y-3">
               <button (click)="contact('call')" class="w-full h-12 flex items-center justify-center gap-3 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl font-bold transition-all group">
                 <span class="material-symbols-outlined">call</span>
-                <span class="group-hover:hidden">{{ agent().contact?.phone || 'غير متوفر' }}</span>
+                <span class="group-hover:hidden">{{ agent()?.phone }}</span>
                 <span class="hidden group-hover:inline">اتصل الآن</span>
               </button>
               <button (click)="contact('email')" class="w-full h-12 flex items-center justify-center gap-3 bg-gray-100 dark:bg-gray-700 text-text-secondary dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl font-bold transition-all truncate">
                 <span class="material-symbols-outlined">mail</span>
-                <span class="truncate dir-ltr">{{ agent().contact?.email || 'غير متوفر' }}</span>
+                <span class="truncate dir-ltr">{{ agent()?.email }}</span>
               </button>
             </div>
           </div>

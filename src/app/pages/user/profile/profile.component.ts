@@ -98,7 +98,13 @@ export class ProfileComponent implements OnInit {
 
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
-        this.userService.updateProfileImage(e.target?.result as string);
+        const currentUser = this.userService.userData(); // Assuming userData() returns the current user object
+        const userId = currentUser._id || '1'; // Get user ID
+        if (userId) {
+          this.userService.updateProfileImage(userId, e.target?.result as string);
+        } else {
+          this.toast.show('خطأ: لا يمكن تحديد المستخدم الحالي.', 'error');
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -166,7 +172,11 @@ export class ProfileComponent implements OnInit {
     }
 
     // حفظ في UserService
-    this.userService.updateUser({
+    // Get current user ID
+    const currentUser = this.userService.userData();
+    const userId = currentUser._id || '1'; // Fallback if no ID
+
+    this.userService.updateUser(userId, {
       firstName: info.firstName,
       lastName: info.lastName,
       email: info.email,

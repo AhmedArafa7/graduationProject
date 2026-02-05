@@ -39,9 +39,9 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   activeImage = signal(''); 
 
   // --- Rating & Reviews ---
-  propertyReviews = computed(() => this.ratingService.getReviews(this.property.id, 'property')());
-  propertyRating = computed(() => this.ratingService.getAverageRating(this.property.id, 'property')());
-  reviewsCount = computed(() => this.ratingService.getReviewsCount(this.property.id, 'property')());
+  propertyReviews = computed(() => this.ratingService.getReviews(this.property?.id, 'property')());
+  propertyRating = computed(() => this.ratingService.getAverageRating(this.property?.id, 'property')());
+  reviewsCount = computed(() => this.ratingService.getReviewsCount(this.property?.id, 'property')());
   
   ratingDistribution = computed(() => {
     const reviews = this.propertyReviews();
@@ -125,19 +125,19 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   ngOnInit() {
     // مراقبة تغيير الرابط (عند الضغط على عقار مشابه)
     this.route.params.subscribe(params => {
-      const id = Number(params['id']);
+      const id = params['id']; // ID is string now
       this.loadProperty(id);
     });
   }
 
-  loadProperty(id: number) {
+  loadProperty(id: string) {
     // فحص إذا كان هناك عقار مختار من الشات بوت
     const chatProperty = this.chatbotService.selectedProperty();
     
     if (chatProperty) {
-      // عرض بيانات العقار من الشات بوت
+      // عرض بيانات العقار من الشات بوت (Mapping needs to be resilient)
       this.property = {
-        id: chatProperty.id || id,
+        id: chatProperty.id?.toString() || id,
         title: `${chatProperty.type || 'عقار'} في ${chatProperty.city || ''}`,
         location: chatProperty.city || 'غير محدد',
         type: chatProperty.payment_option === 'rent' ? 'إيجار' : 'بيع',
@@ -159,7 +159,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
           'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1000&auto=format&fit=crop'
         ],
         agent: {
-           name: 'System Agent', phone: '123456', avatar: '/assets/images/logo.png', title: 'AI Assistant'
+           name: 'System Agent', phone: '123456', avatar: '/assets/images/logo.png', title: 'AI Assistant', experience: '5', deals: 50, rating: 4.8
         }
       };
       // مسح العقار المختار بعد العرض
@@ -169,7 +169,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
       const agentProperty = this.agentPropertiesService.getPropertyById(id);
       
       if (agentProperty) {
-        // تحويل بيانات AgentProperty لصيغة هذا الـ component
+        // تحويل بيانات AgentProperty لصيغة هذا الـ componentViewModel
         const amenitiesList: { icon: string; label: string }[] = [];
         if (agentProperty.amenities) {
           if (agentProperty.amenities.pool) amenitiesList.push({ icon: 'pool', label: 'مسبح' });
@@ -184,14 +184,14 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
         
         this.property = {
           id: agentProperty.id,
-          title: agentProperty.address,
+          title: agentProperty.address, // Title wasn't explicit in AgentProperty, using Address or Type
           location: agentProperty.address,
           type: agentProperty.status === 'للإيجار' ? 'إيجار' : 'بيع',
           refCode: `AGT-${agentProperty.id}`,
-          price: agentProperty.priceValue ?? null,
-          area: agentProperty.area ?? null,
-          beds: agentProperty.bedrooms ?? null,
-          baths: agentProperty.bathrooms ?? null,
+          price: agentProperty.priceValue ?? 0,
+          area: agentProperty.area ?? 0,
+          beds: agentProperty.bedrooms ?? 0,
+          baths: agentProperty.bathrooms ?? 0,
           floor: agentProperty.floor !== undefined && agentProperty.floor !== null ? `الطابق ${agentProperty.floor}` : 'غير محدد',
           description: agentProperty.description || 'لا يوجد وصف',
           amenities: amenitiesList.length > 0 ? amenitiesList : [{ icon: 'home', label: 'عقار سكني' }],
@@ -199,7 +199,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
             ? agentProperty.images 
             : [agentProperty.image],
           agent: {
-             name: 'الوكيل الحالي', phone: '', avatar: '/assets/images/user-placeholder.png', title: 'مالك العقار'
+             name: 'الوكيل الحالي', phone: '', avatar: '/assets/images/user-placeholder.png', title: 'مالك العقار', experience: '2', deals: 10, rating: 4.5
           }
         };
       } else {
@@ -208,26 +208,26 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
         
         if (serviceProperty) {
           this.property = {
-            id: serviceProperty.id,
+            id: serviceProperty._id,
             title: serviceProperty.title,
-            location: `${serviceProperty.address}، ${serviceProperty.city}`,
+            location: `${serviceProperty.location.address}، ${serviceProperty.location.city}`,
             type: serviceProperty.type === 'sale' ? 'بيع' : 'إيجار',
-            refCode: serviceProperty.refCode || `BYT-${serviceProperty.id}`,
-            price: serviceProperty.priceValue,
-            area: serviceProperty.areaValue,
-            beds: serviceProperty.beds,
-            baths: serviceProperty.baths,
+            refCode: serviceProperty.refCode || `BYT-${serviceProperty._id.substring(0,6)}`,
+            price: serviceProperty.price,
+            area: serviceProperty.area,
+            beds: serviceProperty.bedrooms,
+            baths: serviceProperty.bathrooms,
             floor: serviceProperty.floor || 'غير محدد',
             description: serviceProperty.description,
             amenities: serviceProperty.amenities || serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
             images: serviceProperty.images,
-            agent: serviceProperty.agent
+            agent: serviceProperty.agent // Ensure Agent interface matches template requirements
           };
         } else {
            // Fallback if ID not found, load first one (Safeguard)
            const first = this.propertyService.properties()[0];
            if (first) {
-             this.loadProperty(first.id); // Recursively load first
+             this.loadProperty(first._id); // Recursively load first using _id
              return;
            }
         }
@@ -235,21 +235,27 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     // تحديث الحالة
-    this.titleService.setTitle(`${this.property.title} - Baytology`);
-    this.activeImage.set(this.property.images[0]);
-    this.mortgagePrice.set(this.property.price); // تحديث سعر الحاسبة
-    this.isReported.set(false); // إعادة تعيين زر الإبلاغ
-    
-    // تحديث العقارات المشابهة (استبعاد الحالي البحث في الخدمة)
-    const allProps = this.propertyService.properties();
-    // Simple similarity: same city or random others
-    this.displayedSimilarProperties = allProps.filter(p => p.id !== this.property.id).slice(0, 3);
-    
-    // الصعود للأعلى
-    if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // تحديث الخريطة بعد فترة قصيرة
-      setTimeout(() => this.initLocationMap(), 300);
+    if (this.property) {
+      this.titleService.setTitle(`${this.property.title} - Baytology`);
+      this.activeImage.set(this.property.images[0]);
+      this.mortgagePrice.set(this.property.price); // تحديث سعر الحاسبة
+      this.isReported.set(false); // إعادة تعيين زر الإبلاغ
+      
+      // تحديث العقارات المشابهة (استبعاد الحالي البحث في الخدمة)
+      const allProps = this.propertyService.properties();
+      this.displayedSimilarProperties = allProps
+        .filter(p => p._id !== this.property.id)
+        .slice(0, 3)
+        .map(p => ({
+            id: p._id,
+            title: p.title,
+            price: p.price,
+            location: `${p.location.city}`,
+            images: p.images,
+            beds: p.bedrooms,
+            baths: p.bathrooms,
+            area: p.area
+        }));
     }
   }
 

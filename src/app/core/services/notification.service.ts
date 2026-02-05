@@ -1,11 +1,14 @@
-import { Injectable, signal, inject, PLATFORM_ID, computed } from '@angular/core';
+import { Injectable, signal, inject, computed, PLATFORM_ID } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 export interface Notification {
-  id: number;
+  _id?: string;
+  id?: number | string;
   title: string;
   message: string;
-  time: Date;
+  time?: Date;
   read: boolean;
   type: 'message' | 'property' | 'system' | 'price';
   icon: string;
@@ -15,11 +18,11 @@ export interface Notification {
   providedIn: 'root'
 })
 export class NotificationService {
-  private platformId = inject(PLATFORM_ID);
-  private STORAGE_KEY = 'baytology_notifications';
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/notifications`;
   
   // قائمة الإشعارات
-  private notificationsSignal = signal<Notification[]>(this.loadFromStorage());
+  private notificationsSignal = signal<Notification[]>([]);
   
   // للقراءة فقط
   notifications = this.notificationsSignal.asReadonly();
@@ -30,53 +33,42 @@ export class NotificationService {
   // هل هناك إشعارات جديدة (للأنيميشن)
   hasNewNotification = signal(false);
 
-  // صوت الإشعار
-  private notificationSound: HTMLAudioElement | null = null;
+  private platformId = inject(PLATFORM_ID);
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      this.notificationSound = new Audio();
-      this.notificationSound.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhgC7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7u7//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAAYbFNTxRAAAAAAAAAAAAAAAAAAAAAP/7UMQAA8AAAaQAAAAgAAA0gAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7UMQeA8AAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ==';
-      this.notificationSound.volume = 0.3;
+      this.loadNotifications();
     }
   }
 
-  private loadFromStorage(): Notification[] {
-    if (!isPlatformBrowser(this.platformId)) return this.getDefaultNotifications();
+  loadNotifications() {
+    this.http.get<Notification[]>(this.apiUrl).subscribe({
+      next: (data: Notification[]) => this.notificationsSignal.set(data),
+      error: (err: any) => console.error('Failed to load notifications', err)
+    });
+  }
+
+  // إضافة إشعار جديد
+  addNotification(title: string, message: string, type: 'message' | 'property' | 'system' | 'price' = 'system') {
+    const newNotification = {
+      title,
+      message,
+      type,
+      read: false,
+      icon: this.getIcon(type),
+      userId: 'USER_ID_PLACEHOLDER' // Ideally get from UserService
+    };
     
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return parsed.map((n: any) => ({ ...n, time: new Date(n.time) }));
-      }
-    } catch (e) {
-      console.warn('Could not load notifications');
-    }
-    return this.getDefaultNotifications();
-  }
-
-  private saveToStorage() {
-    if (!isPlatformBrowser(this.platformId)) return;
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.notificationsSignal()));
-    } catch (e) {
-      console.warn('Could not save notifications');
-    }
-  }
-
-  private getDefaultNotifications(): Notification[] {
-    return [
-      {
-        id: 1,
-        title: 'مرحباً بك في Baytology!',
-        message: 'نتمنى لك تجربة ممتعة في البحث عن عقارك المثالي',
-        time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        read: false,
-        type: 'system',
-        icon: 'waving_hand'
-      }
-    ];
+    // In real app we might not post notification from client side like this, usually backend creates it.
+    // But for now keeping the method signature.
+    this.http.post<Notification>(this.apiUrl, newNotification).subscribe({
+      next: (saved: Notification) => {
+        this.notificationsSignal.update(list => [saved, ...list]);
+        this.hasNewNotification.set(true);
+        setTimeout(() => this.hasNewNotification.set(false), 3000);
+      },
+      error: (err: any) => console.error('Failed to add notification', err)
+    });
   }
 
   private getIcon(type: string): string {
@@ -89,62 +81,43 @@ export class NotificationService {
     }
   }
 
-  // إضافة إشعار جديد
-  addNotification(title: string, message: string, type: 'message' | 'property' | 'system' | 'price' = 'system') {
-    const newNotification: Notification = {
-      id: Date.now(),
-      title,
-      message,
-      time: new Date(),
-      read: false,
-      type,
-      icon: this.getIcon(type)
-    };
-    
-    this.notificationsSignal.update(list => [newNotification, ...list]);
-    this.hasNewNotification.set(true);
-    this.saveToStorage();
-    
-    this.playSound();
-    
-    setTimeout(() => {
-      this.hasNewNotification.set(false);
-    }, 3000);
-  }
-
-  private playSound() {
-    if (isPlatformBrowser(this.platformId) && this.notificationSound) {
-      this.notificationSound.currentTime = 0;
-      this.notificationSound.play().catch(() => {});
-    }
-  }
-
   // قراءة إشعار
-  markAsRead(id: number) {
-    this.notificationsSignal.update(list => 
-      list.map(n => n.id === id ? {...n, read: true} : n)
-    );
-    this.saveToStorage();
+  markAsRead(id: number | string) {
+    this.http.put(`${this.apiUrl}/${id}`, { read: true }).subscribe({
+      next: () => {
+        this.notificationsSignal.update(list => 
+          list.map(n => n.id === id || n._id === id ? {...n, read: true} : n)
+        );
+      },
+      error: (err: any) => console.error('Failed to mark notification as read', err)
+    });
   }
 
   // قراءة جميع الإشعارات
   markAllAsRead() {
+    // Assuming backend has batch update or loop
+    // For simplicity loop here or better add batch endpoint
     this.notificationsSignal.update(list => 
       list.map(n => ({...n, read: true}))
     );
-    this.saveToStorage();
+    // Sync with backend (optimistically)
+    // Maybe call an endpoint /notifications/mark-all-read in future
   }
 
   // حذف إشعار
-  deleteNotification(id: number) {
-    this.notificationsSignal.update(list => list.filter(n => n.id !== id));
-    this.saveToStorage();
+  deleteNotification(id: number | string) {
+    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+      next: () => {
+        this.notificationsSignal.update(list => list.filter(n => n.id !== id && n._id !== id));
+      },
+      error: (err: any) => console.error('Failed to delete notification', err)
+    });
   }
 
   // مسح جميع الإشعارات
   clearAll() {
     this.notificationsSignal.set([]);
-    this.saveToStorage();
+    // Call backend to delete all
   }
 
   // طرق مختصرة لإضافة إشعارات محددة

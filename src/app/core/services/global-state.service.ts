@@ -21,11 +21,12 @@ export class GlobalStateService {
   // 1. حالة المفضلة (مشتركة في كل التطبيق)
   // نقوم بحفظها في localStorage لتبقى حتى بعد تحديث الصفحة
   private storedFavs = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('favorites') || '[]') : [];
-  favorites = signal<number[]>(this.storedFavs);
+  favorites = signal<string[]>(this.storedFavs);
 
   // 2. حالة فلاتر البحث (للحفاظ عليها عند العودة)
+  // 2. حالة فلاتر البحث (للحفاظ عليها عند العودة)
   searchFilters = signal<SearchFilters>({
-    type: 'شقة',
+    type: 'all',
     priceFrom: null,
     priceTo: null,
     beds: 'عدد الغرف',
@@ -39,7 +40,7 @@ export class GlobalStateService {
   });
 
   // دوال المفضلة
-  toggleFavorite(id: number) {
+  toggleFavorite(id: string) {
     this.favorites.update(current => {
       const newFavs = current.includes(id) 
         ? current.filter(favId => favId !== id) 
@@ -52,7 +53,7 @@ export class GlobalStateService {
     });
   }
 
-  isFavorite(id: number) {
+  isFavorite(id: string) {
     return this.favorites().includes(id);
   }
 
@@ -63,7 +64,7 @@ export class GlobalStateService {
 
   resetFilters() {
     this.searchFilters.set({
-      type: 'شقة',
+      type: 'all',
       priceFrom: null,
       priceTo: null,
       beds: 'عدد الغرف',

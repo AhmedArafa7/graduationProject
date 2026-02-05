@@ -56,7 +56,7 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-      @for (prop of featuredProperties; track prop.id) {
+      @for (prop of featuredProperties(); track prop.id) {
         <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col h-full" [routerLink]="['/property', prop.id]">
           <div class="relative h-64 overflow-hidden">
             <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-primary text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm">
@@ -132,20 +132,20 @@
       </a>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      @for (agent of topAgents; track agent.name) {
-        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group" [routerLink]="['/agent', agent.id]"> 
+      @for (agent of displayAgents(); track agent._id) {
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group" [routerLink]="['/agent', agent._id]"> 
           <div class="flex items-center gap-4">
-            <img [src]="agent.image" [alt]="agent.name" class="size-16 rounded-full object-cover border-2 border-gray-100 group-hover:border-primary transition-colors">
+            <img [src]="agent.profileImage || 'assets/default-avatar.png'" [alt]="agent.firstName" class="size-16 rounded-full object-cover border-2 border-gray-100 group-hover:border-primary transition-colors">
             <div class="flex-1">
-              <h3 class="font-bold text-gray-900 text-lg group-hover:text-primary transition-colors">{{agent.name}}</h3>
+              <h3 class="font-bold text-gray-900 text-lg group-hover:text-primary transition-colors">{{agent.firstName}} {{agent.lastName}}</h3>
               <div class="flex items-center gap-1 text-sm text-yellow-500 mt-1">
                 <span class="material-symbols-outlined text-base fill-current">star</span>
-                <span class="font-bold text-gray-900">{{agent.rating}}</span>
-                <span class="text-gray-400 mr-2 text-xs">({{agent.propertiesCount}} عقار)</span>
+                <span class="font-bold text-gray-900">{{agent.agentProfile.rating || 'N/A'}}</span>
+                <span class="text-gray-400 mr-2 text-xs">({{agent.agentProfile.activeProperties || 0}} عقار)</span>
               </div>
             </div>
             
-            <button (click)="contactAgent($event, agent.id)" 
+            <button (click)="contactAgent($event, agent._id)" 
                     class="size-10 rounded-xl bg-gray-50 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-sm">
               <span class="material-symbols-outlined">chat</span>
             </button>

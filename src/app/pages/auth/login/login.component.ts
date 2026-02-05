@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
+import { UserService } from '../../../core/services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,7 @@ import { ToastService } from '../../../core/services/toast.service';
 export class LoginComponent {
   private router = inject(Router);
   private toast = inject(ToastService);
+  private userService = inject(UserService);
 
   // Form Signals
   email = signal('');
@@ -36,17 +38,25 @@ export class LoginComponent {
       return;
     }
 
-    // محاكاة الاتصال بالسيرفر
     this.isSubmitting.set(true);
 
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-      
-      // هنا مفروض يكون في تحقق حقيقي من الباك إند
-      // للمحاكاة سنعتبره ناجحاً
-      this.toast.show('تم تسجيل الدخول بنجاح! مرحباً بك.', 'success');
-      this.router.navigate(['/']); // التوجيه للرئيسية
-    }, 1500);
+    const credentials = {
+      email: this.email(),
+      password: this.password()
+    };
+
+    this.userService.login(credentials).subscribe({
+      next: (user: any) => {
+        this.isSubmitting.set(false);
+        this.toast.show(`تم تسجيل الدخول بنجاح! مرحباً ${user.firstName}`, 'success');
+        this.router.navigate(['/']);
+      },
+      error: (err: any) => {
+        this.isSubmitting.set(false);
+        const errorMessage = err.error?.error || 'حدث خطأ أثناء تسجيل الدخول';
+        this.toast.show(errorMessage, 'error');
+      }
+    });
   }
 
   socialLogin(provider: string) {

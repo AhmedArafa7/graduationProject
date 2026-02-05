@@ -1,11 +1,10 @@
-import { Component, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, signal, inject, OnInit, PLATFORM_ID, computed } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { Title } from '@angular/platform-browser';
 import { RatingService } from '../../../core/services/rating.service';
-import { computed } from '@angular/core';
 import { AgentsService, Agent } from '../../../core/services/agents.service';
 import { PropertyService, Property } from '../../../core/services/property.service';
 
@@ -21,41 +20,31 @@ export class AgentProfileComponent implements OnInit {
   private titleService = inject(Title);
   private platformId = inject(PLATFORM_ID);
   private agentsService = inject(AgentsService);
-  private propertyService = inject(PropertyService); // Hypothetically injected, need to import
-
+  private propertyService = inject(PropertyService);
   private ratingService = inject(RatingService);
   
   // --- UI State ---
-  agent = signal<Agent>(this.agentsService.getAllAgents()[0]); // Default first agent
+  agent = signal<Agent | undefined>(undefined);
+
+  // --- Helpers ---
+  fullName = computed(() => {
+    const a = this.agent();
+    return a ? `${a.firstName} ${a.lastName}` : '';
+  });
 
   // --- Properties from Service ---
   agentPropertiesSignal = computed(() => {
-    // Assuming PropertyService has a method or we can filter properties
-    // We need to match properties to this agent.
-    // Since we don't have real backend, we'll try to find properties where agent name matches or similar? 
-    // Actually, PropertyService refactor in Step 40 added 'agent' object to properties but not ID. 
-    // And AgentService agents have ID.
-    // I should update PropertyService data to include agentID for proper linking.
-    // For now, I'll just fetch *all* properties as a placeholder or filter if possible.
-    // Let's assume I can filter by agent name for now as a robust enough mock link.
     const currentAgent = this.agent();
-    return this.propertyService.properties().filter(p => p.agent.name === currentAgent.name);
+    if (!currentAgent) return [];
+    
+    // Match properties by Agent ID
+    return this.propertyService.properties().filter(p => 
+      p.agent?._id === currentAgent._id
+    );
   });
   
-  agentProperties = this.agentPropertiesSignal; // To match template usage if it's not a signal call (template says 'agentProperties') -> checks template: passed to `app-property-card` usually?
-  // Template probably iterates: @for (prop of agentProperties; ...) or agentProperties() if signal.
-  // Original validation: `agentProperties = [...]`. So it was a property, not a signal.
-  // I will make it a computed property. But wait, `agentProperties` in original was an array.
-  // I'll make it a getter or computed signal. If template uses `agentProperties` without parentheses, it might be an issue if I switch to signal.
-  // Angular 17+ control flow uses `track`.
-  // Let's keep it as a signal or computed, and update template if needed?
-  // Actually, let's look at the original code. `agentProperties = [...]`.
-  // I'll use a computed signal and if template fails I'll fix it. Or I can just expose a property that updates in `loadAgent`.
-
-  // Let's use `update` in `loadAgent` to set a standard array for `agentProperties`.
-  filteredProperties = signal<Property[]>([]); // To replace agentProperties
-
-  // ... rest of code ...
+  agentProperties = this.agentPropertiesSignal;
+  filteredProperties = signal<Property[]>([]); 
 
   // --- Form Data ---
   meetingRequest = {
@@ -66,52 +55,50 @@ export class AgentProfileComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      const id = Number(params['id']);
+      const id = params['id'];
       this.loadAgent(id);
     });
   }
 
-  loadAgent(id: number) {
+  loadAgent(id: string) {
     const foundAgent = this.agentsService.getAgentById(id);
     if (foundAgent) {
       this.agent.set(foundAgent);
+      this.titleService.setTitle(`${foundAgent.firstName} ${foundAgent.lastName} - ملف الوكيل`);
+      
+      const props = this.propertyService.properties().filter(p => 
+        p.agent?._id === foundAgent._id
+      );
+      this.filteredProperties.set(props);
+      
+      if (isPlatformBrowser(this.platformId)) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } else {
-      this.agent.set(this.agentsService.getAllAgents()[0]); // Fallback
-    }
-    
-    // Load properties for this agent
-    const props = this.propertyService.properties().filter(p => p.agent.name === this.agent().name);
-    // Note: This relies on name match which is fragile but works for mock data if names align.
-    // Better: Update PropertyService to have agentId. I'll do that in a separate step if strictly needed, but name match is okay for "Refactor Data".
-    this.filteredProperties.set(props);
-    
-    this.titleService.setTitle(`${this.agent().name} - ملف الوكيل`);
-    
-    if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      this.toast.show('الوكيل غير موجود', 'error');
     }
   }
-
-
-  // --- Actions ---
 
   submitRequest() {
     if (!this.meetingRequest.name() || !this.meetingRequest.phone() || !this.meetingRequest.date()) {
       this.toast.show('يرجى ملء جميع الحقول المطلوبة', 'error');
       return;
     }
-
     this.toast.show('تم إرسال طلبك بنجاح! سيتواصل معك الوكيل قريباً.', 'success');
-    
-    // تصفير النموذج
     this.meetingRequest.name.set('');
     this.meetingRequest.phone.set('');
     this.meetingRequest.date.set('');
   }
 
-  // --- Review & Validation Helpers ---
-  agentRating = computed(() => this.agent()?.rating || 0);
-  reviewsCount = computed(() => this.agent()?.reviewsCount || 0);
+  // --- Helpers ---
+  agentRating = computed(() => this.agent()?.agentProfile?.rating || 0);
+  reviewsCount = computed(() => this.agent()?.agentProfile?.reviewsCount || 0);
+
+  // Helper for UI to get displayable specialization array
+  agentSpecializations = computed(() => {
+    const spec = this.agent()?.agentProfile?.specialization;
+    return spec ? spec.split(',').map(s => s.trim()) : [];
+  });
 
   ratingDistribution = computed(() => [
     { stars: 5, percentage: 70 },
@@ -141,21 +128,19 @@ export class AgentProfileComponent implements OnInit {
     }, 1500);
   }
 
-  // --- Actions ---
   contact(method: 'call' | 'email' | 'whatsapp') {
     const agent = this.agent();
-    if (!agent || !agent.contact) {
+    if (!agent) {
        this.toast.show('بيانات الاتصال غير متوفرة', 'error');
        return;
     }
-    const data = agent.contact;
     
     if (method === 'call') {
-      window.open(`tel:${data.phone}`, '_self');
+      window.open(`tel:${agent.phone}`, '_self');
     } else if (method === 'email') {
-      window.open(`mailto:${data.email}`, '_self');
+      window.open(`mailto:${agent.email}`, '_self');
     } else if (method === 'whatsapp') {
-      const url = `https://wa.me/${data.phone}`;
+      const url = `https://wa.me/${agent.phone}`;
       window.open(url, '_blank');
     }
   }

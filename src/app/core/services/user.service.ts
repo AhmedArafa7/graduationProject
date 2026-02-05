@@ -1,20 +1,24 @@
-import { Injectable, signal } from '@angular/core';
-import { Observable, of, delay, tap } from 'rxjs';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface UserData {
+  _id?: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   profileImage: string | null;
-  userType: 'buyer' | 'agent';
+  userType: 'buyer' | 'agent' | 'admin';
   // Agent specific
   licenseNumber?: string;
   company?: string;
   experience?: string;
   specialization?: string;
   bio?: string;
-}
+} 
 
 // الصورة الافتراضية - أيقونة رمادية
 export const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgMTIwIDEyMCI+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNjAiIGZpbGw9IiNlNWU3ZWIiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjQ1IiByPSIyMCIgZmlsbD0iIzljYTNhZiIvPgogIDxwYXRoIGQ9Ik0yMCAxMDVjMC0yMiAxOC00MCA0MC00MHM0MCAxOCA0MCA0MCIgZmlsbD0iIzljYTNhZiIvPgo8L3N2Zz4=';
@@ -23,6 +27,11 @@ export const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDo
   providedIn: 'root'
 })
 export class UserService {
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private apiUrl = `${environment.apiUrl}/users`;
+  private authUrl = `${environment.apiUrl}/auth`;
+
   // حالة تسجيل الدخول
   isLoggedIn = signal(false);
 
@@ -36,34 +45,77 @@ export class UserService {
     userType: 'buyer'
   });
 
-  // تسجيل مستخدم جديد
-  registerUser(data: Partial<UserData>): Observable<boolean> {
-    return of(true).pipe(
-      delay(1500), // محاكاة وقت الاتصال
-      tap(() => {
-        this.userData.update(current => ({
-          ...current,
-          ...data
-        }));
+  constructor() {
+    this.checkSession();
+  }
+
+  // التحقق من الجلسة (لو مخزنة في localStorage)
+  private checkSession() {
+    if (typeof localStorage !== 'undefined') {
+      const user = localStorage.getItem('user');
+      if (user) {
+        this.userData.set(JSON.parse(user));
         this.isLoggedIn.set(true);
+      }
+    }
+  }
+
+  // تسجيل مستخدم جديد
+  registerUser(data: Partial<UserData>): Observable<any> {
+    return this.http.post(`${this.authUrl}/register`, data).pipe(
+      tap((response: any) => {
+        this.setSession(response);
       })
     );
   }
 
+  // تسجيل الدخول
+  login(credentials: {email: string, password: string}): Observable<any> {
+    return this.http.post(`${this.authUrl}/login`, credentials).pipe(
+      tap((response: any) => {
+        this.setSession(response);
+      })
+    );
+  }
+
+  // حفظ الجلسة
+  private setSession(user: any) {
+    // Map backend response to UserData interface if needed
+    // Assuming backend returns matching fields
+    const mappedUser: UserData = {
+      firstName: user.firstName,
+      lastName: user.lastName, 
+      email: user.email,
+      phone: user.phone,
+      profileImage: user.profileImage,
+      userType: user.userType,
+      _id: user._id, // Add _id to interface if needed
+      ...user
+    };
+
+    this.userData.set(mappedUser);
+    this.isLoggedIn.set(true);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(mappedUser));
+    }
+  }
+
   // تحديث بيانات المستخدم
-  updateUser(data: Partial<UserData>) {
-    this.userData.update(current => ({
-      ...current,
-      ...data
-    }));
+  updateUser(id: string, data: Partial<UserData>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, data).pipe(
+      tap((updatedUser: any) => {
+        this.userData.update(current => ({ ...current, ...updatedUser }));
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(this.userData()));
+        }
+      })
+    );
   }
 
   // تحديث الصورة الشخصية
-  updateProfileImage(image: string | null) {
-    this.userData.update(current => ({
-      ...current,
-      profileImage: image
-    }));
+  updateProfileImage(id: string, image: string | null) {
+    // This should ideally call an upload endpoint, but assuming base64 or url update
+    return this.updateUser(id, { profileImage: image });
   }
 
   // الحصول على الصورة (الافتراضية إذا لم توجد)
@@ -88,5 +140,9 @@ export class UserService {
       userType: 'buyer'
     });
     this.isLoggedIn.set(false);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('user');
+    }
+    this.router.navigate(['/auth/login']);
   }
 }

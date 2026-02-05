@@ -1,4 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 export interface Faq {
   id: number;
@@ -11,57 +13,28 @@ export interface Faq {
   providedIn: 'root'
 })
 export class FaqService {
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/faqs`;
   
-  private faqsSignal = signal<Faq[]>([
-    {
-      id: 1,
-      question: 'كيف يمكنني استخدام البحث بالذكاء الاصطناعي؟',
-      answer: 'البحث بالذكاء الاصطناعي في Baytology يسمح لك بوصف منزل أحلامك بلغة طبيعية (مثال: "شقة في التجمع 3 غرف بحديقة"). فقط اكتب ما تبحث عنه في شريط البحث الرئيسي، وسيقوم نظامنا بتحليل طلبك وعرض العقارات الأكثر تطابقاً.',
-      category: 'عامة'
-    },
-    {
-      id: 2,
-      question: 'ما هي تكلفة استخدام منصة Baytology؟',
-      answer: 'التصفح والبحث عن العقارات والتواصل مع الوكلاء مجاني تماماً للمشترين والمستأجرين. يتم تطبيق رسوم اشتراك فقط على الوكلاء العقاريين والمطورين الراغبين في عرض عقاراتهم.',
-      category: 'عامة'
-    },
-    {
-      id: 3,
-      question: 'كيف يمكنني التواصل مع وكيل عقاري؟',
-      answer: 'عندما تجد عقاراً يعجبك، ستجد زر "تواصل" أو "واتساب" في صفحة التفاصيل. يمكنك أيضاً زيارة ملف الوكيل الشخصي لرؤية كافة طرق الاتصال المتاحة وساعات العمل.',
-      category: 'للمشترين'
-    },
-    {
-      id: 4,
-      question: 'هل البيانات المعروضة عن الأسعار دقيقة؟',
-      answer: 'نعم، نستخدم خوارزميات متطورة لتحليل بيانات السوق الحقيقية وتحديث تقديرات الأسعار يومياً. ومع ذلك، السعر النهائي يخضع دائماً للتفاوض بين البائع والمشتري.',
-      category: 'للمشترين'
-    },
-    {
-      id: 5,
-      question: 'كيف يمكنني الانضمام كوكيل عقاري؟',
-      answer: 'يمكنك التسجيل كوكيل عن طريق الضغط على "إنشاء حساب" واختيار "وكيل عقاري". ستحتاج لتقديم رخصة مزاولة المهنة وبعض المستندات للتحقق من هويتك قبل تفعيل الحساب.',
-      category: 'للوكلاء'
-    },
-    {
-      id: 6,
-      question: 'ما هي طرق الدفع المتاحة للاشتراكات؟',
-      answer: 'نقبل الدفع عبر البطاقات الائتمانية (Visa, MasterCard)، ومحفظة فودافون كاش، وخدمة فوري.',
-      category: 'المدفوعات'
-    },
-    {
-      id: 7,
-      question: 'نسيت كلمة المرور، ماذا أفعل؟',
-      answer: 'يمكنك استعادة كلمة المرور بالضغط على "تسجيل الدخول" ثم اختيار "نسيت كلمة المرور". سنرسل لك رابطاً عبر البريد الإلكتروني لتعيين كلمة مرور جديدة.',
-      category: 'تقنية'
-    }
-  ]);
-
+  private faqsSignal = signal<Faq[]>([]);
+  
   get faqs() {
     return this.faqsSignal.asReadonly();
   }
 
+  constructor() {
+    this.loadFaqs();
+  }
+
+  loadFaqs() {
+    this.http.get<Faq[]>(this.apiUrl).subscribe({
+      next: (data: Faq[]) => this.faqsSignal.set(data),
+      error: (err: any) => console.error('Failed to load FAQs', err)
+    });
+  }
+
   getCategories() {
+    // Ideally fetch from backend or derive from data
     return [
       'الكل',
       'عامة',
