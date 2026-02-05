@@ -1,0 +1,201 @@
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn" dir="rtl">
+  
+  <div class="bg-white dark:bg-gray-800 w-full max-w-6xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-scaleIn">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
+      <div>
+        <h2 class="text-2xl font-black text-text-primary dark:text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">compare_arrows</span>
+          مقارنة العقارات الذكية
+        </h2>
+        <p class="text-sm text-text-secondary dark:text-gray-400 mt-1">
+          تحليل ذكي لمساعدتك في اتخاذ القرار الأفضل
+        </p>
+      </div>
+      <button (click)="closeModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+        <span class="material-symbols-outlined text-text-secondary dark:text-gray-400">close</span>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-8">
+      
+      <!-- 1. Comparison Table -->
+      <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+        <table class="w-full text-right text-sm">
+          <thead class="bg-gray-50 dark:bg-gray-900/50 text-text-secondary dark:text-gray-400">
+            <tr>
+              <th class="p-4 font-bold min-w-[120px]">المواصفات</th>
+              @for (prop of properties; track prop.id) {
+                <th class="p-4 min-w-[200px]">
+                  <div class="flex flex-col items-center gap-2">
+                    <img [src]="prop.coverImage || prop.images?.[0] || prop.image" class="w-full h-32 object-cover rounded-lg shadow-sm" [alt]="prop.title">
+                    <span class="font-bold text-text-primary dark:text-white text-base text-center line-clamp-1">{{ prop.title }}</span>
+                    @if (result()?.winnerId === prop.id || result()?.winnerId === prop._id) {
+                      <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold border border-green-200 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">emoji_events</span>
+                        الخيار الأفضل
+                      </span>
+                    }
+                  </div>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700 dark:text-gray-300">
+            <!-- Price -->
+            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+              <td class="p-4 font-bold bg-gray-50/30 dark:bg-gray-800/30">السعر</td>
+              @for (prop of properties; track prop.id) {
+                <td class="p-4 text-center font-bold text-primary text-lg">{{ prop.price }}</td>
+              }
+            </tr>
+            <!-- Area -->
+            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+              <td class="p-4 font-bold bg-gray-50/30 dark:bg-gray-800/30">المساحة</td>
+              @for (prop of properties; track prop.id) {
+                <td class="p-4 text-center">{{ prop.area }}</td>
+              }
+            </tr>
+            <!-- Location -->
+            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+              <td class="p-4 font-bold bg-gray-50/30 dark:bg-gray-800/30">الموقع</td>
+              @for (prop of properties; track prop.id) {
+                <td class="p-4 text-center">{{ prop.location }}</td>
+              }
+            </tr>
+            <!-- Beds/Baths -->
+            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+              <td class="p-4 font-bold bg-gray-50/30 dark:bg-gray-800/30">غرف / حمام</td>
+              @for (prop of properties; track prop.id) {
+                <td class="p-4 text-center">{{ prop.beds }} غرف / {{ prop.baths }} حمام</td>
+              }
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2. AI Analysis Cards -->
+      @if (result(); as res) {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (prop of properties; track prop.id) {
+            <div class="bg-gray-50 dark:bg-gray-750 rounded-xl p-5 border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:shadow-md transition-all">
+              @if (res.winnerId === prop.id) {
+                <div class="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+              }
+
+              <h3 class="font-bold text-lg mb-4 flex items-center gap-2 dark:text-white">
+                تحليل {{ prop.title }}
+              </h3>
+
+              <!-- Pros -->
+              <div class="space-y-2 mb-4">
+                @for (pro of res.analysis[prop.id]?.pros; track pro) {
+                  <div class="flex items-start gap-2 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    {{ pro }}
+                  </div>
+                }
+              </div>
+
+              <!-- Cons -->
+              <div class="space-y-2">
+                @for (con of res.analysis[prop.id]?.cons; track con) {
+                  <div class="flex items-start gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
+                    <span class="material-symbols-outlined text-base">warning</span>
+                    {{ con }}
+                  </div>
+                }
+              </div>
+
+              <!-- Score -->
+              <div class="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-600 pt-4">
+                <span class="text-sm font-bold text-gray-500">تقييم الذكاء الاصطناعي</span>
+                <span class="text-xl font-black text-primary">{{ res.analysis[prop.id]?.score }}%</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- AI Summary -->
+        <div class="bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-xl p-6 flex items-start gap-4">
+          <div class="p-3 bg-white dark:bg-gray-800 rounded-full shadow-sm text-primary">
+            <span class="material-symbols-outlined text-3xl">psychology</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-lg text-primary mb-2">الخلاصة</h3>
+            <p class="text-text-primary dark:text-gray-200 leading-relaxed">
+              {{ res.summary }}
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- 3. Ask AI Chat -->
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm flex flex-col h-[400px]">
+        <div class="bg-gray-50 dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="font-bold text-text-primary dark:text-white flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">forum</span>
+            اسأل المساعد الذكي عن هذه المقارنة
+          </h3>
+        </div>
+
+        <!-- Messages -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 dark:bg-gray-900/50">
+          @if (messages().length === 0) {
+            <div class="h-full flex flex-col items-center justify-center text-gray-400 text-sm">
+              <span class="material-symbols-outlined text-4xl mb-2 opacity-50">chat</span>
+              <p>هل محتار؟ اسألني "أيهم أفضل للاستثمار؟" أو "أيهم أرخص؟"</p>
+            </div>
+          }
+          
+          @for (msg of messages(); track msg) {
+            <div class="flex gap-3" [class.flex-row-reverse]="msg.type === 'user'">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0" 
+                   [class]="msg.type === 'user' ? 'bg-gray-200 text-gray-700' : 'bg-primary text-white'">
+                <span class="material-symbols-outlined text-sm">
+                  {{ msg.type === 'user' ? 'person' : 'smart_toy' }}
+                </span>
+              </div>
+              <div class="max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm"
+                   [class]="msg.type === 'user' ? 'bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded-br-none' : 'bg-primary text-white rounded-bl-none'">
+                {{ msg.text }}
+              </div>
+            </div>
+          }
+          
+          @if (isThinking()) {
+            <div class="flex gap-3">
+              <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-sm animate-pulse">smart_toy</span>
+              </div>
+              <div class="bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-2xl rounded-bl-none p-3 text-sm flex items-center gap-1">
+                <span>جاري التحليل</span>
+                <span class="animate-bounce delay-100">.</span>
+                <span class="animate-bounce delay-200">.</span>
+                <span class="animate-bounce delay-300">.</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Input -->
+        <div class="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 relative">
+          <input type="text" 
+                 [(ngModel)]="userQuestion" 
+                 (keyup.enter)="askAi()"
+                 placeholder="اكتب سؤالك هنا..." 
+                 class="w-full h-12 pr-4 pl-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white focus:ring-2 focus:ring-primary/50 outline-none transition-all placeholder:text-gray-400">
+          
+          <button (click)="askAi()" 
+                  [disabled]="!userQuestion().trim() || isThinking()"
+                  class="absolute left-6 top-1/2 -translate-y-1/2 text-primary hover:text-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors p-2 cursor-pointer">
+            <span class="material-symbols-outlined rotate-180">send</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

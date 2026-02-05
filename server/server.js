@@ -147,6 +147,17 @@ const createCrudRoutes = (model, routeName) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
   });
 
+  // GET User Favorites (Specific to User Model)
+  if (model.modelName === 'User') {
+    router.get('/:id/favorites', async (req, res) => {
+      try {
+        const user = await model.findById(req.params.id).populate('favorites');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json(user.favorites);
+      } catch (err) { res.status(500).json({ error: err.message }); }
+    });
+  }
+
   // GET ONE
   router.get('/:id', async (req, res) => {
     try {
@@ -209,6 +220,18 @@ app.use('/api/messages', createCrudRoutes(Message));
 app.use('/api/reviews', createCrudRoutes(Review));
 app.use('/api/notifications', createCrudRoutes(Notification));
 app.use('/api/faqs', createCrudRoutes(Faq));
+
+// AI Log Schema (New Feature)
+const AiLogSchema = new Schema({
+  question: { type: String }, // User's question
+  context: [{ type: String }], // Property IDs compared
+  answer: { type: String, required: true },
+  provider: { type: String, enum: ['local', 'external'], default: 'local' },
+  needsReview: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+});
+const AiLog = mongoose.model('AiLog', AiLogSchema);
+app.use('/api/ai/log', createCrudRoutes(AiLog));
 
 // Authentication Routes
 app.post('/api/auth/login', async (req, res) => {

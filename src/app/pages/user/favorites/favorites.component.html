@@ -15,28 +15,39 @@
     <!-- Property Grid -->
     @if (favorites().length > 0) {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        @for (property of favorites(); track property.id) {
+        @for (property of favorites(); track property._id) {
           <div class="flex flex-col bg-card-background dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 group cursor-pointer">
             
             <!-- Property Image -->
             <div class="relative">
-              <img [src]="property.image" [alt]="property.location" class="w-full aspect-[4/3] object-cover" />
+              <img [src]="property.coverImage || property.images[0]" [alt]="property.location" class="w-full aspect-[4/3] object-cover" />
               
               <!-- Remove Button -->
-              <button (click)="removeFromFavorites(property.id)"
+              <button (click)="removeFromFavorites(property._id)"
                       class="absolute top-3 left-3 h-9 w-9 flex items-center justify-center rounded-full bg-black/40 text-red-500 hover:bg-black/60 transition-colors cursor-pointer"
                       title="إزالة من المفضلة">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
               </button>
 
-              <!-- Type Badge -->
+              <!-- Type Badge (Moved slightly to accommodate checkbox if needed, or keep as is) -->
               <span class="absolute bottom-3 right-3 px-3 py-1 text-xs font-bold text-white rounded-full bg-green-600">
                 للبيع
               </span>
+
+              <!-- Comparison Checkbox -->
+              <div class="absolute top-3 right-3" (click)="$event.stopPropagation()">
+                <label class="relative flex items-center justify-center p-2 rounded-full cursor-pointer hover:bg-black/20 transition-colors">
+                  <input type="checkbox" 
+                         [checked]="selectedIds().has(property._id)"
+                         (change)="toggleSelection(property._id, $event)"
+                         class="peer relative h-5 w-5 cursor-pointer appearance-none rounded border-2 border-white transition-all checked:border-primary checked:bg-primary" />
+                  <span class="pointer-events-none absolute text-white opacity-0 peer-checked:opacity-100 material-symbols-outlined text-sm font-bold">check</span>
+                </label>
+              </div>
             </div>
 
             <!-- Property Info -->
-            <div class="p-4 flex flex-col flex-1" [routerLink]="['/property', property.id]">
+            <div class="p-4 flex flex-col flex-1" [routerLink]="['/property', property._id]">
               <p class="text-xl font-bold text-text-primary dark:text-white">{{ property.price }}</p>
               <p class="text-text-secondary dark:text-gray-400 text-sm mt-1">{{ property.location }}</p>
               
@@ -59,6 +70,22 @@
           </div>
         }
       </div>
+
+      <!-- Comparison Floating Button -->
+      @if (selectedIds().size > 0) {
+        <div class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 animate-fadeIn">
+          <button (click)="startComparison()"
+                  [disabled]="selectedIds().size < 2"
+                  class="flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-full shadow-2xl hover:bg-primary/90 transition-all disabled:opacity-70 disabled:cursor-not-allowed hover:scale-105 active:scale-95">
+            <span class="material-symbols-outlined text-2xl">compare_arrows</span>
+            <span class="font-bold text-lg">مقارنة ({{ selectedIds().size }})</span>
+            @if (selectedIds().size < 2) {
+              <span class="text-xs bg-white/20 px-2 py-1 rounded">اختر 2 على الأقل</span>
+            }
+          </button>
+        </div>
+      }
+
     } @else {
       <!-- Empty State -->
       <div class="flex flex-col items-center justify-center py-20 text-center">
@@ -74,4 +101,12 @@
     }
 
   </main>
+
+  <!-- Comparison Modal -->
+  @if (showComparisonModal()) {
+    <app-comparison-modal 
+      [properties]="selectedProperties()" 
+      (close)="closeComparison()">
+    </app-comparison-modal>
+  }
 </div>

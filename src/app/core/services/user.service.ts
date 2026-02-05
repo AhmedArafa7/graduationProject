@@ -130,6 +130,15 @@ export class UserService {
   }
 
   // تسجيل الخروج
+  // الحصول على العقارات المفضلة (بيانات كاملة)
+  getUserFavorites(): Observable<any[]> {
+    const user = this.userData();
+    if (!user._id) return new Observable(obs => obs.next([]));
+    
+    // If we have an ID, fetch from the dedicated endpoint
+    return this.http.get<any[]>(`${this.apiUrl}/${user._id}/favorites`);
+  }
+
   logout() {
     this.userData.set({
       firstName: '',
