@@ -37,8 +37,8 @@ export class ChatbotService {
   private http = inject(HttpClient);
   private offlineAi = inject(OfflineAiService);
   
-  // API URL
-  private readonly API_URL = 'http://localhost:8000';
+  // API URL - Empty to prevent "Local Network Permissions" prompt in production
+  private readonly API_URL = ''; // Was 'http://localhost:8000';
   
   // Session ID فريد لكل جلسة
   readonly sessionId = 'session_' + Date.now();
@@ -80,6 +80,7 @@ export class ChatbotService {
   // فحص الاتصال بالـ API
   async checkConnection(): Promise<boolean> {
     try {
+      if (!this.API_URL) return false;
       const response = await fetch(this.API_URL + '/');
       if (response.ok) {
         this.isConnected.set(true);

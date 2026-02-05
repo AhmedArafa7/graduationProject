@@ -38,7 +38,7 @@
               {{ personalInfo().firstName }} {{ personalInfo().lastName }}
             </h2>
             <p class="text-text-secondary dark:text-gray-400 mb-1">{{ personalInfo().email }}</p>
-            <p class="text-xs text-secondary font-bold mb-4">{{ isAgent() ? 'وكيل عقاري' : 'مشتري' }}</p>
+            <p class="text-xs text-secondary font-bold mb-4">{{ isAgent() ?'مالك عقار' : 'مشتري' }}</p>
             
             <button (click)="toggleEdit()" 
                     class="px-6 py-2.5 bg-secondary hover:bg-secondary/90 text-white font-bold text-sm rounded-lg transition-all shadow-md cursor-pointer">
