@@ -6,6 +6,7 @@ import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sideb
 import { ToastService } from '../../../core/services/toast.service';
 import { AgentPropertiesService, AgentProperty, PropertyAmenities, RoomDimension } from '../../../core/services/agent-properties.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { NgxImageCompressService } from 'ngx-image-compress';
 import * as L from 'leaflet';
 
 @Component({
@@ -20,6 +21,7 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
   private toast = inject(ToastService);
   private agentProperties = inject(AgentPropertiesService);
   private notificationService = inject(NotificationService);
+  private imageCompress = inject(NgxImageCompressService);
   private platformId = inject(PLATFORM_ID);
 
   private map: L.Map | null = null;
@@ -217,6 +219,28 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
   removeRoom(index: number) {
     if (this.form.roomDimensions.length > 1) {
       this.form.roomDimensions.splice(index, 1);
+    }
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const image = e.target?.result as string;
+        this.toast.show('جاري معالجة الصورة...', 'info');
+        
+        this.imageCompress.compressFile(image, -1, 50, 50).then(
+          (compressedImage: string) => {
+            this.form.image = compressedImage;
+            this.toast.show('تم تحديث الصورة بنجاح', 'success');
+          }
+        );
+      };
+      reader.readAsDataURL(file);
     }
   }
 

@@ -1,7 +1,8 @@
 <div class="container mx-auto px-4 py-5 font-display">
   <div class="flex flex-col lg:flex-row gap-8">
     
-    <aside class="w-full lg:w-[30%]">
+    <!-- Desktop Sidebar (Hidden on Mobile) -->
+    <aside class="hidden lg:block lg:w-[30%]">
        <div class="sticky top-24">
           <div class="flex h-full flex-col justify-between bg-card-background dark:bg-background-dark rounded-xl border border-border-color dark:border-gray-700 p-4 shadow-sm">
             <div class="flex flex-col gap-6">
@@ -16,7 +17,7 @@
                   <select [(ngModel)]="localFilters.type" class="form-select w-full rounded-lg border-border-color dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-primary focus:border-primary">
                     <option value="all">الكل</option>
                     <option value="شقة">شقة</option>
-                    <option value="fiلا">فيلا</option>
+                    <option value="فيلا">فيلا</option>
                     <option value="شاليه">شاليه</option>
                     <option value="تاون هاوس">تاون هاوس</option>
                   </select>
@@ -63,6 +64,84 @@
           </div>
        </div>
     </aside>
+
+    <!-- Mobile Header with Filter Toggle -->
+    <div class="lg:hidden w-full flex justify-between items-center mb-4">
+       <button (click)="toggleMobileFilters()" 
+               class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm text-text-primary dark:text-white font-medium">
+         <span class="material-symbols-outlined">tune</span>
+         تصفية النتائج
+       </button>
+    </div>
+
+    <!-- Mobile Filter Drawer (Overlay) -->
+    @if (isMobileFiltersOpen()) {
+      <div class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+        <!-- Backdrop -->
+        <div (click)="toggleMobileFilters()" class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"></div>
+        
+        <!-- Drawer Panel -->
+        <div class="fixed inset-x-0 bottom-0 z-50 w-full bg-background-light dark:bg-background-dark rounded-t-2xl shadow-2xl p-6 transition-transform transform max-h-[85vh] overflow-y-auto">
+           <div class="flex items-center justify-between mb-6">
+             <h2 class="text-xl font-bold text-text-primary dark:text-white">تصفية العقارات</h2>
+             <button (click)="toggleMobileFilters()" class="p-2 bg-gray-100 dark:bg-gray-700 rounded-full">
+               <span class="material-symbols-outlined">close</span>
+             </button>
+           </div>
+
+           <!-- Reuse the same filter controls here for Mobile -->
+           <div class="flex flex-col gap-6">
+              <!-- Property Type -->
+              <div class="flex flex-col gap-2">
+                <label class="text-text-primary dark:text-white text-sm font-semibold">نوع العقار</label>
+                <select [(ngModel)]="localFilters.type" class="form-select w-full h-12 rounded-lg border-border-color dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                  <option value="الكل">الكل</option>
+                  <option value="شقة">شقة</option>
+                  <option value="فيلا">فيلا</option>
+                  <option value="شاليه">شاليه</option>
+                  <option value="تاون هاوس">تاون هاوس</option>
+                </select>
+              </div>
+
+              <!-- Price Range -->
+              <div class="flex flex-col gap-2">
+                <label class="text-text-primary dark:text-white text-sm font-semibold">نطاق السعر</label>
+                <div class="flex gap-2">
+                  <input [(ngModel)]="localFilters.priceFrom" class="form-input w-full h-12 rounded-lg border-border-color dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="من" type="number"/>
+                  <input [(ngModel)]="localFilters.priceTo" class="form-input w-full h-12 rounded-lg border-border-color dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="إلى" type="number"/>
+                </div>
+              </div>
+
+              <!-- Amenities -->
+              <div class="flex flex-col gap-2">
+                <label class="text-text-primary dark:text-white text-sm font-semibold">المرافق</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center gap-2 p-3 border rounded-lg dark:border-gray-700">
+                      <input [(ngModel)]="localFilters.amenities.pool" class="form-checkbox text-primary" type="checkbox"/> حمام سباحة
+                    </label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg dark:border-gray-700">
+                      <input [(ngModel)]="localFilters.amenities.garden" class="form-checkbox text-primary" type="checkbox"/> حديقة
+                    </label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg dark:border-gray-700">
+                      <input [(ngModel)]="localFilters.amenities.garage" class="form-checkbox text-primary" type="checkbox"/> جراج
+                    </label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg dark:border-gray-700">
+                      <input [(ngModel)]="localFilters.amenities.balcony" class="form-checkbox text-primary" type="checkbox"/> شرفة
+                    </label>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex gap-3 mt-4">
+                <button (click)="resetFilters()" class="flex-1 py-3 text-red-500 bg-red-50 dark:bg-red-900/20 rounded-xl font-bold">إعادة تعيين</button>
+                <button (click)="applyFilters(); toggleMobileFilters()" class="flex-[2] py-3 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/30">
+                  عرض النتائج
+                </button>
+              </div>
+           </div>
+        </div>
+      </div>
+    }
 
     <main class="w-full lg:w-[70%] flex flex-col gap-6">
       
@@ -125,7 +204,7 @@
       </div>
 
       <div class="flex flex-wrap gap-2">
-        @if (globalState.searchFilters().type !== 'شقة') {
+        @if (globalState.searchFilters().type !== 'الكل' && globalState.searchFilters().type !== 'all') {
           <button (click)="removeFilter('type')" 
                   class="text-sm font-medium px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors group">
              {{ globalState.searchFilters().type }} 
@@ -150,6 +229,19 @@
 
       <div class="grid grid-cols-1 gap-6" [class.md:grid-cols-2]="viewMode() === 'grid'">
         
+        @if (filteredProperties().length === 0 && !isLoading()) {
+          <div class="col-span-full flex flex-col items-center justify-center py-16 text-center animate-fade-in">
+             <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-full mb-4">
+               <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-gray-500">search_off</span>
+             </div>
+             <h3 class="text-2xl font-bold text-text-primary dark:text-white mb-2">عذراً، لا توجد نتائج مطابقة</h3>
+             <p class="text-text-secondary dark:text-gray-400 max-w-md mx-auto mb-6">لم نعثر على عقارات تطابق معايير بحثك الحالية. حاول تغيير الفلاتر أو البحث في منطقة مختلفة.</p>
+             <button (click)="resetFilters()" class="px-6 py-3 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+               إعادة تعيين الفلاتر
+             </button>
+          </div>
+        }
+
         @for (prop of filteredProperties(); track prop._id) {
           <div class="bg-card-background dark:bg-background-dark border border-border-color dark:border-gray-700 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col relative group">
               

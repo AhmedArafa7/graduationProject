@@ -305,7 +305,12 @@ const seedContent = async () => {
   }
 };
 // Run seed on connection
-mongoose.createConnection(MONGO_URI).once('open', seedContent);
+// Run seed on connection (Using existing connection to prevent pool exhaustion)
+if (mongoose.connection.readyState === 1) {
+  seedContent();
+} else {
+  mongoose.connection.once('connected', seedContent);
+}
 
 // Report Schema (Moderation)
 const ReportSchema = new Schema({

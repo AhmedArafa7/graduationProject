@@ -24,6 +24,7 @@ export class SearchListComponent {
   viewMode = signal<'grid' | 'list'>('grid');
   currentPage = signal(1);
   isLoading = signal(false);
+  isMobileFiltersOpen = signal(false); // Mobile Filter Drawer State
   
   // Smart Search
   smartSearchQuery = signal('');
@@ -140,6 +141,10 @@ export class SearchListComponent {
     this.toast.show('تم حفظ البحث بنجاح! سنرسل لك تنبيهات للعقارات الجديدة.', 'success');
   }
 
+  toggleMobileFilters() {
+    this.isMobileFiltersOpen.update(v => !v);
+  }
+
   applyFilters() {
     this.isLoading.set(true);
     setTimeout(() => {
@@ -157,7 +162,13 @@ export class SearchListComponent {
     this.localFilters = { ...this.globalState.searchFilters() };
     this.smartSearchQuery.set('');
     this.aiAnalysisResult = signal(null);
-    this.toast.show('تم إعادة تعيين الفلاتر', 'info');
+    
+    // Force re-fetch/update local state
+    this.isLoading.set(true);
+    setTimeout(() => {
+      this.isLoading.set(false);
+      this.toast.show('تم إعادة تعيين الفلاتر', 'info');
+    }, 300);
   }
 
   // --- دالة جديدة لحذف الفلاتر عند الضغط على X ---
@@ -166,7 +177,7 @@ export class SearchListComponent {
     const updatedFilters = { ...current };
 
     if (filterKey === 'type') {
-      updatedFilters.type = 'شقة'; // العودة للافتراضي
+      updatedFilters.type = 'الكل'; // Reset to "All" (User defined 'الكل')
     } else if (filterKey === 'pool') {
       updatedFilters.amenities = { ...current.amenities, pool: false };
     } else if (filterKey === 'garden') {

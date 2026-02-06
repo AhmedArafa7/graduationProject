@@ -371,6 +371,12 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
     if (!this.validateForm()) {
       return;
     }
+
+    if (this.form.images.length === 0) {
+       this.toast.show('يجب إضافة صورة واحدة على الأقل للعقار', 'error');
+       this.currentStep.set(1); // Go back to step 1 (where images usually are, or just focus)
+       return;
+    }
     
     const newProperty = this.agentProperties.addProperty({
       image: this.form.images.length > 0 
