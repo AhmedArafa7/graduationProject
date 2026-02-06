@@ -1,8 +1,11 @@
-import { Injectable, signal, inject, PLATFORM_ID, computed } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, signal, inject, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { UserService } from './user.service';
+import { Observable, map } from 'rxjs';
 
 export interface Message {
-  id: number;
+  id: string | number; // Support string IDs from backend
   text: string;
   sender: 'user' | 'other';
   time: string;
@@ -15,12 +18,13 @@ export interface Message {
 }
 
 export interface Conversation {
-  id: number;
+  id: string | number;
   name: string;
   avatar: string;
   lastMessage: string;
   time: string;
   unread: boolean;
+  unreadCount?: number;
   online?: boolean;
   messages: Message[];
 }
@@ -28,212 +32,135 @@ export interface Conversation {
 @Injectable({
   providedIn: 'root'
 })
+@Injectable({
+  providedIn: 'root'
+})
 export class MessagesService {
-  private platformId = inject(PLATFORM_ID);
-  private STORAGE_KEY = 'baytology_messages';
-  private VERSION_KEY = 'baytology_messages_version';
-  private CURRENT_VERSION = 2;
-
+  private http = inject(HttpClient);
+  private userService = inject(UserService);
+  private apiUrl = `${environment.apiUrl}/chat`;
+  
   private conversationsSignal = signal<Conversation[]>([]);
+  public conversations = this.conversationsSignal.asReadonly();
   
-  conversations = this.conversationsSignal.asReadonly();
-  
-  // عدد المحادثات غير المقروءة
-  unreadCount = computed(() => 
-    this.conversationsSignal().filter(c => c.unread).length
+  public unreadCount = computed(() => 
+    this.conversationsSignal().reduce((acc, curr) => acc + (curr.unreadCount || (curr.unread ? 1 : 0)), 0)
   );
 
   constructor() {
-    // تحميل البيانات بعد التهيئة
-    this.conversationsSignal.set(this.loadFromStorage());
-  }
-
-  private defaultConversations: Conversation[] = [
-    {
-      id: 1,
-      name: 'Baytology',
-      avatar: '/Baytology_image.png',
-      lastMessage: 'استفسار عن: شقة في التجمع الخامس',
-      time: '3:45 PM',
-      unread: false,
-      online: true,
-      messages: [
-        { id: 1, text: 'مرحباً! هذه رسالة تلقائية بخصوص استفسارك عن العقار في التجمع الخامس.', sender: 'other', time: '3:45 PM' },
-        { id: 2, text: 'ممتاز، شكراً! أنا مهتم جداً وعايز أعرف أكتر عن المنطقة.', sender: 'user', time: '3:50 PM' },
-        { id: 3, text: 'طبعاً. المنطقة معروفة بمدارسها الممتازة والحدائق. مناسبة جداً للعائلات.', sender: 'other', time: '3:52 PM' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'سلمى أحمد',
-      avatar: '/hijab_salma.png',
-      lastMessage: 'أنا مهتمة بالعقار اللي عرضته',
-      time: 'أمس',
-      unread: false,
-      messages: [
-        { id: 1, text: 'مرحباً، أنا مهتمة بالعقار اللي عرضته في الزمالك', sender: 'other', time: '2:30 PM' },
-        { id: 2, text: 'أهلاً سلمى! أيوه، العقار متاح للمعاينة.', sender: 'user', time: '2:35 PM' },
-        { id: 3, text: 'ممتاز! ممكن نحدد موعد الأسبوع الجاي؟', sender: 'other', time: '2:40 PM' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'محمد علي',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-      lastMessage: 'ممكن نحدد موعد للمعاينة؟',
-      time: 'منذ يومين',
-      unread: false,
-      messages: [
-        { id: 1, text: 'السلام عليكم، أنا شايف العقار ده على الموقع وعايز أعرف تفاصيل أكتر', sender: 'other', time: '10:00 AM' },
-        { id: 2, text: 'وعليكم السلام محمد، العقار 3 غرف وصالة، التشطيب سوبر لوكس', sender: 'user', time: '10:15 AM' },
-        { id: 3, text: 'ممكن نحدد موعد للمعاينة؟', sender: 'other', time: '10:20 AM' }
-      ]
-    }
-  ];
-
-  private loadFromStorage(): Conversation[] {
-    if (!isPlatformBrowser(this.platformId)) return this.getDefaultConversations();
-    
-    try {
-      // التحقق من الإصدار - لو مختلف، نمسح البيانات القديمة
-      const storedVersion = localStorage.getItem(this.VERSION_KEY);
-      if (storedVersion !== String(this.CURRENT_VERSION)) {
-        localStorage.removeItem(this.STORAGE_KEY);
-        localStorage.setItem(this.VERSION_KEY, String(this.CURRENT_VERSION));
-        return this.getDefaultConversations();
-      }
-
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (e) {
-      console.warn('Could not load messages');
-    }
-    return this.getDefaultConversations();
-  }
-
-  private getDefaultConversations(): Conversation[] {
-    return [...this.defaultConversations];
-  }
-
-  private saveToStorage() {
-    if (!isPlatformBrowser(this.platformId)) return;
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.conversationsSignal()));
-    } catch (e) {
-      console.warn('Could not save messages');
+    // Load if user is logged in
+    if (this.userService.userData()) {
+      this.loadConversations();
     }
   }
 
-  getConversations() {
-    return this.conversationsSignal();
+  loadConversations() {
+    const userId = this.userService.userData()._id;
+    if (!userId) return;
+
+    this.http.get<any[]>(`${this.apiUrl}?userId=${userId}`).pipe(
+      map(data => data.map(this.mapBackendConversation))
+    ).subscribe({
+      next: (data) => this.conversationsSignal.set(data),
+      error: (err) => console.error('Failed to load conversations', err)
+    });
   }
 
-  markAsRead(id: number) {
-    this.conversationsSignal.update(list => 
-      list.map(c => c.id === id ? {...c, unread: false} : c)
+  getMessages(conversationId: string): Observable<Message[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${conversationId}/messages`).pipe(
+      map(msgs => msgs.map(this.mapBackendMessage))
     );
-    this.saveToStorage();
   }
 
-  markAllAsRead() {
-    this.conversationsSignal.update(list => 
-      list.map(c => ({...c, unread: false}))
-    );
-    this.saveToStorage();
-  }
+  sendMessage(conversationId: string, text: string, attachment?: any) {
+    const senderId = this.userService.userData()._id;
+    if (!senderId) return;
 
-  // إعادة تعيين البيانات للافتراضي (مسح localStorage)
-  resetToDefaults() {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem(this.STORAGE_KEY);
-    }
-    this.conversationsSignal.set(this.getDefaultConversations());
-  }
-
-  addMessage(conversationId: number, message: Message) {
-    this.conversationsSignal.update(list => 
-      list.map(c => {
-        if (c.id === conversationId) {
-          return {
-            ...c,
-            messages: [...c.messages, message],
-            lastMessage: message.text || `📎 ${message.attachment?.name || 'مرفق'}`,
-            time: 'الآن'
-          };
-        }
-        return c;
-      })
-    );
-    this.saveToStorage();
-  }
-
-  deleteConversation(id: number) {
-    this.conversationsSignal.update(list => list.filter(c => c.id !== id));
-    this.saveToStorage();
-  }
-
-  // عند استلام رسالة جديدة
-  receiveMessage(conversationId: number, text: string) {
-    const msg: Message = {
-      id: Date.now(),
+    this.http.post<any>(`${this.apiUrl}/${conversationId}/messages`, {
       text,
-      sender: 'other',
-      time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    this.conversationsSignal.update(list => 
-      list.map(c => {
-        if (c.id === conversationId) {
-          return {
-            ...c,
-            messages: [...c.messages, msg],
-            lastMessage: text,
-            time: 'الآن',
-            unread: true
-          };
-        }
-        return c;
-      })
-    );
-    this.saveToStorage();
-  }
-
-  // بدء محادثة مع وكيل محدد
-  startChatWithAgent(agentName: string, agentImage: string, propertyTitle: string): number {
-    // البحث عن محادثة موجودة مع نفس الوكيل
-    const existingConvo = this.conversationsSignal().find(c => c.name === agentName);
-    
-    if (existingConvo) {
-      // فقط فتح المحادثة الموجودة بدون إضافة رسالة
-      this.conversationsSignal.update(list =>
-        list.map(c => {
-          if (c.id === existingConvo.id) {
-            return { ...c, unread: false };
+      senderId,
+      attachment
+    }).subscribe({
+      next: (newMsg) => {
+        // Optimistic update of conversation list (last message)
+        this.conversationsSignal.update(list => list.map(c => {
+          if (String(c.id) === String(conversationId)) {
+            return { 
+              ...c, 
+              lastMessage: text || 'مرفق', 
+              time: 'الآن',
+              messages: [...(c.messages || []), this.mapBackendMessage(newMsg)] 
+            };
           }
           return c;
-        })
-      );
-      this.saveToStorage();
-      return existingConvo.id;
+        }));
+      },
+      error: (err) => console.error('Failed to send message', err)
+    });
+  }
+
+  startChatWithAgent(agentName: string, agentImage: string, agentId: string): Observable<string> { // Returns Conversation ID
+    const userId = this.userService.userData()._id;
+    if (!userId) {
+       // Handle not logged in - maybe return error or prompt login
+       return new Observable(obs => obs.error('Must be logged in'));
     }
 
-    // إنشاء محادثة جديدة فارغة - المستخدم سيكتب رسالته بنفسه
-    const newId = Date.now();
-    const newConvo: Conversation = {
-      id: newId,
-      name: agentName,
-      avatar: agentImage,
-      lastMessage: 'ابدأ المحادثة...',
-      time: 'الآن',
-      unread: false,
-      online: true,
-      messages: [] // محادثة فارغة
+    const payload = {
+      participants: [userId, agentId], // Assuming agentId is passed
+      participantsDetails: [
+        { id: userId, name: 'أنت', role: 'user' },
+        { id: agentId, name: agentName, avatar: agentImage, role: 'agent' }
+      ]
     };
 
-    this.conversationsSignal.update(list => [newConvo, ...list]);
-    this.saveToStorage();
-    return newId;
+    return this.http.post<any>(this.apiUrl, payload).pipe(
+      map(res => {
+        this.loadConversations(); // Refresh list
+        return res._id;
+      })
+    );
+  }
+
+  markAsRead(conversationId: string | number) {
+    // In real app, call API to mark read. For now just local update + maybe silent api call
+    this.conversationsSignal.update(list => 
+      list.map(c => String(c.id) === String(conversationId) ? {...c, unread: false, unreadCount: 0} : c)
+    );
+  }
+  
+  markAllAsRead() {
+    this.conversationsSignal.update(list => 
+      list.map(c => ({...c, unread: false, unreadCount: 0}))
+    );
+  }
+
+  deleteConversation(id: string | number) {
+     // Implement API delete if supported
+     this.conversationsSignal.update(list => list.filter(c => String(c.id) !== String(id)));
+  }
+
+  // Mappers
+  private mapBackendConversation(item: any): Conversation {
+    return {
+      id: item._id,
+      name: item.participantsDetails?.find((p: any) => p.role === 'agent')?.name || 'Agent', // Simplified logic
+      avatar: item.participantsDetails?.find((p: any) => p.role === 'agent')?.avatar || '/assets/images/user-placeholder.png',
+      lastMessage: item.lastMessage,
+      time: new Date(item.updatedAt).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}),
+      unread: item.unreadCount > 0,
+      unreadCount: item.unreadCount,
+      messages: [] // Loaded on demand usually
+    };
+  }
+
+  private mapBackendMessage(item: any): Message {
+    return {
+      id: item._id,
+      text: item.text,
+      sender: item.senderId === item.senderId ? 'user' : 'other', // Logic needs current User ID comparison
+      time: new Date(item.createdAt).toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}),
+      attachment: item.attachment
+    };
   }
 }

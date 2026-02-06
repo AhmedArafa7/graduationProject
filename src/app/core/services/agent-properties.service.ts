@@ -1,4 +1,8 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { UserService } from './user.service';
+import { environment } from '../../../environments/environment';
+import { Observable, map } from 'rxjs';
 
 export interface PropertyAmenities {
   pool: boolean;
@@ -45,144 +49,137 @@ export interface AgentProperty {
   providedIn: 'root'
 })
 export class AgentPropertiesService {
+  private http = inject(HttpClient);
+  private user = inject(UserService); // To get current user ID
+  private apiUrl = `${environment.apiUrl}/properties`;
   
-  private propertiesSignal = signal<AgentProperty[]>(this.loadFromStorage());
+  // No more signals for local state - fetch on demand or use a resource pattern
+  // For simplicity, we will return Observables directly
 
-  properties = this.propertiesSignal.asReadonly();
-
-  // جلب عقار بالـ ID
-  getPropertyById(id: string): AgentProperty | undefined {
-    return this.propertiesSignal().find(p => p.id === id);
-  }
-
-  // إضافة عقار جديد
-  addProperty(property: Omit<AgentProperty, 'id' | 'createdAt' | 'statusColor'>) {
-    const newProperty: AgentProperty = {
-      ...property,
-      id: Date.now().toString(), // String ID
-      createdAt: new Date().toISOString().split('T')[0],
-      statusColor: this.getStatusColor(property.status)
-    };
+  // Get all properties for the current agent
+  getAgentProperties(): Observable<AgentProperty[]> {
+    const userId = this.user.userData()._id;
+    if (!userId) return new Observable(obs => obs.next([]));
     
-    this.propertiesSignal.update(list => [newProperty, ...list]);
-    this.saveToStorage();
-    return newProperty;
-  }
-
-  // حذف عقار
-  deleteProperty(id: string) {
-    this.propertiesSignal.update(list => list.filter(p => p.id !== id));
-    this.saveToStorage();
-  }
-
-  // تحديث عقار
-  updateProperty(id: string, updates: Partial<AgentProperty>) {
-    this.propertiesSignal.update(list => 
-      list.map(p => {
-        if (p.id === id) {
-          const updated = { ...p, ...updates };
-          if (updates.status) {
-            updated.statusColor = this.getStatusColor(updates.status);
-          }
-          return updated;
-        }
-        return p;
-      })
+    return this.http.get<any[]>(`${this.apiUrl}?agent=${userId}`).pipe(
+      map(items => items.map(this.mapBackendToFrontend))
     );
-    this.saveToStorage();
   }
 
-  private getStatusColor(status: string): string {
-    switch (status) {
-      case 'للإيجار': return 'bg-blue-600';
-      case 'مباع': return 'bg-red-600';
-      case 'معلق': return 'bg-yellow-600';
-      default: return 'bg-green-600';
-    }
+  // Get single property
+  getPropertyById(id: string): Observable<AgentProperty> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map(this.mapBackendToFrontend)
+    );
   }
 
-  private saveToStorage() {
-    try {
-      localStorage.setItem('agent_properties', JSON.stringify(this.propertiesSignal()));
-    } catch (e) {
-      console.warn('Could not save properties to localStorage');
-    }
+  // Add new property
+  addProperty(property: any): Observable<AgentProperty> {
+    const backendPayload = this.mapFrontendToBackend(property);
+    return this.http.post<any>(this.apiUrl, backendPayload).pipe(
+      map(this.mapBackendToFrontend)
+    );
   }
 
-  private loadFromStorage(): AgentProperty[] {
-    try {
-      const stored = localStorage.getItem('agent_properties');
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    } catch (e) {
-      console.warn('Could not load properties from localStorage');
-    }
-    
-    return [
-      {
-        id: '1',
-        image: 'https://images.unsplash.com/photo-1600596542815-e32cb51813b9?q=80&w=200&auto=format&fit=crop',
-        address: 'شارع النيل، الزمالك، القاهرة',
-        price: '1,200,000 جنيه',
-        priceValue: 1200000,
-        status: 'للبيع',
-        statusColor: 'bg-green-600',
-        createdAt: '2026-01-15',
-        propertyType: 'شقة',
-        area: 180,
-        bedrooms: 3,
-        bathrooms: 2,
-        floor: 5,
-        description: 'شقة فاخرة تطل على النيل مباشرة',
-        amenities: { pool: false, garage: true, gym: false, garden: false, balcony: true, security: true, ac: true, petFriendly: false }
+  // Delete property
+  deleteProperty(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  // Update property
+  updateProperty(id: string, updates: Partial<AgentProperty>): Observable<AgentProperty> {
+    // Note: This relies on backend accepting partial updates (PATCH/PUT)
+    // We might need to map updates to backend structure too
+    const backendPayload = this.mapFrontendToBackend(updates as any); // Partial mapping might be tricky, assuming full object or compatible structure
+    return this.http.put<any>(`${this.apiUrl}/${id}`, backendPayload).pipe(
+      map(this.mapBackendToFrontend)
+    );
+  }
+
+  // HELPER: Map Backend Schema -> Frontend Interface
+  private mapBackendToFrontend(item: any): AgentProperty {
+    return {
+      id: item._id,
+      image: item.coverImage || (item.images && item.images[0]) || '',
+      images: item.images || [],
+      address: item.location?.address || item.title,
+      price: item.price + ' جنيه', // Format as needed
+      priceValue: item.price,
+      status: item.status === 'available' ? 'للبيع' : (item.status === 'rented' ? 'للإيجار' : 'مباع'), // Mapping needed
+      statusColor: item.status === 'available' ? 'bg-green-600' : 'bg-red-600', // Simplified
+      createdAt: item.createdAt,
+      propertyType: item.propertyType,
+      area: item.area,
+      bedrooms: item.bedrooms,
+      bathrooms: item.bathrooms,
+      floor: item.floor,
+      description: item.description,
+      amenities: {
+          pool: item.features?.includes('pool'),
+          garage: item.features?.includes('garage'),
+          gym: item.features?.includes('gym'),
+          garden: item.features?.includes('garden'),
+          balcony: item.features?.includes('balcony'),
+          security: item.features?.includes('security'),
+          ac: item.features?.includes('ac'),
+          petFriendly: item.features?.includes('petFriendly')
       },
-      {
-        id: '2',
-        image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=200&auto=format&fit=crop',
-        address: 'شارع التسعين، التجمع الخامس',
-        price: '850,000 جنيه',
-        priceValue: 850000,
-        status: 'مباع',
-        statusColor: 'bg-red-600',
-        createdAt: '2026-01-14',
-        propertyType: 'شقة',
-        area: 150,
-        bedrooms: 2,
-        bathrooms: 1,
-        floor: 3
+      latitude: item.location?.coordinates?.coordinates[1]?.toString(),
+      longitude: item.location?.coordinates?.coordinates[0]?.toString(),
+      locationId: item._id // use ID as location ID
+    };
+  }
+
+  // HELPER: Map Frontend Interface -> Backend Schema
+  private mapFrontendToBackend(data: any): any {
+    const features: string[] = [];
+    if (data.amenities?.pool) features.push('pool');
+    if (data.amenities?.garage) features.push('garage');
+    if (data.amenities?.gym) features.push('gym');
+    if (data.amenities?.garden) features.push('garden');
+    if (data.amenities?.balcony) features.push('balcony');
+    if (data.amenities?.security) features.push('security');
+    if (data.amenities?.ac) features.push('ac');
+    if (data.amenities?.petFriendly) features.push('petFriendly');
+
+    return {
+      title: data.address || data.title, // 'address' in frontend often used as title
+      description: data.description || 'No description',
+      price: data.priceValue || parseInt(data.price),
+      area: data.area,
+      location: {
+        city: 'القاهرة', // DEFAULT for now as it's missing in frontend form
+        address: data.address || 'Cairo',
+        coordinates: {
+          type: 'Point',
+          coordinates: [
+            parseFloat(data.longitude || '31.2357'), 
+            parseFloat(data.latitude || '30.0444')
+          ]
+        }
       },
-      {
-        id: '3',
-        image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=200&auto=format&fit=crop',
-        address: 'المعادي، القاهرة',
-        price: '8,500 جنيه/شهر',
-        priceValue: 8500,
-        status: 'للإيجار',
-        statusColor: 'bg-blue-600',
-        createdAt: '2026-01-12',
-        propertyType: 'شقة',
-        area: 120,
-        bedrooms: 2,
-        bathrooms: 1,
-        floor: 2
-      },
-      {
-        id: '4',
-        image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=200&auto=format&fit=crop',
-        address: 'الشيخ زايد، 6 أكتوبر',
-        price: '2,100,000 جنيه',
-        priceValue: 2100000,
-        status: 'معلق',
-        statusColor: 'bg-yellow-600',
-        createdAt: '2026-01-10',
-        propertyType: 'فيلا',
-        area: 350,
-        bedrooms: 5,
-        bathrooms: 4,
-        floor: 0,
-        amenities: { pool: true, garage: true, gym: false, garden: true, balcony: true, security: true, ac: true, petFriendly: true }
-      }
-    ];
+      type: data.status === 'للإيجار' ? 'rent' : 'sale',
+      propertyType: this.mapPropertyType(data.propertyType), 
+      bedrooms: data.bedrooms || 1,
+      bathrooms: data.bathrooms || 1,
+      floor: data.floor || 0,
+      images: data.images || (data.image ? [data.image] : []),
+      coverImage: data.image || (data.images && data.images[0]), // First image as cover
+      features: features,
+      status: data.status === 'مباع' ? 'sold' : 'available',
+      agent: this.user.userData()._id // Link to current agent
+    };
+  }
+
+  private mapPropertyType(type: string): string {
+    const map: any = {
+      'شقة': 'apartment',
+      'فيلا': 'villa',
+      'تاون هاوس': 'house',
+      'شاليه': 'chalet',
+      'أرض': 'land',
+      'تجاري': 'commercial'
+    };
+    return map[type] || 'apartment';
   }
 }

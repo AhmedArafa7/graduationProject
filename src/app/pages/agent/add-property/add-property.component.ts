@@ -378,7 +378,7 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
        return;
     }
     
-    const newProperty = this.agentProperties.addProperty({
+    this.agentProperties.addProperty({
       image: this.form.images.length > 0 
         ? this.form.images[0].preview 
         : 'https://images.unsplash.com/photo-1600596542815-e32cb51813b9?q=80&w=200&auto=format&fit=crop',
@@ -398,15 +398,21 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
       locationId: this.form.locationId,
       amenities: this.form.amenities,
       images: this.form.images.map(img => img.preview)
+    }).subscribe({
+      next: () => {
+        this.toast.show('تم إضافة العقار بنجاح!', 'success');
+        this.notificationService.notifyPropertyAdded(this.form.title);
+        localStorage.removeItem('property_draft');
+        
+        setTimeout(() => {
+          this.router.navigate(['/agent-dashboard']);
+        }, 1000);
+      },
+      error: (err) => {
+        console.error('Error adding property:', err);
+        this.toast.show('حدث خطأ أثناء إضافة العقار. يرجى المحاولة مرة أخرى.', 'error');
+      }
     });
-    
-    this.toast.show('تم إضافة العقار بنجاح!', 'success');
-    this.notificationService.notifyPropertyAdded(this.form.title);
-    localStorage.removeItem('property_draft');
-    
-    setTimeout(() => {
-      this.router.navigate(['/agent-dashboard']);
-    }, 1000);
   }
 
   private formatPrice(price: number): string {

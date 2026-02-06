@@ -18,6 +18,7 @@ export interface UserData {
   experience?: string;
   specialization?: string;
   bio?: string;
+  password?: string; // Only for registration
 } 
 
 // الصورة الافتراضية - أيقونة رمادية

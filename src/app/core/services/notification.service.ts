@@ -2,6 +2,7 @@ import { Injectable, signal, inject, computed, PLATFORM_ID } from '@angular/core
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { UserService } from './user.service';
 
 export interface Notification {
   _id?: string;
@@ -19,6 +20,7 @@ export interface Notification {
 })
 export class NotificationService {
   private http = inject(HttpClient);
+  private userService = inject(UserService); // Inject User Service
   private apiUrl = `${environment.apiUrl}/notifications`;
   
   // قائمة الإشعارات
@@ -50,13 +52,15 @@ export class NotificationService {
 
   // إضافة إشعار جديد
   addNotification(title: string, message: string, type: 'message' | 'property' | 'system' | 'price' = 'system') {
+    const userId = this.userService.userData()._id || 'anonymous'; // Fallback if needed, but preferably catch earlier
+
     const newNotification = {
       title,
       message,
       type,
       read: false,
       icon: this.getIcon(type),
-      userId: 'USER_ID_PLACEHOLDER' // Ideally get from UserService
+      userId: userId
     };
     
     // In real app we might not post notification from client side like this, usually backend creates it.

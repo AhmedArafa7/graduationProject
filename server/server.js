@@ -200,6 +200,35 @@ const NotificationSchema = new Schema({
 });
 const Notification = mongoose.model('Notification', NotificationSchema);
 
+// Chat Schemas
+const ChatMessageSchema = new Schema({
+  conversationId: { type: String, required: true, index: true },
+  senderId: { type: String, required: true }, // 'user' or Agent ID
+  text: { type: String },
+  attachment: {
+    name: String,
+    size: String,
+    type: String,
+    url: String
+  },
+  createdAt: { type: Date, default: Date.now }
+});
+const ChatMessage = mongoose.model('ChatMessage', ChatMessageSchema);
+
+const ConversationSchema = new Schema({
+  participants: [{ type: String }], // [userId, agentId]
+  participantsDetails: [{
+    id: String,
+    name: String,
+    avatar: String,
+    role: String
+  }],
+  lastMessage: String,
+  unreadCount: { type: Number, default: 0 },
+  updatedAt: { type: Date, default: Date.now }
+});
+const Conversation = mongoose.model('Conversation', ConversationSchema);
+
 // ==========================================
 // 4. GENERIC CRUD ROUTES (مولد الروابط التلقائي)
 // ==========================================
@@ -222,6 +251,25 @@ const createCrudRoutes = (model, routeName) => {
         const user = await model.findById(req.params.id).populate('favorites');
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.json(user.favorites);
+      } catch (err) { res.status(500).json({ error: err.message }); }
+    });
+
+    // POST Toggle Favorite
+    router.post('/:id/favorites', async (req, res) => {
+      try {
+        const { propertyId } = req.body;
+        const user = await model.findById(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const index = user.favorites.indexOf(propertyId);
+        if (index === -1) {
+          user.favorites.push(propertyId); // Add
+        } else {
+          user.favorites.splice(index, 1); // Remove
+        }
+        
+        await user.save();
+        res.json(user.favorites); // Return updated list of IDs
       } catch (err) { res.status(500).json({ error: err.message }); }
     });
   }
@@ -289,6 +337,142 @@ app.use('/api/reviews', createCrudRoutes(Review));
 app.use('/api/notifications', createCrudRoutes(Notification));
 app.use('/api/faqs', createCrudRoutes(Faq));
 
+// Chat Routes
+const chatRouter = express.Router();
+
+// Get User Conversations
+chatRouter.get('/', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) return res.status(400).json({ error: 'userId is required' });
+    
+    // Find conversations where participants array contains userId
+    const conversations = await Conversation.find({ participants: userId }).sort({ updatedAt: -1 });
+    res.json(conversations);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Get Messages for Conversation
+chatRouter.get('/:id/messages', async (req, res) => {
+  try {
+    const messages = await ChatMessage.find({ conversationId: req.params.id }).sort({ createdAt: 1 });
+    res.json(messages);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Send Message
+chatRouter.post('/:id/messages', async (req, res) => {
+  try {
+    const { text, senderId, attachment } = req.body;
+    const conversationId = req.params.id;
+    
+    // Create Message
+    const newMessage = new ChatMessage({ conversationId, senderId, text, attachment });
+    await newMessage.save();
+    
+    // Update Conversation
+    await Conversation.findByIdAndUpdate(conversationId, {
+      lastMessage: text || (attachment ? 'مرفق' : ''),
+      updatedAt: Date.now(),
+      $inc: { unreadCount: 1 } // Primitive unread logic
+    });
+    
+    res.status(201).json(newMessage);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Start New Conversation
+chatRouter.post('/', async (req, res) => {
+  try {
+    const { participants, participantsDetails, firstMessage } = req.body;
+    // Check existing
+    // Logic simplified: just create new for now or finding existing based on participants could be added
+    
+    const newConv = new Conversation({ participants, participantsDetails, lastMessage: firstMessage || '' });
+    await newConv.save();
+    res.status(201).json(newConv);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.use('/api/chat', chatRouter);
+
+const aiRouter = express.Router();
+
+aiRouter.post('/chat', async (req, res) => {
+  try {
+    const { message, session_id } = req.body;
+    
+    // 1. Simple Keyword Extraction (Rule-Based AI)
+    const query = {};
+    const filters = {};
+    const keywords = message.toLowerCase();
+
+    // Type Extraction
+    if (keywords.includes('apartment') || keywords.includes('flat') || keywords.includes('شقة')) filters.type = 'apartment';
+    if (keywords.includes('villa') || keywords.includes('فيلا')) filters.type = 'villa';
+    
+    // Purpose Extraction
+    if (keywords.includes('rent') || keywords.includes('إيجار')) query.type = 'rent';
+    if (keywords.includes('sale') || keywords.includes('buy') || keywords.includes('بيع') || keywords.includes('شراء')) query.type = 'sale';
+
+    // Location Extraction (Simple)
+    const locations = ['cairo', 'giza', 'new cairo', 'maadi', 'zamalek', 'nasr city', '6th of october', 'sheikh zayed'];
+    // Arabic Mapping could be added here
+    locations.forEach(loc => {
+      if (keywords.includes(loc)) query['location.city'] = { $regex: loc, $options: 'i' };
+    });
+
+    // Price Extraction (Very basic: finds numbers)
+    const numbers = message.match(/\d+/g);
+    if (numbers && numbers.length > 0) {
+      // Assume the largest number is price if > 1000
+      const potentialPrice = numbers.map(n => parseInt(n)).filter(n => n > 1000);
+      if (potentialPrice.length > 0) {
+        filters.priceTo = Math.max(...potentialPrice);
+        query.price = { $lte: filters.priceTo };
+      }
+    }
+
+    // 2. Database Search
+    // Combine filters if property schema uses them differently. 
+    // Schema: type (sale/rent), price, location.city. 
+    // Property Type is inside 'features' maybe? Or missing in schema? 
+    // Retaining 'type' as sale/rent based on schema seen earlier. 
+    // We'll search primarily by Price, Location, Type(Sale/Rent).
+    
+    const properties = await Property.find(query).limit(5);
+
+    // 3. Construct Response
+    let reply = '';
+    if (properties.length > 0) {
+      reply = `وجدنا ${properties.length} عقارات تطابق بحثك.`;
+    } else {
+      reply = 'عذراً، لم نجد عقارات تطابق طلبك بدقة، لكن يمكنك تجربة البحث في صفحة العقارات.';
+    }
+
+    // 4. Log interaction
+    const newLog = new AiLog({
+      question: message,
+      answer: reply,
+      context: properties.map(p => p._id),
+      provider: 'local' // Rule-based
+    });
+    await newLog.save();
+
+    res.json({
+      message: reply,
+      filters: filters,
+      properties: properties
+    });
+
+  } catch (err) {
+    console.error('AI Error:', err);
+    res.status(500).json({ error: 'AI processing failed' });
+  }
+});
+
+app.use('/api/ai', aiRouter);
+
 // AI Log Schema (New Feature)
 const AiLogSchema = new Schema({
   question: { type: String }, // User's question
@@ -315,6 +499,35 @@ const ContentSchema = new Schema({
 const Content = mongoose.model('Content', ContentSchema);
 app.use('/api/content', createCrudRoutes(Content));
 
+// Testimonial Schema
+const TestimonialSchema = new Schema({
+  name: { type: String, required: true },
+  role: { type: String }, // e.g. "Buyer", "Seller"
+  text: { type: String, required: true },
+  rating: { type: Number, default: 5 },
+  image: { type: String },
+  date: { type: Date, default: Date.now }
+});
+const Testimonial = mongoose.model('Testimonial', TestimonialSchema);
+app.use('/api/testimonials', createCrudRoutes(Testimonial));
+
+// Blog Schema
+const BlogPostSchema = new Schema({
+  title: { type: String, required: true },
+  excerpt: { type: String, required: true },
+  content: { type: String },
+  image: { type: String },
+  author: { type: String },
+  authorImage: { type: String },
+  authorTitle: { type: String },
+  category: { type: String },
+  views: { type: String, default: '0' },
+  readTime: { type: String },
+  date: { type: Date, default: Date.now }
+});
+const BlogPost = mongoose.model('BlogPost', BlogPostSchema);
+app.use('/api/posts', createCrudRoutes(BlogPost));
+
 // Seed Default Content if Empty
 const seedContent = async () => {
   try {
@@ -335,10 +548,87 @@ const seedContent = async () => {
         // Team (Sample)
         { type: 'team', title: 'أحمد عرفه', subtitle: 'Frontend Engineer', image: './Ahmed_Arafa.jpg', order: 1 },
         { type: 'team', title: 'عبد الرحمن عطية', subtitle: 'AI Engineer', image: './Abdul_Rahman_Atti.jpeg', order: 2 },
-        // ... (can add others via API later)
       ];
       await Content.insertMany(defaultContent);
       console.log('✅ Default content seeded successfully');
+    }
+
+    // Seed Testimonials
+    const testimonialCount = await Testimonial.countDocuments();
+    if (testimonialCount === 0) {
+      console.log('🌱 Seeding default testimonials...');
+      await Testimonial.insertMany([
+        {
+          name: 'حسن مصطفى',
+          role: 'مشتري',
+          date: new Date('2023-08-15'),
+          rating: 5,
+          text: "تجربة البحث بالذكاء الاصطناعي كانت مذهلة! وصفت الشقة التي أحلم بها ووجد لي النظام خيارات ممتازة في ثوانٍ.",
+          image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop'
+        },
+        {
+          name: 'سلمى أحمد',
+          role: 'مستأجر',
+          date: new Date('2023-07-22'),
+          rating: 4.5,
+          text: "الوكيل الذي تواصلت معه كان محترفاً جداً ويعرف منطقة التجمع جيداً. شكراً Baytology.",
+          image: '/hijab_salma.png'
+        },
+        {
+          name: 'عمر خالد',
+          role: 'مستثمر',
+          date: new Date('2023-06-05'),
+          rating: 5,
+          text: "كنت قلقاً كوني مشتري لأول مرة، لكن الموقع سهل عليّ كل الخطوات من البحث وحتى التعاقد.",
+          image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&auto=format&fit=crop'
+        }
+      ]);
+      console.log('✅ Default testimonials seeded successfully');
+    }
+
+    // Seed Blog Posts
+    const postCount = await BlogPost.countDocuments();
+    if (postCount === 0) {
+      console.log('🌱 Seeding default blog posts...');
+      await BlogPost.insertMany([
+        {
+          title: 'كيف تختار عقارك الأول؟ نصائح للمبتدئين',
+          excerpt: 'شراء العقار الأول هو خطوة كبيرة. إليك أهم النصائح التي يجب عليك معرفتها قبل اتخاذ القرار لضمان استثمار ناجح.',
+          image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+          author: 'كريم محمد',
+          authorImage: 'https://i.pravatar.cc/150?u=a042581f4e29026024d',
+          authorTitle: 'مستشار عقاري',
+          date: new Date('2023-10-15'),
+          readTime: '5 دقائق',
+          category: 'نصائح للبائعين',
+          views: '1.2k'
+        },
+        {
+          title: 'تحليل سوق العقارات في التجمع الخامس 2024',
+          excerpt: 'نظرة شاملة على تطور أسعار المتر في التجمع الخامس وأهم المناطق الواعدة للاستثمار في الفترة القادمة.',
+          image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+          author: 'منى السيد',
+          authorImage: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
+          authorTitle: 'محلل اقتصادي',
+          date: new Date('2023-10-10'),
+          readTime: '7 دقائق',
+          category: 'أخبار السوق',
+          views: '850'
+        },
+        {
+          title: 'أحدث صيحات التصميم الداخلي للشقق الصغيرة',
+          excerpt: 'استغل كل شبر في شقتك مع هذه الأفكار الذكية للتصميم والديكور التي تجعل المساحات الصغيرة تبدو أكبر.',
+          image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+          author: 'ليلى حسن',
+          authorImage: 'https://i.pravatar.cc/150?u=a04258114e29026302d',
+          authorTitle: 'مهندسة ديكور',
+          date: new Date('2023-10-05'),
+          readTime: '4 دقائق',
+          category: 'تصميم وديكور',
+          views: '2.1k'
+        }
+      ]);
+      console.log('✅ Default blog posts seeded successfully');
     }
   } catch (err) {
     console.error('❌ Error seeding content:', err);

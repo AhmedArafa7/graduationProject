@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { OfflineAiService } from '../offline-ai.service';
+import { environment } from '../../../../environments/environment';
 
 // واجهة الرد من API
 export interface ChatResponse {
@@ -37,8 +38,8 @@ export class ChatbotService {
   private http = inject(HttpClient);
   private offlineAi = inject(OfflineAiService);
   
-  // API URL - Empty to prevent "Local Network Permissions" prompt in production
-  private readonly API_URL = ''; // Was 'http://localhost:8000';
+  // API URL - Connected to Real Backend
+  private readonly API_URL = `${environment.apiUrl}/ai`; // Real Backend Connection
   
   // Session ID فريد لكل جلسة
   readonly sessionId = 'session_' + Date.now();
@@ -81,7 +82,9 @@ export class ChatbotService {
   async checkConnection(): Promise<boolean> {
     try {
       if (!this.API_URL) return false;
-      const response = await fetch(this.API_URL + '/');
+      // Fetch uses only base URL part if needed, or we just trust it for now.
+      // Simplification: Check root API which we know exists
+      const response = await fetch(`${environment.apiUrl}/`);
       if (response.ok) {
         this.isConnected.set(true);
         return true;

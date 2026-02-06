@@ -1,4 +1,7 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { UserService } from './user.service';
+import { environment } from '../../../environments/environment';
 
 export interface SearchFilters {
   type: string;
@@ -18,6 +21,9 @@ export interface SearchFilters {
   providedIn: 'root'
 })
 export class GlobalStateService {
+  private http = inject(HttpClient);
+  private userService = inject(UserService);
+
   // 1. حالة المفضلة (مشتركة في كل التطبيق)
   // نقوم بحفظها في localStorage لتبقى حتى بعد تحديث الصفحة
   private storedFavs = typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('favorites') || '[]') : [];
@@ -41,6 +47,9 @@ export class GlobalStateService {
 
   // دوال المفضلة
   toggleFavorite(id: string) {
+    const userId = this.userService.userData()._id;
+
+    // 1. Optimistic Update (Immediate UI feedback)
     this.favorites.update(current => {
       const newFavs = current.includes(id) 
         ? current.filter(favId => favId !== id) 
@@ -51,6 +60,18 @@ export class GlobalStateService {
       }
       return newFavs;
     });
+
+    // 2. Persist to Backend if logged in
+    if (userId) {
+      this.http.post<string[]>(`${environment.apiUrl}/users/${userId}/favorites`, { propertyId: id })
+        .subscribe({
+          next: (updatedFavorites) => {
+             // Optional: Sync from backend to be sure
+             // this.favorites.set(updatedFavorites); 
+          },
+          error: (err) => console.error('Failed to sync favorite', err)
+        });
+    }
   }
 
   isFavorite(id: string) {

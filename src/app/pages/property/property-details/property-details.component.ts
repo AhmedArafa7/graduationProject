@@ -139,7 +139,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     const chatProperty = this.chatbotService.selectedProperty();
     
     if (chatProperty) {
-      // عرض بيانات العقار من الشات بوت (Mapping needs to be resilient)
+      // عرض بيانات العقار من الشات بوت
       this.property = {
         id: chatProperty.id?.toString() || id,
         title: `${chatProperty.type || 'عقار'} في ${chatProperty.city || ''}`,
@@ -166,48 +166,51 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
            name: 'System Agent', phone: '123456', avatar: '/assets/images/logo.png', title: 'AI Assistant', experience: '5', deals: 50, rating: 4.8
         }
       };
-      // مسح العقار المختار بعد العرض
       this.chatbotService.clearSelectedProperty();
-    } else {
-      // 0. البحث في AgentPropertiesService أولاً (العقارات المضافة من الوكيل)
-      const agentProperty = this.agentPropertiesService.getPropertyById(id);
-      
-      if (agentProperty) {
-        // تحويل بيانات AgentProperty لصيغة هذا الـ componentViewModel
-        const amenitiesList: { icon: string; label: string }[] = [];
-        if (agentProperty.amenities) {
-          if (agentProperty.amenities.pool) amenitiesList.push({ icon: 'pool', label: 'مسبح' });
-          if (agentProperty.amenities.garage) amenitiesList.push({ icon: 'local_parking', label: 'جراج' });
-          if (agentProperty.amenities.gym) amenitiesList.push({ icon: 'fitness_center', label: 'صالة رياضية' });
-          if (agentProperty.amenities.garden) amenitiesList.push({ icon: 'park', label: 'حديقة' });
-          if (agentProperty.amenities.balcony) amenitiesList.push({ icon: 'balcony', label: 'بلكونة' });
-          if (agentProperty.amenities.security) amenitiesList.push({ icon: 'security', label: 'أمن 24/7' });
-          if (agentProperty.amenities.ac) amenitiesList.push({ icon: 'air', label: 'تكييف' });
-          if (agentProperty.amenities.petFriendly) amenitiesList.push({ icon: 'pets', label: 'يسمح بالحيوانات' });
-        }
-        
-        this.property = {
-          id: agentProperty.id,
-          title: agentProperty.address, // Title wasn't explicit in AgentProperty, using Address or Type
-          location: agentProperty.address,
-          type: agentProperty.status === 'للإيجار' ? 'إيجار' : 'بيع',
-          refCode: `AGT-${agentProperty.id}`,
-          price: agentProperty.priceValue ?? 0,
-          area: agentProperty.area ?? 0,
-          beds: agentProperty.bedrooms ?? 0,
-          baths: agentProperty.bathrooms ?? 0,
-          floor: agentProperty.floor !== undefined && agentProperty.floor !== null ? `الطابق ${agentProperty.floor}` : 'غير محدد',
-          description: agentProperty.description || 'لا يوجد وصف',
-          amenities: amenitiesList.length > 0 ? amenitiesList : [{ icon: 'home', label: 'عقار سكني' }],
-          images: agentProperty.images && agentProperty.images.length > 0 
-            ? agentProperty.images 
-            : [agentProperty.image],
-          agent: {
-             name: 'الوكيل الحالي', phone: '', avatar: '/assets/images/user-placeholder.png', title: 'مالك العقار', experience: '2', deals: 10, rating: 4.5
+      this.updateUI();
+      return;
+    }
+
+    // 1. Try AgentPropertiesService (Async)
+    this.agentPropertiesService.getPropertyById(id).subscribe({
+      next: (agentProperty) => {
+        if (agentProperty) {
+          // تحويل بيانات AgentProperty لصيغة هذا الـ componentViewModel
+          const amenitiesList: { icon: string; label: string }[] = [];
+          if (agentProperty.amenities) {
+            if (agentProperty.amenities.pool) amenitiesList.push({ icon: 'pool', label: 'مسبح' });
+            if (agentProperty.amenities.garage) amenitiesList.push({ icon: 'local_parking', label: 'جراج' });
+            if (agentProperty.amenities.gym) amenitiesList.push({ icon: 'fitness_center', label: 'صالة رياضية' });
+            if (agentProperty.amenities.garden) amenitiesList.push({ icon: 'park', label: 'حديقة' });
+            if (agentProperty.amenities.balcony) amenitiesList.push({ icon: 'balcony', label: 'بلكونة' });
+            if (agentProperty.amenities.security) amenitiesList.push({ icon: 'security', label: 'أمن 24/7' });
+            if (agentProperty.amenities.ac) amenitiesList.push({ icon: 'air', label: 'تكييف' });
+            if (agentProperty.amenities.petFriendly) amenitiesList.push({ icon: 'pets', label: 'يسمح بالحيوانات' });
           }
-        };
-      } else {
-        // 1. البحث في PropertyService (Consolidated Source)
+          
+          this.property = {
+            id: agentProperty.id,
+            title: agentProperty.address, 
+            location: agentProperty.address,
+            type: agentProperty.status === 'للإيجار' ? 'إيجار' : 'بيع',
+            refCode: `AGT-${agentProperty.id}`,
+            price: agentProperty.priceValue ?? 0,
+            area: agentProperty.area ?? 0,
+            beds: agentProperty.bedrooms ?? 0,
+            baths: agentProperty.bathrooms ?? 0,
+            floor: agentProperty.floor !== undefined && agentProperty.floor !== null ? `الطابق ${agentProperty.floor}` : 'غير محدد',
+            description: agentProperty.description || 'لا يوجد وصف',
+            amenities: amenitiesList.length > 0 ? amenitiesList : [{ icon: 'home', label: 'عقار سكني' }],
+            images: agentProperty.images && agentProperty.images.length > 0 ? agentProperty.images : [agentProperty.image],
+            agent: {
+               name: 'الوكيل الحالي', phone: '', avatar: '/assets/images/user-placeholder.png', title: 'مالك العقار', experience: '2', deals: 10, rating: 4.5
+            }
+          };
+          this.updateUI();
+        }
+      },
+      error: () => {
+        // 2. البحث في PropertyService (Consolidated Source) كـ fallback
         const serviceProperty = this.propertyService.getPropertyById(id);
         
         if (serviceProperty) {
@@ -225,27 +228,27 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
             description: serviceProperty.description,
             amenities: serviceProperty.amenities || serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
             images: serviceProperty.images,
-            agent: serviceProperty.agent // Ensure Agent interface matches template requirements
+            agent: serviceProperty.agent
           };
+          this.updateUI();
         } else {
            // Fallback if ID not found, load first one (Safeguard)
            const first = this.propertyService.properties()[0];
-           if (first) {
-             this.loadProperty(first._id); // Recursively load first using _id
-             return;
+           if (first && first._id !== id) {
+             this.loadProperty(first._id);
            }
         }
       }
-    }
+    });
+  }
 
-    // تحديث الحالة
+  updateUI() {
     if (this.property) {
       this.titleService.setTitle(`${this.property.title} - Baytology`);
       this.activeImage.set(this.property.images[0]);
-      this.mortgagePrice.set(this.property.price); // تحديث سعر الحاسبة
-      this.isReported.set(false); // إعادة تعيين زر الإبلاغ
+      this.mortgagePrice.set(this.property.price);
+      this.isReported.set(false);
       
-      // تحديث العقارات المشابهة (استبعاد الحالي البحث في الخدمة)
       const allProps = this.propertyService.properties();
       this.displayedSimilarProperties = allProps
         .filter(p => p._id !== this.property.id)
@@ -260,6 +263,10 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
             baths: p.bathrooms,
             area: p.area
         }));
+        
+      if (isPlatformBrowser(this.platformId)) {
+        setTimeout(() => this.initLocationMap(), 500);
+      }
     }
   }
 
@@ -383,16 +390,26 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  // فتح محادثة مع الوكيل
+    // فتح محادثة مع الوكيل
   openChatWithAgent() {
     if (!this.property.agent) return;
 
-    const conversationId = this.messagesService.startChatWithAgent(
+    // Prefer agent ID from backend object, fallback to mock logic if needed
+    const agentId = (this.property.agent as any)._id || (this.property.agent as any).id || 'system';
+
+    this.messagesService.startChatWithAgent(
       this.property.agent.name,
       this.property.agent.avatar,
-      this.property.title
-    );
-    this.router.navigate(['/messages'], { queryParams: { chat: conversationId } });
+      agentId
+    ).subscribe({
+      next: (conversationId) => {
+        this.router.navigate(['/messages'], { queryParams: { chat: conversationId } });
+      },
+      error: (err) => {
+        this.toast.show('يجب تسجيل الدخول لبدء المحادثة', 'error');
+        console.error(err);
+      }
+    });
   }
 
   shareProperty() {

@@ -1,5 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { PropertyService, Property } from './property.service';
+import { GlobalStateService } from './global-state.service';
 
 export interface FavoriteProperty {
   id: string; // Changed to string
@@ -15,21 +16,23 @@ export interface FavoriteProperty {
 @Injectable({
   providedIn: 'root'
 })
+@Injectable({
+  providedIn: 'root'
+})
 export class FavoritesService {
   private propertyService = inject(PropertyService);
+  private globalState = inject(GlobalStateService);
   
-  // استخدام نفس الـ key الموجود في GlobalStateService
-  private storedFavs = typeof localStorage !== 'undefined' 
-    ? JSON.parse(localStorage.getItem('favorites') || '[]') 
-    : [];
-  
-  // IDs المفضلة
-  private favoriteIds = signal<string[]>(this.storedFavs);
+  // IDs المفضلة - نأخذها من GlobalState مباشرة
+  private favoriteIds = this.globalState.favorites;
 
   // العقارات المفضلة (computed من PropertyService)
   favorites = computed(() => {
     const ids = this.favoriteIds();
-    return this.propertyService.properties()
+    // Ensure we have properties loaded
+    const allProperties = this.propertyService.properties();
+    
+    return allProperties
       .filter(p => ids.includes(p._id))
       .map(p => this.mapToFavorite(p));
   });
@@ -39,32 +42,27 @@ export class FavoritesService {
 
   // هل العقار في المفضلة؟
   isFavorite(propertyId: string): boolean {
-    return this.favoriteIds().includes(propertyId);
+    return this.globalState.isFavorite(propertyId);
   }
 
   // إضافة للمفضلة
   addToFavorites(propertyId: string) {
     if (!this.isFavorite(propertyId)) {
-      this.favoriteIds.update(ids => [...ids, propertyId]);
-      this.saveToStorage();
+      this.globalState.toggleFavorite(propertyId);
     }
   }
 
   // إزالة من المفضلة
   removeFromFavorites(propertyId: string) {
-    this.favoriteIds.update(ids => ids.filter(id => id !== propertyId));
-    this.saveToStorage();
+    if (this.isFavorite(propertyId)) {
+      this.globalState.toggleFavorite(propertyId);
+    }
   }
 
   // Toggle المفضلة
   toggleFavorite(propertyId: string): boolean {
-    if (this.isFavorite(propertyId)) {
-      this.removeFromFavorites(propertyId);
-      return false;
-    } else {
-      this.addToFavorites(propertyId);
-      return true;
-    }
+    this.globalState.toggleFavorite(propertyId);
+    return this.isFavorite(propertyId); // Return new state
   }
 
   // جلب كل الـ IDs المفضلة
@@ -76,7 +74,7 @@ export class FavoritesService {
   private mapToFavorite(p: Property): FavoriteProperty {
     return {
       id: p._id,
-      image: p.images[0],
+      image: p.coverImage || (p.images && p.images[0]) || '',
       price: p.price,
       address: `${p.location.address || ''}، ${p.location.city || ''}`,
       beds: p.bedrooms,
@@ -84,14 +82,5 @@ export class FavoritesService {
       area: p.area,
       type: p.type
     };
-  }
-
-  // حفظ في localStorage - نفس الـ key المستخدم في GlobalStateService
-  private saveToStorage() {
-    try {
-      localStorage.setItem('favorites', JSON.stringify(this.favoriteIds()));
-    } catch (e) {
-      console.warn('Could not save favorites to localStorage');
-    }
   }
 }

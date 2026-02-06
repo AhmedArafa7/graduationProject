@@ -41,7 +41,8 @@ export class MessagesComponent implements OnInit {
       const convs = this.conversations();
       
       if (chatId) {
-        const targetConv = convs.find(c => c.id === Number(chatId));
+        // Compare loosely or as strings
+        const targetConv = convs.find(c => String(c.id) === String(chatId));
         if (targetConv) {
           this.selectConversation(targetConv);
           return;
@@ -68,7 +69,7 @@ export class MessagesComponent implements OnInit {
     this.selectedConversation.set(conv);
     this.messagesService.markAsRead(conv.id);
     // تحديث المحادثة المختارة بعد تعليمها كمقروءة
-    const updated = this.conversations().find(c => c.id === conv.id);
+    const updated = this.conversations().find(c => String(c.id) === String(conv.id));
     if (updated) {
       this.selectedConversation.set(updated);
     }
@@ -81,21 +82,11 @@ export class MessagesComponent implements OnInit {
     const conv = this.selectedConversation();
     if (!text || !conv) return;
 
-    const newMsg: Message = {
-      id: Date.now(),
-      text,
-      sender: 'user',
-      time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    this.messagesService.addMessage(conv.id, newMsg);
+    // Use service to send
+    this.messagesService.sendMessage(String(conv.id), text);
     
-    // تحديث المحادثة المختارة
-    const updatedConv = this.conversations().find(c => c.id === conv.id);
-    if (updatedConv) {
-      this.selectedConversation.set(updatedConv);
-    }
-
+    // Service handles optimistic update
+    
     this.newMessage.set('');
   }
 
@@ -117,31 +108,16 @@ export class MessagesComponent implements OnInit {
       const fileType = this.getFileType(file.name);
       const fileSize = this.formatFileSize(file.size);
       
-      let fileUrl: string | undefined;
-      if (fileType === 'image') {
-        fileUrl = URL.createObjectURL(file);
-      }
-
-      const newMsg: Message = {
-        id: Date.now(),
-        text: '',
-        sender: 'user',
-        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-        attachment: {
-          name: file.name,
-          size: fileSize,
-          type: fileType,
-          url: fileUrl
-        }
+      // For demo purposes, we can't easily upload real files to this simple backend without Multer.
+      // We will simulate it by sending metadata.
+      const attachment = {
+        name: file.name,
+        size: fileSize,
+        type: fileType,
+        url: '' // In real app, upload first then get URL
       };
 
-      this.messagesService.addMessage(conv.id, newMsg);
-
-      const updatedConv = this.conversations().find(c => c.id === conv.id);
-      if (updatedConv) {
-        this.selectedConversation.set(updatedConv);
-      }
-
+      this.messagesService.sendMessage(String(conv.id), '', attachment);
       input.value = '';
     }
   }
