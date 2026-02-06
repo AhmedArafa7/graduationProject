@@ -294,7 +294,8 @@ app.post('/api/auth/login', async (req, res) => {
     const { password: _, ...userData } = user.toObject();
     res.json(userData);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Login Error:', err);
+    res.status(500).json({ error: 'Login failed', details: err.message });
   }
 });
 
@@ -306,11 +307,16 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already exists' });
     }
     const newUser = new User(req.body);
-    const savedUser = await newUser.save();
+    const savedUser = await newUser.save(); // This will fail if DB is not connected
     const { password: _, ...userData } = savedUser.toObject();
     res.status(201).json(userData);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Registration Error:', err);
+    res.status(500).json({ 
+      error: 'Registration failed', 
+      details: err.message,
+      code: err.code 
+    });
   }
 });
 

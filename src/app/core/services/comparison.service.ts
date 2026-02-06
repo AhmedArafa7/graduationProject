@@ -49,7 +49,7 @@ export class ComparisonService {
     const result: ComparisonResult = {
       winnerId: winner.id,
       analysis: {},
-      summary: ` بناءً على التحليل، ${winner.title} هو الخيار الأفضل لأنه يجمع بين السعر والمساحة.`
+      summary: this.generateFriendlySummary(winner, scoredProperties)
     };
 
     scoredProperties.forEach(p => {
@@ -61,6 +61,33 @@ export class ComparisonService {
     });
 
     return result;
+  }
+
+  private generateFriendlySummary(winner: any, all: any[]): string {
+    // Strategy: "Friendly Expert" Tone
+    // "If you want X, go with A. If you want Y, go with B."
+    
+    // Find runner up
+    const runnerUp = all.filter(p => p.id !== winner.id).sort((a, b) => b.score - a.score)[0];
+    
+    if (!runnerUp) {
+      return `بصراحة، ${winner.title} هو الخيار الكسبان باكتساح لأن سعره ومواصفاته هما الأفضل.`;
+    }
+
+    const priceWinner = all.reduce((min, p) => this.parsePrice(p.price) < this.parsePrice(min.price) ? p : min);
+    const areaWinner = all.reduce((max, p) => this.parseArea(p.area) > this.parseArea(max.area) ? p : max);
+
+    let summary = `بص، لو بتدور على الصفقة المتكاملة، فـ **${winner.title}** هو اختيارنا ليك. `;
+    
+    if (priceWinner.id !== winner.id) {
+      summary += `بس لو ميزانيتك محدودة وعايز توفر، بص على **${priceWinner.title}** لأنه الأرخص. `;
+    }
+
+    if (areaWinner.id !== winner.id && areaWinner.id !== priceWinner.id) {
+      summary += `ولو المساحة هي أهم حاجة عندك، يبقى **${areaWinner.title}** هو اللي هيريحك.`;
+    }
+
+    return summary;
   }
 
   private scoreProperty(p: Property, all: Property[]): { id: number | string, score: number, pros: string[], cons: string[], title: string } {

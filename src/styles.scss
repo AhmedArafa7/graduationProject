@@ -8,3 +8,8 @@ body {
   font-family: 'Cairo', 'Inter', sans-serif;
 }
 
+/* Hide Edge/IE default password reveal button */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}

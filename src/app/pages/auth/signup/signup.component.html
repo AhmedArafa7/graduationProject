@@ -4,8 +4,17 @@
     <div class="w-full max-w-md py-8">
       
       <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-text-primary dark:text-white mb-3">إنشاء حساب جديد</h2>
-        <p class="text-text-secondary dark:text-gray-400">ابدأ رحلتك العقارية معنا اليوم</p>
+        @if (userType() === 'agent') {
+          <h2 class="text-3xl font-bold text-text-primary dark:text-white mb-3">عقارك يسوى كام النهاردة؟</h2>
+          <p class="text-text-secondary dark:text-gray-400 max-w-xs mx-auto text-sm leading-relaxed">
+            التسعير الخاطئ هو السبب رقم 1 لعدم بيع العقارات.<br>اعرف السعر العادل مجاناً.
+          </p>
+        } @else {
+          <h2 class="text-3xl font-bold text-text-primary dark:text-white mb-3">لا تشتري قبل أن تستشيرنا</h2>
+          <p class="text-text-secondary dark:text-gray-400 max-w-xs mx-auto text-sm leading-relaxed">
+            وفرنا لعملائنا متوسط 15% من سعر العقار من خلال كشف القيمة الحقيقية.
+          </p>
+        }
       </div>
 
       <div class="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8 border border-border-color dark:border-gray-700">
