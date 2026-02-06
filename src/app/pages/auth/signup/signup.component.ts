@@ -156,17 +156,20 @@ export class SignupComponent {
         this.toast.show('تم إنشاء الحساب بنجاح! جاري تحويلك...', 'success');
         this.router.navigate(['/profile']);
       },
-      error: () => {
+      error: (err: any) => {
         this.isSubmitting.set(false);
-        this.toast.show('حدث خطأ أثناء التسجيل', 'error');
+        // Extract error message from backend response { error: "message" }
+        const msg = err.error?.error || 'حدث خطأ أثناء التسجيل';
+        this.toast.show(msg, 'error');
       }
     });
   }
 
   socialLogin(provider: string) {
     this.toast.show(`جاري التسجيل بواسطة ${provider}...`, 'info');
-    // محاكاة توجيه خارجي
+    // محاكاة تسجيل الدخول وتحديث الحالة
     setTimeout(() => {
+      this.userService.mockSocialLogin(provider);
       this.router.navigate(['/']);
     }, 1000);
   }

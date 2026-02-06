@@ -61,8 +61,9 @@ export class LoginComponent {
 
   socialLogin(provider: string) {
     this.toast.show(`جاري التحويل لصفحة تسجيل الدخول عبر ${provider}...`, 'info');
-    // محاكاة توجيه خارجي
+    // محاكاة تسجيل الدخول وتحديث الحالة
     setTimeout(() => {
+      this.userService.mockSocialLogin(provider);
       this.router.navigate(['/']);
     }, 1000);
   }

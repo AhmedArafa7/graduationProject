@@ -547,7 +547,6 @@ const seedContent = async () => {
 
         // Team (Sample)
         { type: 'team', title: 'أحمد عرفه', subtitle: 'Frontend Engineer', image: './Ahmed_Arafa.jpg', order: 1 },
-        { type: 'team', title: 'عبد الرحمن عطية', subtitle: 'AI Engineer', image: './Abdul_Rahman_Atti.jpeg', order: 2 },
       ];
       await Content.insertMany(defaultContent);
       console.log('✅ Default content seeded successfully');

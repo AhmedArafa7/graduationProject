@@ -140,6 +140,20 @@ export class UserService {
     return this.http.get<any[]>(`${this.apiUrl}/${user._id}/favorites`);
   }
 
+  // محاكاة تسجيل الدخول الاجتماعي
+  mockSocialLogin(provider: string) {
+    const mockUser: UserData = {
+      _id: 'mock-social-id',
+      firstName: `${provider}`,
+      lastName: 'User',
+      email: `${provider.toLowerCase()}@example.com`,
+      phone: '01000000000',
+      profileImage: 'https://i.pravatar.cc/300?u=social',
+      userType: 'buyer'
+    };
+    this.setSession(mockUser);
+  }
+
   logout() {
     this.userData.set({
       firstName: '',
