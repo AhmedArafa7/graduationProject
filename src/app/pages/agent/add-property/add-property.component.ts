@@ -6,6 +6,7 @@ import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sideb
 import { ToastService } from '../../../core/services/toast.service';
 import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { NgxImageCompressService as ImageCompressService } from 'ngx-image-compress';
 import * as L from 'leaflet';
 
 interface RoomDimension {
@@ -294,25 +295,41 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  private imageCompress = inject(ImageCompressService);
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       Array.from(input.files).forEach(file => {
+        // Validation check
+        if (!file.type.startsWith('image/')) return;
+        
         const reader = new FileReader();
         reader.onload = (e) => {
-          this.form.images.push({
+          const originalImage = e.target?.result as string;
+          
+          // Add as 'Analyzing' placeholder first (UX)
+          const imageEntry = {
             file,
-            preview: e.target?.result as string,
-            status: 'جاري التحليل...',
+            preview: originalImage, // Show original while compressing
+            status: 'جاري الضغط والتحليل...',
             altText: ''
-          });
-          setTimeout(() => {
-            const img = this.form.images.find(i => i.file === file);
-            if (img) {
-              img.status = 'مكتمل';
-              img.altText = `صورة ${file.name.split('.')[0]} - غرفة واسعة ومضيئة`;
+          };
+          this.form.images.push(imageEntry);
+
+          // Compress
+          this.imageCompress.compressFile(originalImage, -1, 50, 50).then(
+            (compressedImage: string) => {
+              // Update with compressed version
+              imageEntry.preview = compressedImage;
+              
+              // Simulate AI Analysis (keep existing timeout logic for UX)
+              setTimeout(() => {
+                imageEntry.status = 'مكتمل';
+                imageEntry.altText = `صورة ${file.name.split('.')[0]} - غرفة واسعة ومضيئة`;
+              }, 1500);
             }
-          }, 2000);
+          );
         };
         reader.readAsDataURL(file);
       });

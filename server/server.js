@@ -16,6 +16,24 @@ mongoose.connect(MONGO_URI)
   .then(() => console.log('✅ Connected to MongoDB (Baytology DB)'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
+/* 
+  ========================================================================================
+  🚀 FUTURE PLAN: CLOUD STORAGE MIGRATION (LOCKED PLAN)
+  ========================================================================================
+  Currently, we are using "Client-side Compression" (ngx-image-compress) to keep image sizes 
+  under 100KB and storing them as Base64 strings in MongoDB. This is optimal for MVP cost-saving.
+
+  TRIGGER FOR CHANGE:
+  When database size exceeds 4GB or response times slow down significantly.
+
+  ACTION PLAN:
+  1. Create account on Cloudinary or AWS S3.
+  2. Update backend to accept files (using Multer).
+  3. Upload file to Cloud -> Get URL -> Save URL in MongoDB (instead of Base64).
+  4. Write a script to migrate existing Base64 strings to Cloud URLs.
+  ========================================================================================
+*/
+
 // ==========================================
 // 3. تعريف الـ SCHEMAS (من الملف المرفق)
 // ==========================================

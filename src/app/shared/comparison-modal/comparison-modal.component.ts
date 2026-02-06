@@ -58,4 +58,9 @@ export class ComparisonModalComponent implements OnInit {
   closeModal() {
     this.close.emit();
   }
+
+  // Helper for strict template checking
+  getAnalysis(res: ComparisonResult, id: string | number) {
+    return res.analysis[id];
+  }
 }

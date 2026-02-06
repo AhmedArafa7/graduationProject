@@ -4,6 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { UserService } from '../../../core/services/user.service';
+import { NgxImageCompressService as ImageCompressService } from 'ngx-image-compress';
 
 @Component({
   selector: 'app-signup',
@@ -60,6 +61,10 @@ export class SignupComponent {
     fileInput.click();
   }
 
+  private imageCompress = inject(ImageCompressService);
+
+  // ... (existing code)
+
   onImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
@@ -71,15 +76,22 @@ export class SignupComponent {
         return;
       }
       
-      // التحقق من حجم الملف (الحد الأقصى 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        this.toast.show('حجم الصورة يجب أن يكون أقل من 5 ميجابايت', 'error');
-        return;
-      }
-
+      // قراءة الملف وضغطه
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
-        this.profileImage.set(e.target?.result as string);
+        const image = e.target?.result as string;
+        
+        // ضغط الصورة: Ratio 50%, Quality 50% (تقليل الحجم للنصف تقريباً)
+        this.imageCompress.compressFile(image, -1, 50, 50).then(
+          (result: string) => {
+            this.profileImage.set(result);
+            
+            // حساب حجم الصورة الجديدة للمقارنة (اختياري)
+            const oldSize = (image.length * 3) / 4 / 1024;
+            const newSize = (result.length * 3) / 4 / 1024;
+            console.log(`Image compressed from ${oldSize.toFixed(2)}KB to ${newSize.toFixed(2)}KB`);
+          }
+        );
       };
       reader.readAsDataURL(file);
     }

@@ -30,7 +30,7 @@
               @for (prop of properties; track prop.id) {
                 <th class="p-4 min-w-[200px]">
                   <div class="flex flex-col items-center gap-2">
-                    <img [src]="prop.coverImage || prop.images?.[0] || prop.image" class="w-full h-32 object-cover rounded-lg shadow-sm" [alt]="prop.title">
+                    <img [src]="prop.coverImage || prop.images?.[0] || prop.image || ''" class="w-full h-32 object-cover rounded-lg shadow-sm" [alt]="prop.title">
                     <span class="font-bold text-text-primary dark:text-white text-base text-center line-clamp-1">{{ prop.title }}</span>
                     @if (result()?.winnerId === prop.id || result()?.winnerId === prop._id) {
                       <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold border border-green-200 flex items-center gap-1">
@@ -91,7 +91,7 @@
 
               <!-- Pros -->
               <div class="space-y-2 mb-4">
-                @for (pro of res.analysis[prop.id]?.pros; track pro) {
+                @for (pro of getAnalysis(res, prop.id).pros; track pro) {
                   <div class="flex items-start gap-2 text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg">
                     <span class="material-symbols-outlined text-base">check_circle</span>
                     {{ pro }}
@@ -101,7 +101,7 @@
 
               <!-- Cons -->
               <div class="space-y-2">
-                @for (con of res.analysis[prop.id]?.cons; track con) {
+                @for (con of getAnalysis(res, prop.id).cons; track con) {
                   <div class="flex items-start gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
                     <span class="material-symbols-outlined text-base">warning</span>
                     {{ con }}
@@ -112,7 +112,7 @@
               <!-- Score -->
               <div class="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-600 pt-4">
                 <span class="text-sm font-bold text-gray-500">تقييم الذكاء الاصطناعي</span>
-                <span class="text-xl font-black text-primary">{{ res.analysis[prop.id]?.score }}%</span>
+                <span class="text-xl font-black text-primary">{{ getAnalysis(res, prop.id).score }}%</span>
               </div>
             </div>
           }
