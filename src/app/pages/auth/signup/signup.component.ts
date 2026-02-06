@@ -110,7 +110,13 @@ export class SignupComponent {
       return;
     }
 
-    // 4. التحقق من الشروط
+    // 4. التحقق من طول كلمة المرور (جديد للإنتاج)
+    if (this.password().length < 6) {
+      this.toast.show('كلمة المرور قصيرة جداً (6 أحرف على الأقل)', 'error');
+      return;
+    }
+
+    // 5. التحقق من الشروط
     if (!this.agreeTerms()) {
       this.toast.show('يجب الموافقة على الشروط والأحكام', 'error');
       return;

@@ -1,5 +1,5 @@
 {
-  "name": "graduation-project",
+  "name": "baytology",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:graduationProject": "node dist/graduation-project/server/server.mjs"
+    "serve:ssr:baytology": "node dist/baytology/server/server.mjs"
   },
   "private": true,
   "dependencies": {

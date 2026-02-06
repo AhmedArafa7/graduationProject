@@ -9,5 +9,5 @@ import { ToastComponent } from './shared/toast/toast.component';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'graduationProject';
+  title = 'baytology';
 }

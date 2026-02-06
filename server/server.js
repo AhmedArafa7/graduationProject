@@ -25,9 +25,18 @@ const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phone: { type: String, required: true },
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true, 
+    match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address.'] 
+  },
+  password: { type: String, required: true, minlength: [6, 'Password must be at least 6 characters.'] },
+  phone: { 
+    type: String, 
+    required: true, 
+    match: [/^01[0125][0-9]{8}$/, 'Please use a valid Egyptian phone number (01xxxxxxxxx).'] 
+  },
   city: { type: String }, // For filtering agents by location
   address: { type: String },
   profileImage: { type: String },
@@ -51,9 +60,9 @@ const UserSchema = new Schema({
 const PropertySchema = new Schema({
   title: { type: String, required: true, index: true },
   description: { type: String, required: true },
-  price: { type: Number, required: true, index: true },
+  price: { type: Number, required: true, index: true, min: [0, 'Price must be positive'] },
   currency: { type: String, default: 'EGP' },
-  area: { type: Number, required: true },
+  area: { type: Number, required: true, min: [0, 'Area must be positive'] },
   location: {
     city: { type: String, required: true, index: true },
     address: { type: String, required: true },
