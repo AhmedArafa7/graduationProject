@@ -9,12 +9,52 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // 2. الاتصال بقاعدة البيانات (محلياً أو Atlas)
-// غير الرابط إذا كنت تستخدم MongoDB Atlas
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://ahmed:TGZhPF75jhb0gZjS@cluster0.h1s04.mongodb.net/?appName=Cluster0'; 
 
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('✅ Connected to MongoDB (Baytology DB)'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false, // تعطي خطأ فورياً إذا لم يكن هناك اتصال
+    };
+
+    cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
+      console.log('✅ Connected to MongoDB (Baytology DB)');
+      return mongoose;
+    });
+  }
+  
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
+}
+
+// Middleware لضمان الاتصال قبل كل طلب
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState === 1) {
+    return next();
+  }
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    res.status(500).json({ error: 'Database connection failed', details: error.message });
+  }
+});
 
 /* 
   ========================================================================================
