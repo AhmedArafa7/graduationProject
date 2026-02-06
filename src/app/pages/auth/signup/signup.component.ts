@@ -147,6 +147,7 @@ export class SignupComponent {
       lastName,
       email: this.email(),
       phone: this.phone(),
+      password: this.password(),
       profileImage: this.profileImage(),
       userType: this.userType()
     }).subscribe({
