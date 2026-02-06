@@ -243,6 +243,52 @@ const AiLogSchema = new Schema({
 const AiLog = mongoose.model('AiLog', AiLogSchema);
 app.use('/api/ai/log', createCrudRoutes(AiLog));
 
+// Content Schema (Dynamic Site Content)
+const ContentSchema = new Schema({
+  type: { type: String, enum: ['value', 'stat', 'team', 'partner'], required: true },
+  title: { type: String }, // For values/stats/team
+  subtitle: { type: String }, // For roles/descriptions
+  description: { type: String },
+  icon: { type: String }, // material icon name
+  image: { type: String }, // URL
+  order: { type: Number, default: 0 },
+  isVisible: { type: Boolean, default: true }
+});
+const Content = mongoose.model('Content', ContentSchema);
+app.use('/api/content', createCrudRoutes(Content));
+
+// Seed Default Content if Empty
+const seedContent = async () => {
+  try {
+    const count = await Content.countDocuments();
+    if (count === 0) {
+      console.log('🌱 Seeding default content...');
+      const defaultContent = [
+        // Values
+        { type: 'value', title: 'محامي المشتري', icon: 'shield_person', description: 'نحن لا نبيع العقارات، نحن نساعدك تشتريها. ولائنا لك وحدك، وليس للبائع أو المطور العقاري.', order: 1 },
+        { type: 'value', title: 'الحقيقة العارية', icon: 'visibility', description: 'نخبرك عن عيوب المنطقة ومشاكل العقار قبل أن نحدثك عن مميزاته. الشفافية ليست خياراً، بل مبدأ.', order: 2 },
+        { type: 'value', title: 'الأرقام لا تكذب', icon: 'analytics', description: 'نلغي العواطف من المعادلة. نستخدم 50 مليون نقطة بيانات لتقييم العقار بسعره العادل الحقيقي.', order: 3 },
+        
+        // Stats
+        { type: 'stat', title: '+50M', subtitle: 'نقطة بيانات محللة', order: 1 },
+        { type: 'stat', title: '0%', subtitle: 'عمليات خداع', order: 2 },
+        { type: 'stat', title: '+12K', subtitle: 'ساعة بحث تم توفيرها', order: 3 },
+
+        // Team (Sample)
+        { type: 'team', title: 'أحمد عرفه', subtitle: 'Frontend Engineer', image: './Ahmed_Arafa.jpg', order: 1 },
+        { type: 'team', title: 'عبد الرحمن عطية', subtitle: 'AI Engineer', image: './Abdul_Rahman_Atti.jpeg', order: 2 },
+        // ... (can add others via API later)
+      ];
+      await Content.insertMany(defaultContent);
+      console.log('✅ Default content seeded successfully');
+    }
+  } catch (err) {
+    console.error('❌ Error seeding content:', err);
+  }
+};
+// Run seed on connection
+mongoose.createConnection(MONGO_URI).once('open', seedContent);
+
 // Report Schema (Moderation)
 const ReportSchema = new Schema({
   reporter: { type: Schema.Types.ObjectId, ref: 'User', required: true },
