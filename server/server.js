@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto'); // For generating reset tokens
 
 // 1. إعداد التطبيق
 const app = express();
@@ -111,7 +113,10 @@ const UserSchema = new Schema({
   isBanned: { type: Boolean, default: false },
   favorites: [{ type: Schema.Types.ObjectId, ref: 'Property' }],
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  // Password Reset Fields
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 });
 
 // Property Schema
@@ -239,7 +244,14 @@ const createCrudRoutes = (model, routeName) => {
   router.get('/', async (req, res) => {
     try {
       const filter = req.query; // Accept query parameters for filtering
-      const items = await model.find(filter).limit(100).sort({ createdAt: -1 });
+      let query = model.find(filter).limit(100).sort({ createdAt: -1 });
+      
+      // Auto-populate for core models
+      if (model.modelName === 'Property') query = query.populate('agent');
+      if (model.modelName === 'Review') query = query.populate('authorId'); // If we have authorId
+      if (model.modelName === 'Post') query = query.populate('author');
+
+      const items = await query.exec();
       res.json(items);
     } catch (err) { res.status(500).json({ error: err.message }); }
   });
@@ -277,7 +289,13 @@ const createCrudRoutes = (model, routeName) => {
   // GET ONE
   router.get('/:id', async (req, res) => {
     try {
-      const item = await model.findById(req.params.id);
+      let query = model.findById(req.params.id);
+      
+      // Auto-populate for core models
+      if (model.modelName === 'Property') query = query.populate('agent');
+      if (model.modelName === 'Post') query = query.populate('author');
+
+      const item = await query.exec();
       if (!item) return res.status(404).json({ error: 'Not found' });
       res.json(item);
     } catch (err) { res.status(500).json({ error: err.message }); }
@@ -724,6 +742,91 @@ app.post('/api/auth/register', async (req, res) => {
       details: err.message,
       code: err.code 
     });
+  }
+});
+
+// ==========================================
+// TEMPORARY: PASSWORD RESET IMPLEMENTATION
+// WARNING: This is a temporary implementation. 
+// Valid Credentials (GMAIL_USER, GMAIL_PASS) are NOT set in this code.
+// ==========================================
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER || 'YOUR_GMAIL@gmail.com', // ⚠️ PLACEHOLDER
+    pass: process.env.GMAIL_PASS || 'YOUR_APP_PASSWORD'     // ⚠️ PLACEHOLDER
+  }
+});
+
+// Forgot Password: Send Email with Code/Token
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generate 6-digit code (simpler for user than long token)
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Save token to DB (valid for 1 hour)
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Send Email
+    const mailOptions = {
+      from: '"Baytology Security" <no-reply@baytology.com>',
+      to: user.email,
+      subject: 'Password Reset Code - Baytology',
+      text: `Your password reset code is: ${resetToken}\n\nThis code will expire in 1 hour.`
+    };
+
+    // ⚠️ WARNING: If credentials are wrong, this will fail.
+    // For now, we simulate success if env vars are missing to prevent crash during demo
+    if (!process.env.GMAIL_USER) {
+      console.log('⚠️ [MOCK SEND] Email:', user.email, 'Code:', resetToken);
+      console.log('⚠️ Set GMAIL_USER and GMAIL_PASS env variables for real sending.');
+      return res.json({ message: 'Email sent (simulated). Check console for code.' });
+    }
+
+    await transporter.sendMail(mailOptions);
+    res.json({ message: 'Reset code sent to email' });
+
+  } catch (err) {
+    console.error('Forgot Password Error:', err);
+    res.status(500).json({ error: 'Failed to send email', details: err.message });
+  }
+});
+
+// Reset Password: Verify Code & Update Password
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    
+    const user = await User.findOne({ 
+      email, 
+      resetPasswordToken: code,
+      resetPasswordExpires: { $gt: Date.now() } // Check expiry
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired code' });
+    }
+
+    // Update Password
+    user.password = newPassword; // ⚠️ In prod: Hash this!
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+
+  } catch (err) {
+    console.error('Reset Password Error:', err);
+    res.status(500).json({ error: 'Failed to reset password', details: err.message });
   }
 });
 

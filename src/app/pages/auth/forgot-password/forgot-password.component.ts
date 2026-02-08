@@ -1,7 +1,8 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
@@ -11,52 +12,66 @@ import { ToastService } from '../../../core/services/toast.service';
   styleUrl: './forgot-password.component.scss'
 })
 export class ForgotPasswordComponent {
+  private http = inject(HttpClient);
   private toast = inject(ToastService);
+  private router = inject(Router);
 
   // Signals
   email = signal('');
+  code = signal('');
+  newPassword = signal('');
+  
   isSubmitting = signal(false);
-  isSent = signal(false);
-  isResending = signal(false); // حالة لزر إعادة الإرسال
+  step = signal<1 | 2>(1); // Step 1: Email, Step 2: Code & New Password
 
-  onSubmit(form: any) {
-    // 1. التحقق من صحة النموذج بالكامل
-    if (form.invalid) {
-      this.toast.show('يرجى إدخال بريد إلكتروني صحيح', 'error');
-      // تعليم الحقل على أنه "تم لمسه" لإظهار رسالة الخطأ الحمراء
-      Object.keys(form.controls).forEach(key => {
-        form.controls[key].markAsTouched();
-      });
-      return;
-    }
+  // URL API
+  private apiUrl = 'http://localhost:3000/api/auth';
 
-    // 2. تحقق إضافي للتأكد (Regex)
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailPattern.test(this.email())) {
-      this.toast.show('صيغة البريد الإلكتروني غير صحيحة', 'error');
+  onSubmitEmail() {
+    if (!this.email()) {
+      this.toast.show('يرجى إدخال البريد الإلكتروني', 'error');
       return;
     }
 
     this.isSubmitting.set(true);
 
-    // محاكاة الإرسال
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-      this.isSent.set(true);
-      this.toast.show('تم إرسال رابط الاستعادة بنجاح!', 'success');
-    }, 1500);
+    this.http.post(`${this.apiUrl}/forgot-password`, { email: this.email() }).subscribe({
+      next: (res: any) => {
+        this.isSubmitting.set(false);
+        this.toast.show('تم إرسال رمز التحقق إلى بريدك الإلكتروني', 'success');
+        this.step.set(2);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        console.error(err);
+        this.toast.show(err.error?.error || 'فشل إرسال البريد الإلكتروني', 'error');
+      }
+    });
   }
 
-  // دالة خاصة لزر إعادة الإرسال
-  resendLink() {
-    if (this.isResending()) return;
+  onSubmitReset() {
+    if (!this.code() || !this.newPassword()) {
+      this.toast.show('يرجى إدخال الكود وكلمة المرور الجديدة', 'error');
+      return;
+    }
 
-    this.isResending.set(true);
-    
-    // محاكاة إعادة الإرسال
-    setTimeout(() => {
-      this.isResending.set(false);
-      this.toast.show('تم إعادة إرسال الرابط إلى بريدك.', 'success');
-    }, 2000);
+    this.isSubmitting.set(true);
+
+    this.http.post(`${this.apiUrl}/reset-password`, { 
+      email: this.email(),
+      code: this.code(),
+      newPassword: this.newPassword()
+    }).subscribe({
+      next: (res: any) => {
+        this.isSubmitting.set(false);
+        this.toast.show('تم تغيير كلمة المرور بنجاح! قم بتسجيل الدخول الآن.', 'success');
+        this.router.navigate(['/auth/login']);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        console.error(err);
+        this.toast.show(err.error?.error || 'فشل تغيير كلمة المرور', 'error');
+      }
+    });
   }
 }

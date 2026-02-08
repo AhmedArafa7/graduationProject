@@ -43,10 +43,36 @@
            حساب جديد
         </a>
       }
-      <button class="md:hidden p-2 text-text-primary dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-        <span class="material-symbols-outlined">menu</span>
+      <button (click)="toggleMobileMenu()" class="md:hidden p-2 text-text-primary dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors z-50 relative">
+        <span class="material-symbols-outlined">{{ isMobileMenuOpen() ? 'close' : 'menu' }}</span>
       </button>
     </div>
-
   </div>
+
+  <!-- Mobile Menu Overlay -->
+  @if (isMobileMenuOpen()) {
+    <div class="fixed inset-0 z-40 bg-white dark:bg-background-dark flex flex-col pt-24 px-6 md:hidden animate-fadeIn">
+      
+      <nav class="flex flex-col gap-6 text-lg font-display">
+        <a (click)="closeMobileMenu()" routerLink="/" routerLinkActive="text-primary font-bold" [routerLinkActiveOptions]="{exact: true}" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">الرئيسية</a>
+        <a (click)="closeMobileMenu()" routerLink="/search" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">شراء</a>
+        <a (click)="closeMobileMenu()" routerLink="/search" [queryParams]="{type: 'rent'}" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">إيجار</a>
+        <a (click)="closeMobileMenu()" routerLink="/agents" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">الوكلاء</a>
+        <a (click)="closeMobileMenu()" routerLink="/blog" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">المدونة</a>
+        <a (click)="closeMobileMenu()" routerLink="/about" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">من نحن</a>
+        
+        @if (!isLoggedIn()) {
+          <div class="flex flex-col gap-4 mt-4">
+            <a (click)="closeMobileMenu()" routerLink="/auth/login" class="flex items-center justify-center rounded-lg h-12 w-full bg-gray-100 dark:bg-gray-800 text-text-primary dark:text-white font-bold hover:bg-gray-200 transition-colors">
+              تسجيل الدخول
+            </a>
+            <a (click)="closeMobileMenu()" routerLink="/auth/signup" class="flex items-center justify-center rounded-lg h-12 w-full bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-md">
+              حساب جديد
+            </a>
+          </div>
+        }
+      </nav>
+
+    </div>
+  }
 </header>

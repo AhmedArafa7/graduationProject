@@ -36,6 +36,17 @@ export class HeaderComponent {
   // هل هناك إشعار جديد (للأنيميشن)
   hasNewNotification = computed(() => this.notificationService.hasNewNotification());
   
+  // حالة القائمة الجانبية (Mobile Menu)
+  isMobileMenuOpen = signal(false);
+  
+  toggleMobileMenu() {
+    this.isMobileMenuOpen.update(v => !v);
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen.set(false);
+  }
+
   // حالة القائمة المنسدلة
   isDropdownOpen = signal(false);
   

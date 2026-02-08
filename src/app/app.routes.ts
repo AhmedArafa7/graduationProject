@@ -60,6 +60,11 @@ export const routes: Routes = [
       },
       // صفحات المعلومات والاتصال
       { 
+        path: 'mortgage-info', 
+        title: 'شروط التمويل العقاري',
+        loadComponent: () => import('./pages/general/mortgage-info/mortgage-info.component').then(m => m.MortgageInfoComponent) 
+      },
+      { 
         path: 'about', 
         title: 'من نحن',
         loadComponent: () => import('./pages/general/about/about.component').then(m => m.AboutComponent) 

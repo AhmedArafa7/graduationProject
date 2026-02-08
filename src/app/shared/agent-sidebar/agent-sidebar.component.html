@@ -1,10 +1,40 @@
+<!-- Mobile Toggle Button (Visible only on mobile) -->
+<div class="md:hidden fixed top-0 right-0 left-0 bg-primary text-white z-50 px-4 py-3 flex items-center justify-between shadow-md">
+  <div class="flex items-center gap-3">
+    <img src="/Baytology_image.png" alt="Baytology Logo" class="h-8 w-8 rounded-full object-cover">
+    <h1 class="text-lg font-bold">Baytology</h1>
+  </div>
+  <button (click)="toggle()" class="p-1 rounded-md hover:bg-white/10 transition-colors">
+    <span class="material-symbols-outlined text-2xl">{{ isOpen() ? 'close' : 'menu' }}</span>
+  </button>
+</div>
+
+<!-- Mobile Overlay -->
+@if (isOpen()) {
+  <div class="fixed inset-0 bg-black/50 z-40 md:hidden animate-fadeIn" (click)="close()"></div>
+}
+
 <!-- Sidebar Navigation -->
-<aside class="w-64 bg-primary text-white flex flex-col fixed h-full right-0 z-40">
-  <!-- Logo -->
-  <a routerLink="/" class="flex items-center gap-3 p-6 border-b border-white/10 hover:bg-white/5 transition-colors">
+<aside class="bg-primary text-white flex flex-col fixed inset-y-0 right-0 z-50 w-64 transform transition-transform duration-300 md:translate-x-0 overflow-y-auto"
+       [class.translate-x-full]="!isOpen()"
+       [class.translate-x-0]="isOpen()">
+  
+  <!-- Logo (Desktop Only) -->
+  <a routerLink="/" class="hidden md:flex items-center gap-3 p-6 border-b border-white/10 hover:bg-white/5 transition-colors">
     <img src="/Baytology_image.png" alt="Baytology Logo" class="h-10 w-10 rounded-full object-cover">
     <h1 class="text-xl font-bold">Baytology</h1>
   </a>
+
+  <!-- Mobile User Info Header -->
+  <div class="md:hidden p-6 border-b border-white/10 bg-white/5">
+    <div class="flex items-center gap-3">
+      <img [src]="userAvatar()" alt="صورتك" class="w-10 h-10 rounded-full object-cover border-2 border-white/30">
+      <div>
+        <p class="text-sm font-bold truncate max-w-[140px]">{{ userName() }}</p>
+        <p class="text-xs text-white/70">{{ isAgent() ? 'مالك عقار' : 'مشتري' }}</p>
+      </div>
+    </div>
+  </div>
 
   <!-- Navigation Links -->
   <nav class="flex flex-col gap-2 p-4">
@@ -12,7 +42,7 @@
     <!-- للوكلاء فقط: لوحة التحكم وعقاراتي -->
     @if (isAgent()) {
 
-      <a routerLink="/agent-dashboard"
+      <a routerLink="/agent-dashboard" (click)="close()"
          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
          [class]="currentPage() === 'properties' ? 'bg-white/20' : 'hover:bg-white/10'">
         <span class="material-symbols-outlined">apartment</span>
@@ -22,7 +52,7 @@
 
     <!-- للمشترين فقط: المفضلة -->
     @if (!isAgent()) {
-      <a routerLink="/favorites"
+      <a routerLink="/favorites" (click)="close()"
          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
          [class]="currentPage() === 'favorites' ? 'bg-white/20' : 'hover:bg-white/10'">
         <span class="material-symbols-outlined">favorite</span>
@@ -31,7 +61,7 @@
     }
 
     <!-- للجميع: الرسائل -->
-    <a routerLink="/messages"
+    <a routerLink="/messages" (click)="close()"
        class="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-colors"
        [class]="currentPage() === 'messages' ? 'bg-white/20' : 'hover:bg-white/10'">
       <div class="flex items-center gap-3">
@@ -46,7 +76,7 @@
     </a>
 
     <!-- للجميع: الإشعارات -->
-    <a routerLink="/notifications"
+    <a routerLink="/notifications" (click)="close()"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
        [class]="currentPage() === 'notifications' ? 'bg-white/20' : 'hover:bg-white/10'">
       <span class="material-symbols-outlined">notifications</span>
@@ -54,7 +84,7 @@
     </a>
 
     <!-- للجميع: ملفي الشخصي -->
-    <a routerLink="/profile"
+    <a routerLink="/profile" (click)="close()"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
        [class]="currentPage() === 'profile' ? 'bg-white/20' : 'hover:bg-white/10'">
       <span class="material-symbols-outlined">person</span>
@@ -62,9 +92,9 @@
     </a>
   </nav>
 
-  <!-- User Info & Logout -->
+  <!-- User Info & Logout (Desktop Footer / Mobile Bottom) -->
   <div class="mt-auto p-4 border-t border-white/10">
-    <div class="flex items-center gap-3 mb-4 px-3">
+    <div class="hidden md:flex items-center gap-3 mb-4 px-3">
       <img [src]="userAvatar()" alt="صورتك" class="w-10 h-10 rounded-full object-cover border-2 border-white/30">
       <div>
         <p class="text-sm font-bold truncate max-w-[140px]">{{ userName() }}</p>

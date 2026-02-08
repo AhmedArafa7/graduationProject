@@ -1,4 +1,4 @@
-import { Component, inject, computed, input } from '@angular/core';
+import { Component, inject, computed, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { UserService } from '../../core/services/user.service';
@@ -25,6 +25,17 @@ export class AgentSidebarComponent {
 
   // عدد الرسائل الجديدة (غير المقروءة)
   newMessages = computed(() => this.messagesService.unreadCount());
+
+  // Mobile Menu State
+  isOpen = signal(false);
+
+  toggle() {
+    this.isOpen.update(v => !v);
+  }
+
+  close() {
+    this.isOpen.set(false);
+  }
 
   logout() {
     this.userService.logout();
