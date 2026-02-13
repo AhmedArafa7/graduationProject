@@ -1,10 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export interface Toast {
-  message: string;
-  type: 'success' | 'error' | 'info';
-  id: number;
-}
+import { Toast } from '../models/toast.model';
 
 @Injectable({
   providedIn: 'root'

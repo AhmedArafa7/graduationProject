@@ -1,9 +1,10 @@
 import { Component, signal, inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
-import { ContactService, ContactForm } from '../../../core/services/contact.service';
+import { ContactService } from '../../../core/services/contact.service';
+import { ContactForm } from '../../../core/models/contact.model';
 
 @Component({
   selector: 'app-contact',
@@ -35,7 +36,7 @@ export class ContactComponent {
     this.phone.set(input.value);
   }
 
-  onSubmit(form: any) {
+  onSubmit(form: NgForm) {
     // 1. التحقق من صلاحية النموذج
     if (form.invalid) {
       this.toast.show('توجد أخطاء في البيانات، يرجى مراجعة الحقول الحمراء', 'error');

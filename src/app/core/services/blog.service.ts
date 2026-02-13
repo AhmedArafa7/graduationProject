@@ -1,22 +1,9 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export interface BlogPost {
-  id: number;
-  title: string;
-  excerpt: string;
-  content?: string; // HTML content
-  image: string;
-  author: string;
-  authorImage: string;
-  authorTitle: string;
-  date: string;
-  readTime: string;
-  category: string;
-  views: string;
-}
+import { BlogPost } from '../models/blog-post.model';
 
 @Injectable({
   providedIn: 'root'
@@ -56,12 +43,14 @@ export class BlogService {
     return this.postsSignal();
   }
 
-  getPostById(id: number | string): BlogPost | undefined {
-    return this.postsSignal().find(p => p.id === id || p.id === Number(id));
-  }
-  
-  // Fetch single post from API if not found (optional enhancement)
-  getPost(id: string): Observable<BlogPost> {
+  getPostById(id: number | string): Observable<BlogPost | undefined> {
+    const existing = this.postsSignal().find(p => p.id === id || p.id === Number(id));
+    
+    if (existing) {
+      return of(existing);
+    }
+
+    // Fallback: Fetch from API if not found Locally
     return this.http.get<BlogPost>(`${this.apiUrl}/${id}`);
   }
 

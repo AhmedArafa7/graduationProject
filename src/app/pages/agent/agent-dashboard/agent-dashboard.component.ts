@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
-import { AgentPropertiesService, AgentProperty } from '../../../core/services/agent-properties.service';
+import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
+import { AgentProperty } from '../../../core/models/agent-property.model';
 import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
 
 @Component({

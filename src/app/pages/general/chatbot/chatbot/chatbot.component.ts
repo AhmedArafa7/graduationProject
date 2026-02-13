@@ -2,17 +2,9 @@ import { Component, signal, ViewChild, ElementRef, afterNextRender, inject, comp
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ChatbotService, ChatResponse, Property } from '../../../../core/services/chatbot/chatbot.service';
+import { ChatbotService } from '../../../../core/services/chatbot/chatbot.service';
+import { ChatResponse, ChatProperty, ChatMessage } from '../../../../core/models/chatbot.model';
 import { UserService } from '../../../../core/services/user.service';
-
-interface Message {
-  id: number;
-  text: string;
-  sender: 'user' | 'bot';
-  type: 'text' | 'property' | 'question';
-  data?: any;
-  time: string;
-}
 
 @Component({
   selector: 'app-chatbot',
@@ -35,7 +27,7 @@ export class ChatbotComponent {
   inputText = signal('');
   apiError = signal<string | null>(null);
 
-  messages = signal<Message[]>([
+  messages = signal<ChatMessage[]>([
     {
       id: 1,
       text: 'مرحباً بك في Baytology! 👋 أنا مساعدك الذكي. كيف يمكنني مساعدتك اليوم في رحلتك العقارية؟',
@@ -110,7 +102,7 @@ export class ChatbotComponent {
     // عرض العقارات
     if (response.properties && response.properties.length > 0) {
       // إضافة ملخص في الرسائل
-      const propertySummary = response.properties.slice(0, 3).map((p: Property) =>
+      const propertySummary = response.properties.slice(0, 3).map((p: ChatProperty) =>
         `🏠 ${p.type || 'عقار'} في ${p.city || '?'} - ${(p.price || 0).toLocaleString()} جنيه`
       ).join('\n');
       this.addMessage('أفضل النتائج:\n' + propertySummary, 'bot');
@@ -145,7 +137,7 @@ export class ChatbotComponent {
   viewPropertyDetails(propertyData: any) {
     // تخزين بيانات العقار في الـ service
     if (propertyData.fullProperty) {
-      this.chatbotService.setSelectedProperty(propertyData.fullProperty);
+      this.chatbotService.setSelectedChatProperty(propertyData.fullProperty);
     }
     this.chatbotService.close();
     this.router.navigate(['/property', propertyData.id || 1]);

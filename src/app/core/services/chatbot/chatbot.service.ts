@@ -4,32 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { OfflineAiService } from '../offline-ai.service';
 import { environment } from '../../../../environments/environment';
 
-// واجهة الرد من API
-export interface ChatResponse {
-  message?: string;
-  question?: string;
-  filters?: Record<string, any>;
-  properties?: Property[];
-  type?: string;
-  properties_count?: number;
-  attribute?: string;
-}
-
-export interface Property {
-  id?: number;
-  type?: string;
-  city?: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  size_sqm?: number;
-  price?: number;
-  location?: string;
-  area?: string;
-  floor?: string;
-  payment_option?: string;
-  furnished?: string;
-  displayImage?: string; // الصورة المعروضة في الشات
-}
+import { ChatResponse, ChatProperty } from '../../models/chatbot.model';
 
 @Injectable({
   providedIn: 'root'
@@ -54,7 +29,7 @@ export class ChatbotService {
   isConnected = signal(false);
   
   // العقار المختار لعرضه في صفحة التفاصيل
-  selectedProperty = signal<Property | null>(null);
+  selectedChatProperty = signal<ChatProperty | null>(null);
 
   toggle() {
     this.isOpen.update(v => !v);
@@ -69,13 +44,13 @@ export class ChatbotService {
   }
 
   // تعيين العقار المختار
-  setSelectedProperty(property: Property) {
-    this.selectedProperty.set(property);
+  setSelectedChatProperty(property: ChatProperty) {
+    this.selectedChatProperty.set(property);
   }
 
   // مسح العقار المختار
-  clearSelectedProperty() {
-    this.selectedProperty.set(null);
+  clearSelectedChatProperty() {
+    this.selectedChatProperty.set(null);
   }
 
   // فحص الاتصال بالـ API

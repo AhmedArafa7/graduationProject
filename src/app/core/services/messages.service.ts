@@ -4,34 +4,8 @@ import { environment } from '../../../environments/environment';
 import { UserService } from './user.service';
 import { Observable, map } from 'rxjs';
 
-export interface Message {
-  id: string | number; // Support string IDs from backend
-  text: string;
-  sender: 'user' | 'other';
-  time: string;
-  attachment?: {
-    name: string;
-    size: string;
-    type: 'image' | 'pdf' | 'doc' | 'other';
-    url?: string;
-  };
-}
+import { Message, Conversation } from '../models/chat.model';
 
-export interface Conversation {
-  id: string | number;
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  unread: boolean;
-  unreadCount?: number;
-  online?: boolean;
-  messages: Message[];
-}
-
-@Injectable({
-  providedIn: 'root'
-})
 @Injectable({
   providedIn: 'root'
 })

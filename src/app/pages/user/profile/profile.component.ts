@@ -2,7 +2,8 @@ import { Component, signal, inject, computed, OnInit, effect } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
-import { UserService, DEFAULT_AVATAR } from '../../../core/services/user.service';
+import { UserService } from '../../../core/services/user.service';
+import { DEFAULT_AVATAR } from '../../../core/models/user.model';
 import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
 
 @Component({

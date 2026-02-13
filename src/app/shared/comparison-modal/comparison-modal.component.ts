@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ComparisonService, Property, ComparisonResult } from '../../core/services/comparison.service';
+import { ComparisonService } from '../../core/services/comparison.service';
+import { ComparisonProperty, ComparisonResult } from '../../core/models/comparison.model';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -15,7 +16,7 @@ import { FormsModule } from '@angular/forms';
   `]
 })
 export class ComparisonModalComponent implements OnInit {
-  @Input({ required: true }) properties: Property[] = [];
+  @Input({ required: true }) properties: ComparisonProperty[] = [];
   @Output() close = new EventEmitter<void>();
 
   private comparisonService = inject(ComparisonService);

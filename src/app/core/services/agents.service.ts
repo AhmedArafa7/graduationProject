@@ -1,35 +1,9 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Observable, of } from 'rxjs';
 
-// Interfaces matching Backend Schema
-export interface Agent {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  city?: string; // Added for location filtering
-  profileImage: string;
-  userType: 'agent';
-  agentProfile: {
-    title: string;
-    licenseNumber: string;
-    company: string;
-    experience: string;
-    specialization: string;
-    bio: string;
-    rating: number;
-    reviewsCount: number;
-    activeProperties: number;
-    verified: boolean;
-    socialLinks: {
-      facebook: string;
-      linkedin: string;
-      twitter: string;
-    };
-  };
-}
+import { Agent } from '../models/agent.model';
 
 @Injectable({
   providedIn: 'root'
@@ -55,7 +29,11 @@ export class AgentsService {
     });
   }
 
-  getAgentById(id: string): Agent | undefined {
-    return this.agentsSignal().find(a => a._id === id);
+  getAgent(id: string): Observable<Agent> {
+    const existingAgent = this.agentsSignal().find(a => a._id === id);
+    if (existingAgent) {
+      return of(existingAgent);
+    }
+    return this.http.get<Agent>(`${this.apiUrl}/${id}`);
   }
 }

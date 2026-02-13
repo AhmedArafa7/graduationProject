@@ -4,16 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 import { UserService } from './user.service';
 
-export interface Notification {
-  _id?: string;
-  id?: number | string;
-  title: string;
-  message: string;
-  time?: Date;
-  read: boolean;
-  type: 'message' | 'property' | 'system' | 'price';
-  icon: string;
-}
+import { Notification } from '../models/notification.model';
 
 @Injectable({
   providedIn: 'root'

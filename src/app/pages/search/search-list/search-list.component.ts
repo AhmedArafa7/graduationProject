@@ -2,9 +2,11 @@ import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { GlobalStateService, SearchFilters } from '../../../core/services/global-state.service';
+import { GlobalStateService } from '../../../core/services/global-state.service';
+import { SearchFilters } from '../../../core/models/search-filters.model';
 import { ToastService } from '../../../core/services/toast.service';
 import { PropertyService } from '../../../core/services/property.service';
+import { Property } from '../../../core/models/property.model';
 import { OfflineAiService } from '../../../core/services/offline-ai.service';
 
 @Component({
@@ -41,15 +43,18 @@ export class SearchListComponent {
     this.localFilters = { ...this.globalState.searchFilters() };
 
     this.route.queryParams.subscribe(params => {
-      // FIX: Do not force property type based on buy/rent param
-      /*
-      if (params['type']) {
-        this.localFilters.type = params['type'] === 'buy' ? 'شقة' : 'فيلا';
-        this.applyFilters();
+      // FIX: Handle Buy/Rent filter from header
+      const t = params['type'];
+      
+      if (t === 'rent') {
+          this.localFilters.transactionType = 'rent';
+      } else if (t === 'buy' || t === 'sale') {
+          this.localFilters.transactionType = 'buy';
+      } else {
+          // If no param or unknown, reset to 'all'
+          this.localFilters.transactionType = 'all';
       }
-      */
-      // Instead, we should probably set a Listing Type filter if one existed.
-      // For now, removing this fixes the "Villa" default issue.
+      this.applyFilters();
       
       if (params['debug_ai']) {
         this.offlineAi.runDiagnostics();
@@ -77,6 +82,12 @@ export class SearchListComponent {
          if (mappedType && prop.propertyType?.toLowerCase() !== mappedType.toLowerCase()) return false;
       }
 
+      // Filter logic (Transaction Type: Buy/Rent)
+      if (filters.transactionType && filters.transactionType !== 'all') {
+        const propType = prop.type === 'sale' ? 'buy' : 'rent';
+        if (filters.transactionType !== propType) return false;
+      }
+
       // Filter logic (Amenities)
       if (filters.amenities.pool && !this.hasFeature(prop, 'pool', 'مسبح')) return false;
       if (filters.amenities.garden && !this.hasFeature(prop, 'garden', 'حديقة')) return false;
@@ -87,7 +98,7 @@ export class SearchListComponent {
     });
   });
 
-  private hasFeature(prop: any, enKey: string, arKey: string): boolean {
+  private hasFeature(prop: Property, enKey: string, arKey: string): boolean {
     if (!prop.features) return false;
     return prop.features.some((f: string) => f.toLowerCase().includes(enKey) || f.includes(arKey));
   }
@@ -98,32 +109,30 @@ export class SearchListComponent {
 
     this.isLoading.set(true);
     
-    // Simulate thinking time for "AI" effect
-    setTimeout(() => {
-      const analysis = this.offlineAi.analyze(query);
+    // Direct call without delay
+    const analysis = this.offlineAi.analyze(query);
+    
+    // Merge found filters
+    if (analysis.filters) {
+      this.localFilters = {
+        ...this.localFilters,
+        ...analysis.filters,
+        // Merge amenities carefully
+        amenities: {
+          ...this.localFilters.amenities,
+          ...(analysis.filters.amenities || {})
+        }
+      };
       
-      // Merge found filters
-      if (analysis.filters) {
-        this.localFilters = {
-          ...this.localFilters,
-          ...analysis.filters,
-          // Merge amenities carefully
-          amenities: {
-            ...this.localFilters.amenities,
-            ...(analysis.filters.amenities || {})
-          }
-        };
-        
-        // Auto-apply
-        this.globalState.updateFilters(this.localFilters);
-        this.aiAnalysisResult = signal(`تم تحليل طلبك باستخدام: ${analysis.modelUsed} (ثقة: ${Math.round(analysis.confidence * 100)}%)`);
-        this.toast.show('تم تحديث الفلاتر بناءً على طلبك', 'success');
-      } else {
-        this.toast.show('لم أستطع فهم طلبك بدقة، حاول صيغة أخرى', 'info');
-      }
-      
-      this.isLoading.set(false);
-    }, 800);
+      // Auto-apply
+      this.globalState.updateFilters(this.localFilters);
+      this.aiAnalysisResult = signal(`تم تحليل طلبك باستخدام: ${analysis.modelUsed} (ثقة: ${Math.round(analysis.confidence * 100)}%)`);
+      this.toast.show('تم تحديث الفلاتر بناءً على طلبك', 'success');
+    } else {
+      this.toast.show('لم أستطع فهم طلبك بدقة، حاول صيغة أخرى', 'info');
+    }
+    
+    this.isLoading.set(false);
   }
 
   // ... setView ...
@@ -147,19 +156,29 @@ export class SearchListComponent {
 
   applyFilters() {
     this.isLoading.set(true);
-    setTimeout(() => {
-      this.globalState.updateFilters(this.localFilters);
-      this.isLoading.set(false);
-      this.toast.show('تم تحديث نتائج البحث', 'success');
-      if (typeof window !== 'undefined') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 600);
+    // Instant update
+    this.globalState.updateFilters(this.localFilters);
+    this.isLoading.set(false);
+    this.toast.show('تم تحديث نتائج البحث', 'success');
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   resetFilters() {
     this.globalState.resetFilters();
     this.localFilters = { ...this.globalState.searchFilters() };
+
+    // FIX: Restore transaction type if we are on a specific page (Buy/Rent)
+    const t = this.route.snapshot.queryParams['type'];
+    if (t === 'rent') {
+       this.localFilters.transactionType = 'rent';
+    } else if (t === 'buy' || t === 'sale') {
+       this.localFilters.transactionType = 'buy';
+    }
+    // Update global again with restored type
+    this.globalState.updateFilters(this.localFilters);
+
     this.smartSearchQuery.set('');
     this.aiAnalysisResult = signal(null);
     
@@ -186,6 +205,8 @@ export class SearchListComponent {
       updatedFilters.amenities = { ...current.amenities, garage: false };
     } else if (filterKey === 'balcony') {
       updatedFilters.amenities = { ...current.amenities, balcony: false };
+    } else if (filterKey === 'transactionType') {
+      updatedFilters.transactionType = 'all';
     }
 
     this.globalState.updateFilters(updatedFilters);

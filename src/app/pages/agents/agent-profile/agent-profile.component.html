@@ -227,7 +227,7 @@
                 <div>
                   <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
                     <h4 class="font-bold text-text-primary dark:text-white text-base">{{ review.author }}</h4>
-                    <span class="text-xs text-text-secondary dark:text-gray-500">{{ review.date }}</span>
+                    <span class="text-xs text-text-secondary dark:text-gray-500">{{ review.createdAt | date:'mediumDate' }}</span>
                   </div>
                   <div class="flex gap-0.5 text-yellow-500 mb-2">
                     @for (star of [1,2,3,4,5]; track star) {

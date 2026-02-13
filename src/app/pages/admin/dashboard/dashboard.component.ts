@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReportService } from '../../../core/services/report.service';
 import { ToastService } from '../../../core/services/toast.service';
 
+import { Report } from '../../../core/models/report.model';
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -14,7 +16,7 @@ export class DashboardComponent implements OnInit {
   private reportService = inject(ReportService);
   private toast = inject(ToastService);
 
-  reports = signal<any[]>([]);
+  reports = signal<Report[]>([]);
   isLoading = signal(true);
 
   ngOnInit() {

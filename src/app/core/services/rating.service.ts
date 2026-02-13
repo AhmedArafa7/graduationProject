@@ -3,18 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export interface Review {
-  _id?: string;
-  id?: string; // Changed to string
-  targetId: string; // agentId or propertyId (string)
-  targetType: 'agent' | 'property';
-  author: string;
-  avatar: string;
-  rating: number; // 1-5
-  text: string;
-  date: string;
-  createdAt?: string;
-}
+import { Review } from '../models/review.model';
 
 @Injectable({
   providedIn: 'root'

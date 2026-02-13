@@ -4,10 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
 import { ToastService } from '../../../core/services/toast.service';
-import { AgentPropertiesService, AgentProperty, PropertyAmenities, RoomDimension } from '../../../core/services/agent-properties.service';
+import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
+import { AgentProperty, PropertyAmenities, RoomDimension } from '../../../core/models/agent-property.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { NgxImageCompressService } from 'ngx-image-compress';
-import * as L from 'leaflet';
+// import * as L from 'leaflet'; // Removed static import
+
 
 @Component({
   selector: 'app-edit-property',
@@ -24,8 +26,10 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
   private imageCompress = inject(NgxImageCompressService);
   private platformId = inject(PLATFORM_ID);
 
-  private map: L.Map | null = null;
-  private marker: L.Marker | null = null;
+  private map: any | null = null; // Changed to any
+  private marker: any | null = null; // Changed to any
+  private L: any = null; // Leaflet module
+
 
   propertyId = signal<string | null>(null);
   isEditMode = signal(false);
@@ -78,7 +82,17 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  ngAfterViewInit() {}
+  async ngAfterViewInit() {
+    if (isPlatformBrowser(this.platformId)) {
+        try {
+            this.L = await import('leaflet');
+            // If we are somehow on step 2 already
+            if (this.currentStep() === 2) this.initMap();
+        } catch (error) {
+            console.error('Failed to load Leaflet', error);
+        }
+    }
+  }
 
   ngOnDestroy() {
     if (this.map) {
@@ -121,15 +135,16 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ... (existing helper methods like initMap remain same)
-
   // --- Navigation Methods ---
   nextStep() {
     if (this.currentStep() < this.totalSteps) {
       if (this.validateCurrentStep()) {
         this.currentStep.update(v => v + 1);
         if (this.currentStep() === 2 && isPlatformBrowser(this.platformId)) {
-          setTimeout(() => this.initMap(), 500); // Initialize map on step 2
+          // Check if L is already loaded, if not, it will load eventually, but likely loaded by now
+          if (this.L) {
+              setTimeout(() => this.initMap(), 500); 
+          }
         }
       }
     }
@@ -168,12 +183,8 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   initMap() {
-      // Initialize map logic similar to AddProperty
-      // This is a placeholder as the original code referenced initMap but it wasn't shown fully implemented in previous view
-      // If initMap was intended to be existing helper, it might be missing too.
-      // Based on file view, I didn't see initMap implementation, only call in comment.
-      // Re-implementing simplified version:
-      
+    if (!isPlatformBrowser(this.platformId) || !this.L) return;
+
       const mapContainer = document.getElementById('edit-leaflet-map');
       if (!mapContainer) return;
 
@@ -181,17 +192,17 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
           this.map.remove();
       }
 
-      this.map = L.map('edit-leaflet-map').setView([30.0444, 31.2357], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      this.map = this.L.map('edit-leaflet-map').setView([30.0444, 31.2357], 13);
+      this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap'
       }).addTo(this.map);
 
       // Add click handler
-      this.map.on('click', (e: L.LeafletMouseEvent) => {
+      this.map.on('click', (e: any) => {
           if (this.marker) {
               this.map!.removeLayer(this.marker);
           }
-          this.marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.map!);
+          this.marker = this.L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.map!);
           this.form.latitude = e.latlng.lat.toString();
           this.form.longitude = e.latlng.lng.toString();
       });
@@ -201,7 +212,7 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
            const lat = parseFloat(this.form.latitude);
            const lng = parseFloat(this.form.longitude);
            if(!isNaN(lat) && !isNaN(lng)){
-              this.marker = L.marker([lat, lng]).addTo(this.map);
+              this.marker = this.L.marker([lat, lng]).addTo(this.map);
               this.map.setView([lat, lng], 13);
            }
       }

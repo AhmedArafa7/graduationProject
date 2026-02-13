@@ -6,6 +6,8 @@ import { ToastService } from '../../../core/services/toast.service';
 import { MessagesService } from '../../../core/services/messages.service';
 import { AgentsService } from '../../../core/services/agents.service';
 
+import { Agent } from '../../../core/models/agent.model';
+
 @Component({
   selector: 'app-agents-list',
   imports: [CommonModule, RouterLink, FormsModule],
@@ -75,7 +77,7 @@ export class AgentsListComponent {
     this.toast.show('تم إعادة تعيين الفلاتر', 'info');
   }
 
-  contactAgent(agent: any) {
+  contactAgent(agent: Agent) {
     // إنشاء أو فتح محادثة مع الوكيل
     const fullName = `${agent.firstName} ${agent.lastName}`;
     const conversationId = this.messagesService.startChatWithAgent(

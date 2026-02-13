@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
+import { environment } from '../../../../environments/environment';
 import { UserService } from '../../../core/services/user.service';
+
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -12,8 +15,10 @@ import { UserService } from '../../../core/services/user.service';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
+  // ... imports
   private router = inject(Router);
   private toast = inject(ToastService);
+  private apiUrl = `${environment.apiUrl}/auth`; 
   private userService = inject(UserService);
 
   // Form Signals
@@ -29,7 +34,7 @@ export class LoginComponent {
     this.isPasswordVisible.update(v => !v);
   }
 
-  onSubmit(form: any) {
+  onSubmit(form: NgForm) {
     if (form.invalid) {
       this.toast.show('يرجى التأكد من صحة البيانات المدخلة', 'error');
       Object.keys(form.controls).forEach(key => {

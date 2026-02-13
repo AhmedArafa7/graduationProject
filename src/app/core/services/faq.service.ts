@@ -2,12 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
-export interface Faq {
-  id: number;
-  question: string;
-  answer: string;
-  category: string;
-}
+import { Faq } from '../models/faq.model';
 
 @Injectable({
   providedIn: 'root'

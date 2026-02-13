@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
 import { UserService } from '../../../core/services/user.service';
-import { MessagesService, Conversation, Message } from '../../../core/services/messages.service';
+import { MessagesService } from '../../../core/services/messages.service';
+import { Conversation, Message } from '../../../core/models/chat.model';
 
 @Component({
   selector: 'app-messages',

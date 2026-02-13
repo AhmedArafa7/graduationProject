@@ -3,19 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { UserService } from './user.service';
 import { environment } from '../../../environments/environment';
 
-export interface SearchFilters {
-  type: string;
-  priceFrom: number | null;
-  priceTo: number | null;
-  beds: string;
-  baths: string;
-  amenities: {
-    pool: boolean;
-    garden: boolean;
-    garage: boolean;
-    balcony: boolean;
-  };
-}
+import { SearchFilters } from '../models/search-filters.model';
 
 @Injectable({
   providedIn: 'root'
@@ -30,9 +18,9 @@ export class GlobalStateService {
   favorites = signal<string[]>(this.storedFavs);
 
   // 2. حالة فلاتر البحث (للحفاظ عليها عند العودة)
-  // 2. حالة فلاتر البحث (للحفاظ عليها عند العودة)
   searchFilters = signal<SearchFilters>({
     type: 'all',
+    transactionType: 'all',
     priceFrom: null,
     priceTo: null,
     beds: 'عدد الغرف',
@@ -86,6 +74,7 @@ export class GlobalStateService {
   resetFilters() {
     this.searchFilters.set({
       type: 'all',
+      transactionType: 'all',
       priceFrom: null,
       priceTo: null,
       beds: 'عدد الغرف',

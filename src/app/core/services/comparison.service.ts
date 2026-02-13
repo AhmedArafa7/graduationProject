@@ -4,30 +4,7 @@ import { environment } from '../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 
 // Interfaces match our Property structure roughly
-export interface Property {
-  id: number | string;
-  title: string;
-  price: string | number; // Handling "15,000,000" string or number
-  area: string | number; // "500 m2" or 500
-  location: string;
-  beds: number;
-  baths: number;
-  image?: string;
-  _id?: string;
-  coverImage?: string;
-  images?: string[];
-  [key: string]: any;
-}
-
-export interface ComparisonResult {
-  winnerId: number | string;
-  analysis: Record<string | number, {
-    pros: string[];
-    cons: string[];
-    score: number;
-  }>;
-  summary: string;
-}
+import { ComparisonProperty, ComparisonResult } from '../models/comparison.model';
 
 @Injectable({
   providedIn: 'root'
@@ -38,8 +15,8 @@ export class ComparisonService {
 
   // --- Local AI Engine (Heuristics) ---
 
-  analyze(properties: Property[]): ComparisonResult {
-    const scoredProperties = properties.map(p => this.scoreProperty(p, properties));
+  analyze(properties: ComparisonProperty[]): ComparisonResult {
+    const scoredProperties = properties.map(p => this.scoreComparisonProperty(p, properties));
     
     // Find winner (highest score)
     const winner = scoredProperties.reduce((prev, current) => 
@@ -90,7 +67,7 @@ export class ComparisonService {
     return summary;
   }
 
-  private scoreProperty(p: Property, all: Property[]): { id: number | string, score: number, pros: string[], cons: string[], title: string } {
+  private scoreComparisonProperty(p: ComparisonProperty, all: ComparisonProperty[]): { id: number | string, score: number, pros: string[], cons: string[], title: string } {
     let score = 50; // Base score
     const pros: string[] = [];
     const cons: string[] = [];
@@ -138,7 +115,7 @@ export class ComparisonService {
 
   // --- External/Hybrid AI (Future) ---
 
-  async askAi(question: string, properties: Property[]): Promise<string> {
+  async askAi(question: string, properties: ComparisonProperty[]): Promise<string> {
     // 1. Local Fallback for simple queries
     if (question.includes('أرخص') || question.includes('سعر')) {
       const cheapest = properties.reduce((min, p) => 
@@ -157,7 +134,7 @@ export class ComparisonService {
     return answer;
   }
 
-  private logToBackend(question: string, properties: Property[], answer: string, provider: 'local' | 'external') {
+  private logToBackend(question: string, properties: ComparisonProperty[], answer: string, provider: 'local' | 'external') {
     const payload = {
       question,
       context: properties.map(p => p.id.toString()),

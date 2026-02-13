@@ -1,6 +1,7 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../../core/services/toast.service';
@@ -25,7 +26,7 @@ export class ForgotPasswordComponent {
   step = signal<1 | 2>(1); // Step 1: Email, Step 2: Code & New Password
 
   // URL API
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
 
   onSubmitEmail() {
     if (!this.email()) {

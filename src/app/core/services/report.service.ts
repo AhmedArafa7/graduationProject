@@ -3,17 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
-export interface Report {
-  _id?: string;
-  reporter: string; // User ID
-  property: string; // Property ID
-  reason: string;
-  status: 'pending' | 'resolved' | 'dismissed';
-  createdAt?: string;
-  // Populated fields
-  reporterName?: string;
-  propertyTitle?: string;
-}
+import { Report } from '../models/report.model';
 
 @Injectable({
   providedIn: 'root'

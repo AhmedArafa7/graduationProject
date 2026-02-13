@@ -2,13 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
-export interface Testimonial {
-  name: string;
-  date: string;
-  rating: number;
-  text: string;
-  image: string;
-}
+import { Testimonial } from '../models/testimonial.model';
 
 @Injectable({
   providedIn: 'root'

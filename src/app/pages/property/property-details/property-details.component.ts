@@ -5,13 +5,15 @@ import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { UserService } from '../../../core/services/user.service';
 import { Title } from '@angular/platform-browser';
-import { ChatbotService, Property as ChatProperty } from '../../../core/services/chatbot/chatbot.service';
+import { ChatbotService } from '../../../core/services/chatbot/chatbot.service';
+import { ChatProperty } from '../../../core/models/chatbot.model';
 import { PropertyService } from '../../../core/services/property.service';
+import { Property } from '../../../core/models/property.model';
 import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
 import { MessagesService } from '../../../core/services/messages.service';
 import { RatingService } from '../../../core/services/rating.service';
 import { ReportService } from '../../../core/services/report.service';
-import * as L from 'leaflet';
+// import * as L from 'leaflet'; // Removed static import
 
 
 @Component({
@@ -33,7 +35,9 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   private userService = inject(UserService);
   private ratingService = inject(RatingService);
   private reportService = inject(ReportService);
-  private locationMap: L.Map | null = null;
+  
+  private locationMap: any | null = null; // Changed to any
+  private L: any = null; // Leaflet module
 
 
   // --- UI States ---
@@ -92,10 +96,14 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   } 
 
   // الكائن الحالي المعروض (يتم تحديثه ديناميكياً)
-  property: any; // Will be initialized in loadProperty
+  property: Property | undefined; // Will be initialized in loadProperty
 
   // --- Mortgage Calculator ---
   mortgagePrice = signal(0);
+  
+  marketValueLow = computed(() => (this.property?.price || 0) * 0.95);
+  marketValueHigh = computed(() => (this.property?.price || 0) * 1.05);
+
   downPaymentPercent = signal(20);
   loanTerm = signal(15);
   interestRate = signal(8.5);
@@ -136,7 +144,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
 
   loadProperty(id: string) {
     // فحص إذا كان هناك عقار مختار من الشات بوت
-    const chatProperty = this.chatbotService.selectedProperty();
+    const chatProperty = this.chatbotService.selectedChatProperty();
     
     if (chatProperty) {
       // عرض بيانات العقار من الشات بوت
@@ -144,7 +152,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
         id: chatProperty.id?.toString() || id,
         title: `${chatProperty.type || 'عقار'} في ${chatProperty.city || ''}`,
         location: chatProperty.city || 'غير محدد',
-        type: chatProperty.payment_option === 'rent' ? 'إيجار' : 'بيع',
+        type: chatProperty.payment_option === 'rent' ? 'rent' : 'sale',
         refCode: `API-${chatProperty.id || id}`,
         price: chatProperty.price || 0,
         area: chatProperty.size_sqm || 0,
@@ -166,7 +174,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
            name: 'System Agent', phone: '123456', avatar: '/assets/images/logo.png', title: 'AI Assistant', experience: '5', deals: 50, rating: 4.8
         }
       };
-      this.chatbotService.clearSelectedProperty();
+      this.chatbotService.clearSelectedChatProperty();
       this.updateUI();
       return;
     }
@@ -192,7 +200,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
             id: agentProperty.id,
             title: agentProperty.address, 
             location: agentProperty.address,
-            type: agentProperty.status === 'للإيجار' ? 'إيجار' : 'بيع',
+            type: agentProperty.status === 'للإيجار' ? 'rent' : 'sale',
             refCode: `AGT-${agentProperty.id}`,
             price: agentProperty.priceValue ?? 0,
             area: agentProperty.area ?? 0,
@@ -211,33 +219,39 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
       },
       error: () => {
         // 2. البحث في PropertyService (Consolidated Source) كـ fallback
-        const serviceProperty = this.propertyService.getPropertyById(id);
-        
-        if (serviceProperty) {
-          this.property = {
-            id: serviceProperty._id,
-            title: serviceProperty.title,
-            location: `${serviceProperty.location.address}، ${serviceProperty.location.city}`,
-            type: serviceProperty.type === 'sale' ? 'بيع' : 'إيجار',
-            refCode: serviceProperty.refCode || `BYT-${serviceProperty._id.substring(0,6)}`,
-            price: serviceProperty.price,
-            area: serviceProperty.area,
-            beds: serviceProperty.bedrooms,
-            baths: serviceProperty.bathrooms,
-            floor: serviceProperty.floor || 'غير محدد',
-            description: serviceProperty.description,
-            amenities: serviceProperty.amenities || serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
-            images: serviceProperty.images,
-            agent: serviceProperty.agent
-          };
-          this.updateUI();
-        } else {
-           // Fallback if ID not found, load first one (Safeguard)
-           const first = this.propertyService.properties()[0];
-           if (first && first._id !== id) {
-             this.loadProperty(first._id);
-           }
-        }
+        // NEW: PropertyService now returns Observable
+        this.propertyService.getPropertyById(id).subscribe({
+          next: (serviceProperty) => {
+            if (serviceProperty) {
+              this.property = {
+                id: serviceProperty._id,
+                title: serviceProperty.title,
+                location: `${serviceProperty.location.address}، ${serviceProperty.location.city}`,
+                type: serviceProperty.type === 'sale' ? 'sale' : 'rent',
+                refCode: serviceProperty.refCode || `BYT-${serviceProperty._id.substring(0,6)}`,
+                price: serviceProperty.price,
+                area: serviceProperty.area,
+                beds: serviceProperty.bedrooms,
+                baths: serviceProperty.bathrooms,
+                floor: serviceProperty.floor || 'غير محدد',
+                description: serviceProperty.description,
+                amenities: serviceProperty.amenities || serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
+                images: serviceProperty.images,
+                agent: serviceProperty.agent
+              };
+              this.updateUI();
+            } else {
+               // Fallback if ID not found, load first one (Safeguard)
+               // Note: This relies on properties() being loaded, which might not be true if we came here directly.
+               // Ideally we should show a 404.
+               console.warn('Property not found in service');
+            }
+          },
+          error: (err) => {
+             console.error('Failed to load property details', err);
+             this.toast.show('تعذر تحميل تفاصيل العقار', 'error');
+          }
+        });
       }
     });
   }
@@ -270,9 +284,17 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  ngAfterViewInit() {
+  async ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
-      setTimeout(() => this.initLocationMap(), 500);
+      try {
+        this.L = await import('leaflet');
+        // If property is already loaded, init map (wait for DOM)
+        if (this.property) {
+             setTimeout(() => this.initLocationMap(), 100);
+        }
+      } catch (error) {
+        console.error('Failed to load Leaflet', error);
+      }
     }
   }
 
@@ -299,7 +321,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   };
 
   private initLocationMap() {
-    if (!isPlatformBrowser(this.platformId)) return;
+    if (!isPlatformBrowser(this.platformId) || !this.L) return;
     
     const mapElement = document.getElementById('property-location-map');
     if (!mapElement) return;
@@ -312,24 +334,24 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
 
     // البحث عن الإحداثيات
     let coords: [number, number] = [30.0444, 31.2357]; // القاهرة افتراضياً
-    const location = this.property?.location || '';
+    const locationStr = typeof this.property?.location === 'string' ? this.property.location : (this.property?.location?.city || '');
     
     for (const [area, coord] of Object.entries(this.locationCoords)) {
-      if (location.includes(area)) {
+      if (locationStr.includes(area)) {
         coords = coord;
         break;
       }
     }
 
     // إنشاء الخريطة
-    this.locationMap = L.map('property-location-map').setView(coords, 14);
+    this.locationMap = this.L.map('property-location-map').setView(coords, 14);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap'
     }).addTo(this.locationMap);
 
     // إصلاح مشكلة أيقونة الـ marker
-    const customIcon = L.icon({
+    const customIcon = this.L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
       shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -340,7 +362,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     });
 
     // إضافة marker
-    L.marker(coords, { icon: customIcon }).addTo(this.locationMap)
+    this.L.marker(coords, { icon: customIcon }).addTo(this.locationMap)
       .bindPopup(`<b>${this.property?.title || 'الموقع'}</b><br>${location}`)
       .openPopup();
   }
@@ -399,7 +421,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
 
     this.messagesService.startChatWithAgent(
       this.property.agent.name,
-      this.property.agent.avatar,
+      this.property.agent.avatar || '',
       agentId
     ).subscribe({
       next: (conversationId) => {
@@ -417,13 +439,18 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     
     if (navigator.share) {
       navigator.share({
-        title: this.property.title,
-        text: `شاهد هذا العقار المميز على Baytology: ${this.property.title}`,
+        title: this.property?.title || '',
+        text: `شاهد هذا العقار المميز على Baytology: ${this.property?.title || ''}`,
         url: window.location.href
       }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      this.toast.show('تم نسخ رابط العقار للحافظة', 'success');
+      navigator.clipboard?.writeText(window.location.href)
+        .then(() => {
+          this.toast.show('تم نسخ رابط العقار للحافظة', 'success');
+        })
+        .catch(() => {
+          this.toast.show('فشل نسخ الرابط', 'error');
+        });
     }
   }
 
@@ -434,8 +461,12 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   // منطق زر الإبلاغ
+
+  // --- Report Modal Logic ---
+  isReportModalOpen = signal(false);
+
   toggleReport() {
-    const user = this.userService.userData(); // Quick access if public, else inject UserService
+    const user = this.userService.userData();
     if (!user._id) {
       this.toast.show('يجب عليك تسجيل الدخول للإبلاغ عن عقار', 'error');
       return;
@@ -446,18 +477,30 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
       return;
     }
 
-    const reason = window.prompt('لماذا تريد الإبلاغ عن هذا العقار؟ (احتيال، بيانات خاطئة، صور غير لائقة...)');
-    if (reason) {
-      this.reportService.reportProperty(this.property.id, user._id, reason).subscribe({
-        next: () => {
-          this.isReported.set(true);
-          this.toast.show('تم استلام بلاغك وسيقوم فريقنا بمراجعته.', 'success');
-        },
-        error: (err) => {
-          console.error(err);
-          this.toast.show('حدث خطأ أثناء إرسال البلاغ.', 'error');
-        }
-      });
-    }
+    this.isReportModalOpen.set(true);
   }
+
+  closeReportModal() {
+    this.isReportModalOpen.set(false);
+  }
+
+  submitReport(reason: string, details: string) {
+    const user = this.userService.userData();
+    if (!user._id || !this.property) return;
+
+    const fullReason = `${reason}: ${details}`;
+    
+    this.reportService.reportProperty(this.property.id || this.property._id || '', user._id, fullReason).subscribe({
+      next: () => {
+        this.isReported.set(true);
+        this.closeReportModal();
+        this.toast.show('تم استلام بلاغك وسيقوم فريقنا بمراجعته.', 'success');
+      },
+      error: (err) => {
+        console.error(err);
+        this.toast.show('حدث خطأ أثناء إرسال البلاغ.', 'error');
+      }
+    });
+  }
+
 }

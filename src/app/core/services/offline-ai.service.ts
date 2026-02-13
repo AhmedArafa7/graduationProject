@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
-import { SearchFilters } from './global-state.service';
+import { SearchFilters } from '../models/search-filters.model';
 
-export interface AiAnalysisResult {
-  filters: Partial<SearchFilters>;
-  confidence: number; // 0-1
-  modelUsed: 'regex' | 'keyword' | 'fuzzy' | 'none';
-  matchedTokens: string[];
-}
+import { AiAnalysisResult } from '../models/offline-ai.model';
 
 @Injectable({
   providedIn: 'root'

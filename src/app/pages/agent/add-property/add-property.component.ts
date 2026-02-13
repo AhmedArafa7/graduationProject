@@ -7,45 +7,12 @@ import { ToastService } from '../../../core/services/toast.service';
 import { AgentPropertiesService } from '../../../core/services/agent-properties.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { NgxImageCompressService as ImageCompressService } from 'ngx-image-compress';
-import * as L from 'leaflet';
+// import * as L from 'leaflet'; // Removed static import for SSR
 
-interface RoomDimension {
-  name: string;
-  length: number | null;
-  width: number | null;
-}
+import { RoomDimension } from '../../../core/models/agent-property.model';
 
-interface PropertyForm {
-  title: string;
-  propertyType: string;
-  status: string;
-  price: number | null;
-  area: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  floor: number | null;
-  roomDimensions: RoomDimension[];
-  description: string;
-  latitude: string;
-  longitude: string;
-  locationId: string;
-  amenities: {
-    pool: boolean;
-    garage: boolean;
-    gym: boolean;
-    garden: boolean;
-    balcony: boolean;
-    security: boolean;
-    ac: boolean;
-    petFriendly: boolean;
-  };
-  images: { file: File; preview: string; status: string; altText: string }[];
-}
-
-interface ValidationError {
-  field: string;
-  message: string;
-}
+import { PropertyForm, PropertyImage } from '../../../core/models/property-form.model';
+import { ValidationError } from '../../../core/models/validation.model';
 
 @Component({
   selector: 'app-add-property',
@@ -62,8 +29,9 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('mapContainer') mapContainer!: ElementRef;
 
-  private map: L.Map | null = null;
-  private marker: L.Marker | null = null;
+  private map: any | null = null; // Changed to any
+  private marker: any | null = null; // Changed to any
+  private L: any = null; // Leaflet module
 
   currentStep = signal(1);
   totalSteps = 4;
@@ -107,8 +75,18 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
     return (this.currentStep() / this.totalSteps) * 100;
   }
 
-  ngAfterViewInit() {
-    // تهيئة الخريطة عند فتح الخطوة 2
+  async ngAfterViewInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        this.L = await import('leaflet');
+        // تهيئة الخريطة إذا كنا في الخطوة 2 (e.g. status restored)
+        if (this.currentStep() === 2) {
+           this.initMap();
+        }
+      } catch (error) {
+        console.error('Failed to load Leaflet', error);
+      }
+    }
   }
 
   ngOnDestroy() {
@@ -119,8 +97,9 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
 
   // تهيئة الخريطة
   initMap() {
-    if (!isPlatformBrowser(this.platformId)) return;
+    if (!isPlatformBrowser(this.platformId) || !this.L) return;
 
+    // Small delay to ensure DOM is rendered if switching steps
     setTimeout(() => {
       const mapElement = document.getElementById('leaflet-map');
       if (!mapElement) return;
@@ -132,7 +111,7 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
       }
 
       // Fix for Leaflet default marker icons
-      const iconDefault = L.icon({
+      const iconDefault = this.L.icon({
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -141,16 +120,16 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
       });
-      L.Marker.prototype.options.icon = iconDefault;
+      this.L.Marker.prototype.options.icon = iconDefault;
 
-      this.map = L.map('leaflet-map').setView([this.defaultLat, this.defaultLng], 10);
+      this.map = this.L.map('leaflet-map').setView([this.defaultLat, this.defaultLng], 10);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
       }).addTo(this.map);
 
       // إضافة marker عند النقر
-      this.map.on('click', (e: L.LeafletMouseEvent) => {
+      this.map.on('click', (e: any) => {
         this.setMarker(e.latlng.lat, e.latlng.lng);
       });
 
@@ -168,14 +147,14 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
 
   // وضع marker على الخريطة
   setMarker(lat: number, lng: number) {
-    if (!this.map) return;
+    if (!this.map || !this.L) return;
 
     if (this.marker) {
       this.marker.remove();
     }
 
     // إصلاح مشكلة أيقونة الـ marker
-    const customIcon = L.icon({
+    const customIcon = this.L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
       shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -185,7 +164,7 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
       shadowSize: [41, 41]
     });
 
-    this.marker = L.marker([lat, lng], { icon: customIcon }).addTo(this.map);
+    this.marker = this.L.marker([lat, lng], { icon: customIcon }).addTo(this.map);
     this.marker.bindPopup('موقع العقار').openPopup();
 
     // تحديث القيم

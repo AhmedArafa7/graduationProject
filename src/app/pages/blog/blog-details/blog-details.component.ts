@@ -2,7 +2,8 @@ import { Component, signal, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { BlogService, BlogPost } from '../../../core/services/blog.service';
+import { BlogService } from '../../../core/services/blog.service';
+import { BlogPost } from '../../../core/models/blog-post.model';
 import { ToastService } from '../../../core/services/toast.service';
 import { Title } from '@angular/platform-browser';
 
@@ -40,21 +41,33 @@ export class BlogDetailsComponent implements OnInit {
   }
 
   loadPost(id: number) {
-    const post = this.blogService.getPostById(id);
-    if (post) {
-      this.article.set(post);
-      this.relatedPosts.set(this.blogService.getRelatedPosts(id));
-      this.titleService.setTitle(`${post.title} - مدونة Baytology`);
-      if (isPlatformBrowser(this.platformId)) window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      this.router.navigate(['/blog']);
-    }
+    this.blogService.getPostById(id).subscribe({
+      next: (post) => {
+        if (post) {
+          this.article.set(post);
+          this.relatedPosts.set(this.blogService.getRelatedPosts(id));
+          this.titleService.setTitle(`${post.title} - مدونة Baytology`);
+          if (isPlatformBrowser(this.platformId)) window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+           this.router.navigate(['/blog']);
+        }
+      },
+      error: () => {
+        this.toast.show('المقال غير موجود', 'error');
+        this.router.navigate(['/blog']);
+      }
+    });
   }
 
   sharePost() {
     if (isPlatformBrowser(this.platformId)) {
-      navigator.clipboard.writeText(window.location.href);
-      this.toast.show('تم نسخ رابط المقال للمشاركة', 'success');
+      navigator.clipboard?.writeText(window.location.href)
+        .then(() => {
+          this.toast.show('تم نسخ رابط المقال للمشاركة', 'success');
+        })
+        .catch(() => {
+          this.toast.show('فشل نسخ الرابط', 'error');
+        });
     }
   }
 

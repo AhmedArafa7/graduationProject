@@ -7,7 +7,7 @@
     </a>
 
     <nav class="hidden md:flex items-center gap-8 font-display">
-      <a routerLink="/search" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">شراء</a>
+      <a routerLink="/search" [queryParams]="{type: 'buy'}" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">شراء</a>
       <a routerLink="/search" [queryParams]="{type: 'rent'}" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">إيجار</a>
       <a routerLink="/agents" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">الوكلاء</a>
       <a routerLink="/blog" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white text-sm font-medium hover:text-primary dark:hover:text-secondary transition-colors">المدونة</a>
@@ -55,7 +55,7 @@
       
       <nav class="flex flex-col gap-6 text-lg font-display">
         <a (click)="closeMobileMenu()" routerLink="/" routerLinkActive="text-primary font-bold" [routerLinkActiveOptions]="{exact: true}" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">الرئيسية</a>
-        <a (click)="closeMobileMenu()" routerLink="/search" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">شراء</a>
+        <a (click)="closeMobileMenu()" routerLink="/search" [queryParams]="{type: 'buy'}" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">شراء</a>
         <a (click)="closeMobileMenu()" routerLink="/search" [queryParams]="{type: 'rent'}" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">إيجار</a>
         <a (click)="closeMobileMenu()" routerLink="/agents" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">الوكلاء</a>
         <a (click)="closeMobileMenu()" routerLink="/blog" routerLinkActive="text-primary font-bold" class="text-text-primary dark:text-white hover:text-primary transition-colors border-b border-gray-100 dark:border-gray-800 pb-4">المدونة</a>

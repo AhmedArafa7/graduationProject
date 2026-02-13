@@ -5,6 +5,7 @@ import { GlobalStateService } from '../../../core/services/global-state.service'
 import { UserService } from '../../../core/services/user.service';
 import { AgentSidebarComponent } from '../../../shared/agent-sidebar/agent-sidebar.component';
 import { ComparisonModalComponent } from '../../../shared/comparison-modal/comparison-modal.component';
+import { ComparisonProperty } from '../../../core/models/comparison.model';
 
 @Component({
   selector: 'app-favorites',
@@ -16,7 +17,7 @@ export class FavoritesComponent implements OnInit {
   private globalState = inject(GlobalStateService);
   private userService = inject(UserService);
 
-  favorites = signal<any[]>([]);
+  favorites = signal<ComparisonProperty[]>([]);
   isLoading = signal(true);
 
 

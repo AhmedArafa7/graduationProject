@@ -1,17 +1,11 @@
-import { Injectable, signal, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContentService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://graduation-project-git-master-ahmeds-projects-121d239c.vercel.app/api/content'; 
-  // Note: Using full URL for now to ensure connectivity, or relative if proxy is set. 
-  // Let's use relative '/api/content' assuming proxy or base URL config.
-  // Actually, better to use environment variable, but for now relative path is safest if served from same origin.
-  // Wait, in dev mode (ng serve), relative path needs proxy. Since we don't have proxy.conf set up in this view, 
-  // I will use a reliable relative path or the production URL if dev is local.
+  private apiUrl = `${environment.apiUrl}/content`;
   // Given user is deploying to Vercel, relative '/api/content' is best.
 
   values = signal<any[]>([]);
@@ -24,7 +18,7 @@ export class ContentService {
   }
 
   fetchContent() {
-    this.http.get<any[]>('/api/content').subscribe({
+    this.http.get<any[]>(this.apiUrl).subscribe({
       next: (data) => {
         // Filter and sort by order
         this.values.set(data.filter(i => i.type === 'value').sort((a, b) => a.order - b.order));

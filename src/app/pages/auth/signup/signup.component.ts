@@ -1,7 +1,7 @@
 import { Component, signal, inject, computed, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ToastService } from '../../../core/services/toast.service';
 import { UserService } from '../../../core/services/user.service';
 import { NgxImageCompressService as ImageCompressService } from 'ngx-image-compress';
@@ -66,8 +66,13 @@ export class SignupComponent {
   // ... (existing code)
 
   onImageSelected(event: Event) {
+    // SSR Safety - FileReader only available in browser
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
+    if (input?.files?.[0]) {
       const file = input.files[0];
       
       // التحقق من نوع الملف
@@ -81,6 +86,11 @@ export class SignupComponent {
       reader.onload = (e: ProgressEvent<FileReader>) => {
         const image = e.target?.result as string;
         
+        if (!image) {
+          this.toast.show('فشل تحميل الصورة', 'error');
+          return;
+        }
+        
         // ضغط الصورة: Ratio 50%, Quality 50% (تقليل الحجم للنصف تقريباً)
         this.imageCompress.compressFile(image, -1, 50, 50).then(
           (result: string) => {
@@ -91,8 +101,16 @@ export class SignupComponent {
             const newSize = (result.length * 3) / 4 / 1024;
             console.log(`Image compressed from ${oldSize.toFixed(2)}KB to ${newSize.toFixed(2)}KB`);
           }
-        );
+        ).catch((err) => {
+          console.error('Image compression failed:', err);
+          this.toast.show('فشل ضغط الصورة', 'error');
+        });
       };
+      
+      reader.onerror = () => {
+        this.toast.show('فشل قراءة ملف الصورة', 'error');
+      };
+      
       reader.readAsDataURL(file);
     }
   }
@@ -101,7 +119,7 @@ export class SignupComponent {
     this.profileImage.set(null);
   }
 
-  onSubmit(form: any) {
+  onSubmit(form: NgForm) {
     // 1. التحقق العام
     if (form.invalid) {
       this.toast.show('يرجى مراجعة الحقول ذات الإطار الأحمر', 'error');

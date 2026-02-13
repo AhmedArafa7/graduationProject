@@ -131,7 +131,7 @@
                 <div class="h-full bg-primary animate-pulse" style="width: 85%;"></div>
               </div>
             </div>
-            <p class="text-sm font-medium text-text-secondary dark:text-gray-400 text-center mb-4">القيمة السوقية: {{ (property.price * 0.95) | number }} - {{ (property.price * 1.05) | number }} ج.م</p>
+            <p class="text-sm font-medium text-text-secondary dark:text-gray-400 text-center mb-4">القيمة السوقية: {{ marketValueLow() | number }} - {{ marketValueHigh() | number }} ج.م</p>
             <p class="text-sm text-text-secondary dark:text-gray-400 font-bold mb-2">عوامل مؤثرة:</p>
             <ul class="list-disc list-inside text-sm text-text-primary dark:text-white space-y-1 marker:text-secondary">
               <li>الموقع: حي راقي (+15%)</li>

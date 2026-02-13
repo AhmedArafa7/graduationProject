@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { BlogService } from '../../../core/services/blog.service';
+import { BlogPost } from '../../../core/models/blog-post.model';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
