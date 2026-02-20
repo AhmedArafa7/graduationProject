@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit, PLATFORM_ID, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, PLATFORM_ID, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,14 +13,15 @@ import { AgentPropertiesService } from '../../../core/services/agent-properties.
 import { MessagesService } from '../../../core/services/messages.service';
 import { RatingService } from '../../../core/services/rating.service';
 import { ReportService } from '../../../core/services/report.service';
-// import * as L from 'leaflet'; // Removed static import
+import { Agent } from '../../../core/models/agent.model';
 
 
 @Component({
   selector: 'app-property-details',
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './property-details.component.html',
-  styleUrl: './property-details.component.scss'
+  styleUrl: './property-details.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestroy {
   private toast = inject(ToastService);
@@ -47,9 +48,9 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   activeImage = signal(''); 
 
   // --- Rating & Reviews ---
-  propertyReviews = computed(() => this.ratingService.getReviews(this.property?.id, 'property')());
-  propertyRating = computed(() => this.ratingService.getAverageRating(this.property?.id, 'property')());
-  reviewsCount = computed(() => this.ratingService.getReviewsCount(this.property?.id, 'property')());
+  propertyReviews = computed(() => this.ratingService.getReviews(this.property?.id || '', 'property')());
+  propertyRating = computed(() => this.ratingService.getAverageRating(this.property?.id || '', 'property')());
+  reviewsCount = computed(() => this.ratingService.getReviewsCount(this.property?.id || '', 'property')());
   
   ratingDistribution = computed(() => {
     const reviews = this.propertyReviews();
@@ -75,12 +76,14 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
       return;
     }
 
+    if (!this.property?.id) return;
+
     this.newReview.isSubmitting.set(true);
     
     // Simulate API delay
     setTimeout(() => {
       this.ratingService.addReview(
-        this.property.id,
+        this.property!.id || '',
         'property',
         this.newReview.rating(),
         this.newReview.text(),
@@ -146,33 +149,70 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
     // فحص إذا كان هناك عقار مختار من الشات بوت
     const chatProperty = this.chatbotService.selectedChatProperty();
     
+    // Helper to create a dummy agent
+    const createDummyAgent = (overrides: Partial<Agent> = {}): Agent => ({
+       _id: 'system',
+       firstName: 'System',
+       lastName: 'Agent',
+       email: 'agent@system.com',
+       phone: '123456',
+       profileImage: '/assets/images/logo.png',
+       userType: 'agent',
+       agentProfile: {
+          title: 'AI Assistant',
+          licenseNumber: 'AI-123',
+          company: 'Baytology',
+          experience: '5',
+          specialization: 'General',
+          bio: 'System Agent',
+          rating: 4.8,
+          reviewsCount: 100,
+          activeProperties: 50,
+          verified: true,
+          socialLinks: { facebook: '', linkedin: '', twitter: '' }
+       },
+       ...overrides
+    });
+
     if (chatProperty) {
       // عرض بيانات العقار من الشات بوت
       this.property = {
         id: chatProperty.id?.toString() || id,
         title: `${chatProperty.type || 'عقار'} في ${chatProperty.city || ''}`,
-        location: chatProperty.city || 'غير محدد',
+        location: { city: chatProperty.city || 'غير محدد', address: chatProperty.city || 'غير محدد' },
         type: chatProperty.payment_option === 'rent' ? 'rent' : 'sale',
+        propertyType: chatProperty.type || 'apartment',
         refCode: `API-${chatProperty.id || id}`,
         price: chatProperty.price || 0,
+        currency: 'EGP',
         area: chatProperty.size_sqm || 0,
+        description: `${chatProperty.type || 'عقار'} مميز في ${chatProperty.city || ''} بمساحة ${chatProperty.size_sqm || 0} متر مربع. يحتوي على ${chatProperty.bedrooms || 0} غرف نوم و ${chatProperty.bathrooms || 0} حمام. ${chatProperty.furnished === 'yes' ? 'مفروش بالكامل.' : ''}`,
+        bedrooms: chatProperty.bedrooms || 0,
+        bathrooms: chatProperty.bathrooms || 0,
         beds: chatProperty.bedrooms || 0,
         baths: chatProperty.bathrooms || 0,
-        floor: chatProperty.floor || 'غير محدد',
-        description: `${chatProperty.type || 'عقار'} مميز في ${chatProperty.city || ''} بمساحة ${chatProperty.size_sqm || 0} متر مربع. يحتوي على ${chatProperty.bedrooms || 0} غرف نوم و ${chatProperty.bathrooms || 0} حمام. ${chatProperty.furnished === 'yes' ? 'مفروش بالكامل.' : ''}`,
-        amenities: [
-          { icon: 'home', label: chatProperty.type || 'عقار' },
-          { icon: 'location_city', label: chatProperty.city || 'غير محدد' },
-          ...(chatProperty.furnished === 'yes' ? [{ icon: 'chair', label: 'مفروش' }] : [])
-        ],
+        floor: typeof chatProperty.floor === 'number' ? chatProperty.floor : 0,
+        features: [],
         images: [
           (chatProperty as any).displayImage || 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1000&auto=format&fit=crop',
           'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1000&auto=format&fit=crop',
           'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=1000&auto=format&fit=crop'
         ],
-        agent: {
-           name: 'System Agent', phone: '123456', avatar: '/assets/images/logo.png', title: 'AI Assistant', experience: '5', deals: 50, rating: 4.8
-        }
+        amenities: [
+          { icon: 'home', label: chatProperty.type || 'عقار' },
+          { icon: 'location_city', label: chatProperty.city || 'غير محدد' },
+          ...(chatProperty.furnished === 'yes' ? [{ icon: 'chair', label: 'مفروش' }] : [])
+        ],
+        agent: createDummyAgent({
+           name: 'System Agent', 
+           phone: '123456', 
+           avatar: '/assets/images/logo.png',
+           title: 'AI Assistant', 
+           experience: '5', 
+           deals: 50, 
+           rating: 4.8 
+        }),
+        createdAt: new Date().toISOString()
       };
       this.chatbotService.clearSelectedChatProperty();
       this.updateUI();
@@ -199,20 +239,32 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
           this.property = {
             id: agentProperty.id,
             title: agentProperty.address, 
-            location: agentProperty.address,
+            location: { city: agentProperty.address, address: agentProperty.address },
             type: agentProperty.status === 'للإيجار' ? 'rent' : 'sale',
+            propertyType: 'apartment',
             refCode: `AGT-${agentProperty.id}`,
             price: agentProperty.priceValue ?? 0,
+            currency: 'EGP',
             area: agentProperty.area ?? 0,
+            description: agentProperty.description || 'لا يوجد وصف',
+            bedrooms: agentProperty.bedrooms ?? 0,
+            bathrooms: agentProperty.bathrooms ?? 0,
             beds: agentProperty.bedrooms ?? 0,
             baths: agentProperty.bathrooms ?? 0,
-            floor: agentProperty.floor !== undefined && agentProperty.floor !== null ? `الطابق ${agentProperty.floor}` : 'غير محدد',
-            description: agentProperty.description || 'لا يوجد وصف',
+            floor: typeof agentProperty.floor === 'number' ? agentProperty.floor : 0,
+            features: [],
             amenities: amenitiesList.length > 0 ? amenitiesList : [{ icon: 'home', label: 'عقار سكني' }],
             images: agentProperty.images && agentProperty.images.length > 0 ? agentProperty.images : [agentProperty.image],
-            agent: {
-               name: 'الوكيل الحالي', phone: '', avatar: '/assets/images/user-placeholder.png', title: 'مالك العقار', experience: '2', deals: 10, rating: 4.5
-            }
+            agent: createDummyAgent({
+               name: 'الوكيل الحالي', 
+               phone: '', // Should be filled if available
+               avatar: '/assets/images/user-placeholder.png', 
+               title: 'مالك العقار', 
+               experience: '2', 
+               deals: 10, 
+               rating: 4.5
+            }),
+            createdAt: new Date().toISOString()
           };
           this.updateUI();
         }
@@ -223,21 +275,28 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
         this.propertyService.getPropertyById(id).subscribe({
           next: (serviceProperty) => {
             if (serviceProperty) {
+              const safeId = serviceProperty._id || id;
               this.property = {
-                id: serviceProperty._id,
+                id: safeId,
                 title: serviceProperty.title,
-                location: `${serviceProperty.location.address}، ${serviceProperty.location.city}`,
+                location: serviceProperty.location,
                 type: serviceProperty.type === 'sale' ? 'sale' : 'rent',
-                refCode: serviceProperty.refCode || `BYT-${serviceProperty._id.substring(0,6)}`,
+                propertyType: serviceProperty.propertyType,
+                refCode: serviceProperty.refCode || `BYT-${safeId.substring(0,6)}`,
                 price: serviceProperty.price,
+                currency: serviceProperty.currency,
                 area: serviceProperty.area,
+                description: serviceProperty.description,
+                bedrooms: serviceProperty.bedrooms,
+                bathrooms: serviceProperty.bathrooms,
                 beds: serviceProperty.bedrooms,
                 baths: serviceProperty.bathrooms,
-                floor: serviceProperty.floor || 'غير محدد',
-                description: serviceProperty.description,
+                floor: serviceProperty.floor || 0,
+                features: serviceProperty.features,
                 amenities: serviceProperty.amenities || serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
                 images: serviceProperty.images,
-                agent: serviceProperty.agent
+                agent: serviceProperty.agent, // Assuming this is fully populated or matches Agent interface
+                createdAt: serviceProperty.createdAt
               };
               this.updateUI();
             } else {
@@ -265,7 +324,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
       
       const allProps = this.propertyService.properties();
       this.displayedSimilarProperties = allProps
-        .filter(p => p._id !== this.property.id)
+        .filter(p => p._id !== this.property!.id)
         .slice(0, 3)
         .map(p => ({
             id: p._id,
@@ -363,7 +422,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
 
     // إضافة marker
     this.L.marker(coords, { icon: customIcon }).addTo(this.locationMap)
-      .bindPopup(`<b>${this.property?.title || 'الموقع'}</b><br>${location}`)
+      .bindPopup(`<b>${this.property?.title || 'الموقع'}</b><br>${locationStr}`)
       .openPopup();
   }
 
@@ -401,7 +460,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   contactAgent(method: 'call' | 'whatsapp') {
-    if (!isPlatformBrowser(this.platformId) || !this.property.agent) return;
+    if (!isPlatformBrowser(this.platformId) || !this.property || !this.property.agent) return;
     
     if (method === 'call') {
       window.open(`tel:${this.property.agent.phone}`, '_self');
@@ -414,14 +473,15 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
 
     // فتح محادثة مع الوكيل
   openChatWithAgent() {
-    if (!this.property.agent) return;
+    if (!this.property || !this.property.agent) return;
 
     // Prefer agent ID from backend object, fallback to mock logic if needed
     const agentId = (this.property.agent as any)._id || (this.property.agent as any).id || 'system';
+    const agentName = this.property.agent.name || this.property.agent.firstName + ' ' + this.property.agent.lastName || 'Agent';
 
     this.messagesService.startChatWithAgent(
-      this.property.agent.name,
-      this.property.agent.avatar || '',
+      agentName,
+      this.property.agent.avatar || this.property.agent.profileImage || '',
       agentId
     ).subscribe({
       next: (conversationId) => {

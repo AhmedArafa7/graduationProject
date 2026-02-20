@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,12 +8,19 @@ import { ToastService } from '../../../core/services/toast.service';
 import { PropertyService } from '../../../core/services/property.service';
 import { Property } from '../../../core/models/property.model';
 import { OfflineAiService } from '../../../core/services/offline-ai.service';
+import { UserService } from '../../../core/services/user.service';
+import { SavedSearchService } from '../../../core/services/saved-search.service';
+
+import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader.component';
+import { ImageFallbackDirective } from '../../../shared/directives/image-fallback.directive';
+import { PropertyCardComponent } from '../../../shared/components/property-card/property-card.component';
 
 @Component({
   selector: 'app-search-list',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, SkeletonLoaderComponent, ImageFallbackDirective, PropertyCardComponent],
   templateUrl: './search-list.component.html',
-  styleUrl: './search-list.component.scss'
+  styleUrl: './search-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SearchListComponent {
   private router = inject(Router);
@@ -22,6 +29,8 @@ export class SearchListComponent {
   private toast = inject(ToastService);
   private propertyService = inject(PropertyService);
   private offlineAi = inject(OfflineAiService);
+  private userService = inject(UserService);
+  private savedSearchService = inject(SavedSearchService);
 
   viewMode = signal<'grid' | 'list'>('grid');
   currentPage = signal(1);
@@ -147,7 +156,19 @@ export class SearchListComponent {
   }
 
   saveSearch() {
-    this.toast.show('تم حفظ البحث بنجاح! سنرسل لك تنبيهات للعقارات الجديدة.', 'success');
+    if (!this.userService.isLoggedIn()) {
+      this.toast.show('يرجى تسجيل الدخول أولاً لحفظ البحث', 'info');
+      return;
+    }
+    
+    this.savedSearchService.saveSearch({
+      userId: this.userService.userData()._id,
+      name: `بحث ${new Date().toLocaleDateString('ar-EG')}`,
+      criteria: this.localFilters
+    }).subscribe({
+      next: () => this.toast.show('تم حفظ البحث بنجاح! سنرسل لك تنبيهات للعقارات الجديدة.', 'success'),
+      error: () => this.toast.show('حدث خطأ أثناء حفظ البحث', 'error')
+    });
   }
 
   toggleMobileFilters() {

@@ -16,7 +16,7 @@ export class AgentSidebarComponent {
   private router = inject(Router);
 
   // الصفحة الحالية
-  currentPage = input<'overview' | 'properties' | 'messages' | 'profile' | 'favorites' | 'notifications'>('overview');
+  currentPage = input<'overview' | 'properties' | 'messages' | 'profile' | 'favorites' | 'notifications' | 'saved-searches'>('overview');
 
   // بيانات المستخدم
   userAvatar = computed(() => this.userService.getProfileImage());

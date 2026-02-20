@@ -58,6 +58,13 @@
         <span class="material-symbols-outlined">favorite</span>
         <p class="text-sm font-medium">المفضلة</p>
       </a>
+
+      <a routerLink="/saved-searches" (click)="close()"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors"
+         [class]="currentPage() === 'saved-searches' ? 'bg-white/20' : 'hover:bg-white/10'">
+        <span class="material-symbols-outlined">bookmark</span>
+        <p class="text-sm font-medium">عمليات البحث المحفوظة</p>
+      </a>
     }
 
     <!-- للجميع: الرسائل -->

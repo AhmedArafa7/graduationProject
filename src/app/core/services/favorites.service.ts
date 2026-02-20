@@ -22,7 +22,7 @@ export class FavoritesService {
     const allProperties = this.propertyService.properties();
     
     return allProperties
-      .filter(p => ids.includes(p._id))
+      .filter(p => p._id && ids.includes(p._id))
       .map(p => this.mapToFavorite(p));
   });
   
@@ -62,7 +62,7 @@ export class FavoritesService {
   // تحويل Property إلى FavoriteProperty
   private mapToFavorite(p: Property): FavoriteProperty {
     return {
-      id: p._id,
+      id: p._id || p.id || '',
       image: p.coverImage || (p.images && p.images[0]) || '',
       price: p.price,
       address: `${p.location.address || ''}، ${p.location.city || ''}`,

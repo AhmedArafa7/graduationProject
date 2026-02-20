@@ -31,6 +31,8 @@ export interface Property {
   propertyType: string;
   bedrooms: number;
   bathrooms: number;
+  beds?: number; // Alias for frontend
+  baths?: number; // Alias for frontend
   floor?: number;
   images: string[];
   coverImage?: string;

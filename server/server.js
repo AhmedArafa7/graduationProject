@@ -234,6 +234,16 @@ const ConversationSchema = new Schema({
 });
 const Conversation = mongoose.model('Conversation', ConversationSchema);
 
+// Saved Search Schema
+const SavedSearchSchema = new mongoose.Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  name: { type: String, default: 'بحث جديد' },
+  criteria: { type: Object, required: true }, // Stores filters like type, price, location...
+  createdAt: { type: Date, default: Date.now }
+});
+const SavedSearch = mongoose.model('SavedSearch', SavedSearchSchema);
+
+
 // ==========================================
 // 4. GENERIC CRUD ROUTES (مولد الروابط التلقائي)
 // ==========================================
@@ -353,6 +363,7 @@ app.use('/api/posts', createCrudRoutes(Post));
 app.use('/api/messages', createCrudRoutes(Message));
 app.use('/api/reviews', createCrudRoutes(Review));
 app.use('/api/notifications', createCrudRoutes(Notification));
+app.use('/api/saved-searches', createCrudRoutes(SavedSearch));
 app.use('/api/faqs', createCrudRoutes(Faq));
 
 // Chat Routes

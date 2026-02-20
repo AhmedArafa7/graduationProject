@@ -242,74 +242,28 @@
           </div>
         }
 
-        @for (prop of filteredProperties(); track prop._id) {
-          <div class="bg-card-background dark:bg-background-dark border border-border-color dark:border-gray-700 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col relative group">
-              
-              <div class="relative cursor-pointer" [routerLink]="['/property', prop._id]">
-                <div class="w-full bg-center bg-no-repeat aspect-video bg-cover group-hover:scale-105 transition-transform duration-500" 
-                     [style.background-image]="'url(' + prop.images[0] + ')'">
-                </div>
-                
-                <div class="absolute top-3 right-3 flex gap-2">
-                  @if (prop.tag) {
-                    <span class="text-xs font-bold px-2 py-1 rounded-full bg-secondary text-white shadow-sm">{{prop.tag}}</span>
-                  }
-                </div>
-                
-                <button (click)="toggleFavorite($event, prop._id)" 
-                        class="absolute top-3 left-3 bg-black/30 hover:bg-white rounded-full p-2 transition-all group/fav">
-                  <span class="material-symbols-outlined text-xl transition-colors"
-                        [class]="globalState.isFavorite(prop._id || '') ? 'text-red-500 font-variation-filled' : 'text-white group-hover/fav:text-red-500'">
-                    {{ globalState.isFavorite(prop._id || '') ? 'favorite' : 'favorite_border' }}
-                  </span>
-                </button>
-              </div>
-
-              <div class="p-4 flex flex-col gap-3 flex-grow cursor-pointer" [routerLink]="['/property', prop._id]">
-                <div class="flex justify-between items-start">
-                  <h3 class="text-text-primary dark:text-white text-lg font-bold truncate">{{prop.title}}</h3>
-                  <p class="text-primary font-bold text-lg whitespace-nowrap">{{prop.price}} ج.م</p>
-                </div>
-                
-                <div class="text-text-secondary dark:text-gray-400 text-sm flex items-center gap-1">
-                  <span class="material-symbols-outlined text-base">location_on</span> {{prop.location.city}}، {{prop.location.address}}
-                </div>
-                
-                <div class="flex items-center gap-4 text-text-secondary dark:text-gray-400 text-sm border-t border-b border-border-color dark:border-gray-700 py-2 my-1">
-                  <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">bed</span> {{prop.bedrooms}} غرف</span>
-                  <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">bathtub</span> {{prop.bathrooms}} حمام</span>
-                  <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">square_foot</span> {{prop.area}}</span>
-                </div>
-
-                @if (prop.aiAnalysis) {
-                  <div class="flex flex-col gap-2">
-                    <label class="text-text-secondary dark:text-gray-400 text-xs font-medium flex items-center gap-1">
-                      <span class="material-symbols-outlined text-sm text-primary">analytics</span> تحليل السعر
-                    </label>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                      <div class="h-1.5 rounded-full" 
-                           [style.width.%]="prop.aiAnalysis.percentage"
-                           [class]="prop.aiAnalysis.status === 'fair' ? 'bg-green-500' : (prop.aiAnalysis.status === 'high' ? 'bg-orange-500' : 'bg-blue-500')">
-                      </div>
-                    </div>
-                    <div class="flex justify-between text-xs text-text-secondary dark:text-gray-400">
-                      <span>منخفض</span>
-                      <span [class]="prop.aiAnalysis.status === 'fair' ? 'text-green-600 font-bold' : ''">{{prop.aiAnalysis.label}}</span>
-                      <span>مرتفع</span>
-                    </div>
+        @if (isLoading()) {
+          @for (i of [1,2,3,4,5,6]; track i) {
+             <div class="bg-card-background dark:bg-background-dark border border-border-color dark:border-gray-700 rounded-xl overflow-hidden shadow-sm h-full">
+                <app-skeleton-loader height="200px" className="w-full"></app-skeleton-loader>
+                <div class="p-4 flex flex-col gap-3">
+                  <app-skeleton-loader height="24px" width="70%"></app-skeleton-loader>
+                  <app-skeleton-loader height="16px" width="90%"></app-skeleton-loader>
+                  <div class="flex gap-4 border-t border-b border-gray-100 py-2">
+                     <app-skeleton-loader height="20px" width="30%"></app-skeleton-loader>
+                     <app-skeleton-loader height="20px" width="30%"></app-skeleton-loader>
                   </div>
-                }
-              </div>
-
-              <div class="p-4 border-t border-border-color dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
-                <div class="flex items-center gap-2">
-                  <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8 border border-gray-200" 
-                       [style.background-image]="'url(' + (prop.agent.profileImage || '/assets/images/user-placeholder.png') + ')'"></div>
-                  <span class="text-text-secondary dark:text-gray-400 text-sm font-medium">{{prop.agent.agentProfile.title}}</span>
+                  <div class="flex justify-between items-center">
+                     <app-skeleton-loader height="32px" width="32px" className="rounded-full"></app-skeleton-loader>
+                     <app-skeleton-loader height="36px" width="80px" className="rounded-lg"></app-skeleton-loader>
+                  </div>
                 </div>
-                <button [routerLink]="['/property', prop._id]" class="px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors">التفاصيل</button>
-              </div>
-            </div>
+             </div>
+          }
+        } @else {
+          @for (prop of filteredProperties(); track prop._id || prop.id) {
+            <app-property-card [property]="prop"></app-property-card>
+          }
         }
 
         <div class="hidden md:flex md:col-span-full bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden h-64 relative group cursor-pointer" routerLink="/search/map">

@@ -56,37 +56,27 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-      @for (prop of featuredProperties(); track prop.id) {
-        <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col h-full" [routerLink]="['/property', prop.id]">
-          <div class="relative h-64 overflow-hidden">
-            <div class="absolute top-4 right-4 bg-white/90 backdrop-blur text-primary text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm">
-              {{prop.tag}}
-            </div>
-            
-            <button (click)="toggleFavorite($event, prop.id)" 
-                    class="absolute top-4 left-4 z-20 p-2 rounded-full bg-white/80 backdrop-blur hover:bg-white transition-all shadow-sm group/fav">
-              <span class="material-symbols-outlined text-xl transition-all duration-300"
-                    [class]="isFavorite(prop.id) ? 'text-red-500' : 'text-gray-500 group-hover/fav:text-red-500'">
-                {{ isFavorite(prop.id) ? 'favorite' : 'favorite_border' }}
-              </span>
-            </button>
-
-            <img [src]="prop.image" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" [alt]="prop.title">
-            <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent"></div>
-            <p class="absolute bottom-4 right-4 text-white text-xl font-bold font-display tracking-wide">{{prop.price}} ج.م</p>
-          </div>
-          <div class="p-5 flex flex-col flex-1">
-            <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors">{{prop.title}}</h3>
-            <p class="text-sm text-gray-500 flex items-center gap-1 mb-4">
-              <span class="material-symbols-outlined text-base">location_on</span> {{prop.location}}
-            </p>
-            <div class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-600">
-              <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md"><span class="material-symbols-outlined text-lg text-secondary">bed</span> <strong>{{prop.beds}}</strong></span>
-              <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md"><span class="material-symbols-outlined text-lg text-secondary">bathtub</span> <strong>{{prop.baths}}</strong></span>
-              <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md"><span class="material-symbols-outlined text-lg text-secondary">aspect_ratio</span> <strong>{{prop.area}}</strong> م²</span>
+      @if (isLoading()) {
+        @for (i of [1,2,3,4]; track i) {
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-full">
+            <app-skeleton-loader height="256px" className="w-full"></app-skeleton-loader>
+            <div class="p-5 flex flex-col gap-3">
+              <app-skeleton-loader height="24px" width="70%"></app-skeleton-loader>
+              <app-skeleton-loader height="16px" width="40%"></app-skeleton-loader>
+              <div class="flex justify-between mt-4">
+                <app-skeleton-loader height="20px" width="60px"></app-skeleton-loader>
+                <app-skeleton-loader height="20px" width="60px"></app-skeleton-loader>
+                <app-skeleton-loader height="20px" width="60px"></app-skeleton-loader>
+              </div>
             </div>
           </div>
-        </div>
+        }
+      } @else {
+        @for (prop of featuredProperties(); track prop.id) {
+        @for (prop of featuredProperties(); track prop.id) {
+          <app-property-card [property]="prop"></app-property-card>
+        }
+        }
       }
     </div>
   </div>

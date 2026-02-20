@@ -1,0 +1,66 @@
+<div class="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col h-full relative" [routerLink]="['/property', property.id || property._id]">
+  
+  <!-- Image Container -->
+  <div class="relative h-64 overflow-hidden">
+    <!-- Tag -->
+    <div *ngIf="property.tag" class="absolute top-4 right-4 bg-white/90 backdrop-blur text-primary text-xs font-bold px-3 py-1.5 rounded-full z-10 shadow-sm">
+      {{property.tag}}
+    </div>
+    
+    <!-- Favorite Button -->
+    <button (click)="toggleFavorite($event)" 
+            class="absolute top-4 left-4 z-20 p-2 rounded-full bg-white/80 backdrop-blur hover:bg-white transition-all shadow-sm group/fav">
+      <span class="material-symbols-outlined text-xl transition-all duration-300"
+            [class]="isFavorite() ? 'text-red-500' : 'text-gray-500 group-hover/fav:text-red-500'">
+        {{ isFavorite() ? 'favorite' : 'favorite_border' }}
+      </span>
+    </button>
+
+    <!-- Compare Button (New) -->
+    <button *ngIf="showCompare" (click)="toggleCompare($event)" 
+            class="absolute top-16 left-4 z-20 p-2 rounded-full bg-white/80 backdrop-blur hover:bg-white transition-all shadow-sm group/compare"
+            [title]="isInCompare() ? 'إزالة من المقارنة' : 'إضافة للمقارنة'">
+      <span class="material-symbols-outlined text-xl transition-all duration-300"
+            [class]="isInCompare() ? 'text-secondary' : 'text-gray-500 group-hover/compare:text-secondary'">
+        {{ isInCompare() ? 'compare_arrows' : 'add_circle_outline' }}
+      </span>
+    </button>
+
+    <!-- Image -->
+    <img [src]="property.image || property.coverImage || 'assets/images/placeholder.jpg'" 
+         appImageFallback 
+         class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" 
+         [alt]="property.title">
+         
+    <!-- Overlay Gradient -->
+    <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent"></div>
+    
+    <!-- Price -->
+    <p class="absolute bottom-4 right-4 text-white text-xl font-bold font-display tracking-wide">
+      {{property.price}} <span *ngIf="!property.price.toString().includes('ج.م')">ج.م</span>
+    </p>
+  </div>
+
+  <!-- Content -->
+  <div class="p-5 flex flex-col flex-1">
+    <h3 class="text-lg font-bold text-gray-900 mb-1 line-clamp-1 group-hover:text-primary transition-colors">{{property.title}}</h3>
+    <p class="text-sm text-gray-500 flex items-center gap-1 mb-4">
+      <span class="material-symbols-outlined text-base">location_on</span> {{property.location?.address || property.location}}
+    </p>
+    
+    <div class="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-600">
+      <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md">
+        <span class="material-symbols-outlined text-lg text-secondary">bed</span> 
+        <strong>{{property.beds || property.bedrooms}}</strong>
+      </span>
+      <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md">
+        <span class="material-symbols-outlined text-lg text-secondary">bathtub</span> 
+        <strong>{{property.baths || property.bathrooms}}</strong>
+      </span>
+      <span class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md">
+        <span class="material-symbols-outlined text-lg text-secondary">aspect_ratio</span> 
+        <strong>{{property.area}}</strong> م²
+      </span>
+    </div>
+  </div>
+</div>

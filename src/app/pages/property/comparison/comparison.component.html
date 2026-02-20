@@ -1,0 +1,110 @@
+<div class="container mx-auto px-4 py-10 min-h-screen">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">مقارنة العقارات</h1>
+    <button (click)="clearComparison()" class="text-red-500 hover:text-red-700 font-medium">مسح المقارنة</button>
+  </div>
+
+  @if (properties().length === 0) {
+    <div class="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+      <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">compare_arrows</span>
+      <h2 class="text-xl font-bold text-gray-600 mb-2">لا توجد عقارات في المقارنة</h2>
+      <p class="text-gray-500 mb-6">أضف عقارات من صفحة البحث للمقارنة بينها.</p>
+      <a routerLink="/search" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">تصفح العقارات</a>
+    </div>
+  } @else {
+    <div class="overflow-x-auto pb-4">
+      <table class="w-full text-center border-collapse bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <thead>
+          <tr class="bg-gray-50 dark:bg-gray-700/50">
+            <th class="p-4 text-start min-w-[200px]">المواصفات</th>
+            @for (prop of properties(); track prop.id) {
+              <th class="p-4 min-w-[250px] relative group">
+                <button (click)="removeProperty(prop.id)" class="absolute top-2 left-2 text-gray-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+                <div class="relative h-40 rounded-lg overflow-hidden mb-3">
+                  <img [src]="prop.image || prop.coverImage" class="w-full h-full object-cover" [alt]="prop.title">
+                  <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                    <div class="text-white font-bold text-lg">{{prop.price}}</div>
+                  </div>
+                </div>
+                <a [routerLink]="['/property', prop.id]" class="text-lg font-bold hover:text-primary transition-colors block mb-1">{{prop.title}}</a>
+                <div class="text-sm text-gray-500">{{prop.location.city || prop.location}}</div>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+          <!-- Price -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">السعر</td>
+            @for (prop of properties(); track prop.id) {
+              <td class="p-4 font-bold text-primary text-lg">{{prop.price}}</td>
+            }
+          </tr>
+          
+          <!-- Area -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">المساحة</td>
+            @for (prop of properties(); track prop.id) {
+              <td class="p-4 flex justify-center items-center gap-1">
+                <span class="material-symbols-outlined text-gray-400">square_foot</span>
+                {{prop.area}} م²
+              </td>
+            }
+          </tr>
+
+          <!-- Rooms -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">الغرف</td>
+            @for (prop of properties(); track prop.id) {
+              <td class="p-4">
+                <div class="flex justify-center gap-4 text-sm">
+                   <span class="flex items-center gap-1"><span class="font-bold">{{prop.bedrooms}}</span> نوم</span>
+                   <span class="flex items-center gap-1"><span class="font-bold">{{prop.bathrooms}}</span> حمام</span>
+                </div>
+              </td>
+            }
+          </tr>
+
+          <!-- Location -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">الموقع</td>
+            @for (prop of properties(); track prop.id) {
+              <td class="p-4 text-gray-600">{{prop.location.address || prop.location}}</td>
+            }
+          </tr>
+
+          <!-- Amenities -->
+           <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50 align-top">المميزات</td>
+            @for (prop of properties(); track prop.id) {
+              <td class="p-4">
+                <div class="flex flex-wrap gap-2 justify-center">
+                  @if (prop.features && prop.features.length) {
+                    @for (feature of prop.features.slice(0, 5); track feature) {
+                      <span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-600 dark:text-gray-300">{{feature}}</span>
+                    }
+                  } @else {
+                     <span class="text-gray-400 text-xs">-</span>
+                  }
+                </div>
+              </td>
+            }
+          </tr>
+
+          <!-- Action -->
+          <tr>
+             <td class="p-4 bg-gray-50/50"></td>
+             @for (prop of properties(); track prop.id) {
+               <td class="p-4">
+                 <button class="w-full py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-bold transition-colors shadow-sm">تواصل الآن</button>
+               </td>
+             }
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

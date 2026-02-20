@@ -36,6 +36,12 @@ export const routes: Routes = [
         title: 'تفاصيل العقار',
         loadComponent: () => import('./pages/property/property-details/property-details.component').then(m => m.PropertyDetailsComponent) 
       },
+      // المقارنة
+      { 
+        path: 'compare', 
+        title: 'مقارنة العقارات',
+        loadComponent: () => import('./pages/property/comparison/comparison.component').then(m => m.ComparisonComponent) 
+      },
       // الوكلاء
       { 
         path: 'agents', 
@@ -139,6 +145,12 @@ export const routes: Routes = [
     path: 'notifications', 
     title: 'الإشعارات',
     loadComponent: () => import('./pages/user/notifications/notifications.component').then(m => m.NotificationsComponent) 
+  },
+  // صفحة عمليات البحث المحفوظة
+  { 
+    path: 'saved-searches', 
+    title: 'عمليات البحث المحفوظة',
+    loadComponent: () => import('./pages/user/saved-searches/saved-searches.component').then(m => m.SavedSearchesComponent) 
   },
 
   // 3. صفحات المصادقة (Auth Pages) - بدون الهيدر الرئيسي

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
@@ -12,6 +12,34 @@ import { ComparisonProperty, ComparisonResult } from '../models/comparison.model
 export class ComparisonService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/ai/log`;
+
+  // State
+  compareList = signal<any[]>([]);
+  maxItems = 3;
+
+  addToCompare(property: any) {
+    const list = this.compareList();
+    if (list.length >= this.maxItems) {
+      // Toast notification should be here ideally, but service doesn't have ToastService injected yet commonly
+      return; 
+    }
+    if (!this.isInCompare(property.id || property._id)) {
+      this.compareList.update(l => [...l, property]);
+    }
+  }
+
+  removeFromCompare(id: string) {
+    this.compareList.update(l => l.filter(p => (p.id || p._id) !== id));
+  }
+
+  isInCompare(id: string): boolean {
+    return this.compareList().some(p => (p.id || p._id) === id);
+  }
+
+  clearCompare() {
+    this.compareList.set([]);
+  }
+
 
   // --- Local AI Engine (Heuristics) ---
 

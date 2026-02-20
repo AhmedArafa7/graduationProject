@@ -25,4 +25,10 @@ export interface Agent {
       twitter: string;
     };
   };
+  // Optional flat fields for UI/Mocking
+  name?: string;
+  title?: string;
+  experience?: string;
+  deals?: number;
+  rating?: number;
 }

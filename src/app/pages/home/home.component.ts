@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,11 +8,16 @@ import { AgentsService } from '../../core/services/agents.service';
 import { TestimonialsService } from '../../core/services/testimonials.service';
 import { BlogService } from '../../core/services/blog.service';
 
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { ImageFallbackDirective } from '../../shared/directives/image-fallback.directive';
+import { PropertyCardComponent } from '../../shared/components/property-card/property-card.component';
+
 @Component({
   selector: 'app-home',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, SkeletonLoaderComponent, ImageFallbackDirective, PropertyCardComponent],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  styleUrl: './home.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent {
   private router = inject(Router);
@@ -25,6 +30,12 @@ export class HomeComponent {
   // State Signals
   searchType = signal<'buy' | 'rent'>('buy');
   searchQuery = signal('');
+  isLoading = signal(true); // Default to loading until data is ready
+
+  constructor() {
+    // Simulate loading/wait for signals
+    setTimeout(() => this.isLoading.set(false), 800);
+  }
 
   // Data from Services
   featuredProperties = computed(() => this.propertyService.getFeaturedProperties().map(p => ({

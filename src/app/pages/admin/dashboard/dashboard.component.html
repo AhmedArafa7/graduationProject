@@ -55,9 +55,9 @@
                 </td>
                 <td class="p-4 flex justify-center gap-2">
                   @if (report.property) {
-                    <button (click)="deleteProperty(report.property._id)" 
-                            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="حذف العقار وحل البلاغ">
+                    <button (click)="deleteProperty(report.property._id || report.property)"
+                    class="text-red-500 hover:text-red-700 transition-colors"
+                    title="حذف العقار"> وحل البلاغ">
                       <span class="material-symbols-outlined">delete_forever</span>
                     </button>
                     <button (click)="banUser(report.property.agent)" 
