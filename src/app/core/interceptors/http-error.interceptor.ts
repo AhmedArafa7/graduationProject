@@ -21,8 +21,11 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
         message = 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.';
       }
 
+      // Check if it's a silent request (used for background pings)
+      const isSilentCheck = req.headers.has('X-Silent-Check');
+
       // Only show toast for non-GET requests or critical errors to avoid spamming
-      if (req.method !== 'GET' || error.status === 0 || error.status >= 500) {
+      if (!isSilentCheck && (req.method !== 'GET' || error.status === 0 || error.status >= 500)) {
          toast.show(message, 'error');
       }
       

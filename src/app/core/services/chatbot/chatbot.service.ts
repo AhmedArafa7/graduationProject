@@ -57,10 +57,13 @@ export class ChatbotService {
   async checkConnection(): Promise<boolean> {
     try {
       if (!this.API_URL) return false;
-      // Fetch uses only base URL part if needed, or we just trust it for now.
-      // Simplification: Check root API which we know exists
-      const response = await fetch(`${environment.apiUrl}/`);
-      if (response.ok) {
+      const response = await firstValueFrom(
+        this.http.get(`${environment.apiUrl}/`, {
+          headers: { 'X-Silent-Check': 'true' },
+          observe: 'response',
+        })
+      );
+      if (response.status >= 200 && response.status < 300) {
         this.isConnected.set(true);
         return true;
       }
@@ -89,6 +92,9 @@ export class ChatbotService {
           ...response.filters
         }));
       }
+      
+      // حفظ المحادثة في الداتا بيز إذا تم تحديد رابط الـ API
+      await this.saveHistory(message, response.message || '');
       
       return response;
 
@@ -144,5 +150,26 @@ export class ChatbotService {
       // تجاهل الخطأ إذا فشل المسح
     }
     this.currentFilters.set({});
+  }
+
+  // حفظ تاريخ المحادثة في الداتا بيز
+  private async saveHistory(userMessage: string, aiResponse: string): Promise<void> {
+    if (!environment.chatHistoryApiUrl) {
+      console.warn('chatHistoryApiUrl is not defined in environment. Skipping history save.');
+      return;
+    }
+
+    try {
+      await firstValueFrom(
+        this.http.post(environment.chatHistoryApiUrl, {
+          sessionId: this.sessionId,
+          userMessage: userMessage,
+          aiResponse: aiResponse,
+          timestamp: new Date().toISOString()
+        })
+      );
+    } catch (e) {
+      console.error('Failed to save chat history', e);
+    }
   }
 }

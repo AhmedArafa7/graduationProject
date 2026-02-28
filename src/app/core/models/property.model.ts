@@ -37,7 +37,7 @@ export interface Property {
   images: string[];
   coverImage?: string;
   features: string[];
-  agent: Agent; // Populated agent
+  agent?: Agent; // Populated agent
   createdAt: string;
   isFeatured?: boolean;
   status?: string;

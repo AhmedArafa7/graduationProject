@@ -10,14 +10,15 @@ import { Property } from '../../../core/models/property.model';
 import { OfflineAiService } from '../../../core/services/offline-ai.service';
 import { UserService } from '../../../core/services/user.service';
 import { SavedSearchService } from '../../../core/services/saved-search.service';
+import { SearchHistoryService } from '../../../core/services/search-history.service';
+import { ImageSearchService } from '../../../core/services/image-search.service';
 
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader.component';
-import { ImageFallbackDirective } from '../../../shared/directives/image-fallback.directive';
 import { PropertyCardComponent } from '../../../shared/components/property-card/property-card.component';
 
 @Component({
   selector: 'app-search-list',
-  imports: [CommonModule, RouterLink, FormsModule, SkeletonLoaderComponent, ImageFallbackDirective, PropertyCardComponent],
+  imports: [CommonModule, RouterLink, FormsModule, SkeletonLoaderComponent, PropertyCardComponent],
   templateUrl: './search-list.component.html',
   styleUrl: './search-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,9 +38,14 @@ export class SearchListComponent {
   isLoading = signal(false);
   isMobileFiltersOpen = signal(false); // Mobile Filter Drawer State
   
-  // Smart Search
+  // Smart Search & History
   smartSearchQuery = signal('');
   aiAnalysisResult = signal<string | null>(null);
+  
+  public searchHistory = inject(SearchHistoryService);
+  public imageSearch = inject(ImageSearchService);
+  
+  showHistoryDropdown = signal(false);
 
   // Local Filters
   localFilters: SearchFilters;
@@ -59,6 +65,10 @@ export class SearchListComponent {
           this.localFilters.transactionType = 'rent';
       } else if (t === 'buy' || t === 'sale') {
           this.localFilters.transactionType = 'buy';
+      } else if (Object.keys(params).length === 0) {
+          // Reset filters if navigating directly to /search without parameters
+          this.globalState.resetFilters();
+          this.localFilters = { ...this.globalState.searchFilters() };
       } else {
           // If no param or unknown, reset to 'all'
           this.localFilters.transactionType = 'all';
@@ -118,6 +128,10 @@ export class SearchListComponent {
 
     this.isLoading.set(true);
     
+    // Save to history
+    this.searchHistory.addTextSearch(query);
+    this.showHistoryDropdown.set(false);
+
     // Direct call without delay
     const analysis = this.offlineAi.analyze(query);
     
@@ -142,6 +156,51 @@ export class SearchListComponent {
     }
     
     this.isLoading.set(false);
+  }
+
+  // --- Image Search Handlers ---
+  triggerImageUpload() {
+    const fileInput = document.getElementById('imageSearchInput') as HTMLInputElement;
+    if (fileInput) fileInput.click();
+  }
+
+  async onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    this.showHistoryDropdown.set(false);
+    
+    // Use the service to compress and upload
+    const result = await this.imageSearch.processAndSearchImage(file);
+    
+    if (result) {
+       this.toast.show('تم البحث بالصورة بنجاح', 'success');
+       if (result.aiAnalysis) {
+          this.aiAnalysisResult.set(result.aiAnalysis);
+       }
+       // Process `result.matches` here if backend returns property matches
+       // For now, it just shows the success message and analysis.
+       // In a real app, we'd update `properties` signal or apply a special filter.
+    }
+    
+    // Reset input
+    input.value = '';
+  }
+  
+  applyHistoryItem(item: any) {
+     this.showHistoryDropdown.set(false);
+     if (item.type === 'text') {
+        this.smartSearchQuery.set(item.query);
+        this.onSmartSearch();
+     } else {
+        // For image history, we bypass re-upload and just say we are searching it again
+        this.toast.show('جاري البحث بالصورة المحفوظة...', 'info');
+        // Simulate re-search
+        setTimeout(() => {
+           this.aiAnalysisResult.set('تم استرجاع نتائج بحث الصورة المحفوظة.');
+        }, 1000);
+     }
   }
 
   // ... setView ...

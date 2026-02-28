@@ -148,31 +148,6 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   loadProperty(id: string) {
     // فحص إذا كان هناك عقار مختار من الشات بوت
     const chatProperty = this.chatbotService.selectedChatProperty();
-    
-    // Helper to create a dummy agent
-    const createDummyAgent = (overrides: Partial<Agent> = {}): Agent => ({
-       _id: 'system',
-       firstName: 'System',
-       lastName: 'Agent',
-       email: 'agent@system.com',
-       phone: '123456',
-       profileImage: '/assets/images/logo.png',
-       userType: 'agent',
-       agentProfile: {
-          title: 'AI Assistant',
-          licenseNumber: 'AI-123',
-          company: 'Baytology',
-          experience: '5',
-          specialization: 'General',
-          bio: 'System Agent',
-          rating: 4.8,
-          reviewsCount: 100,
-          activeProperties: 50,
-          verified: true,
-          socialLinks: { facebook: '', linkedin: '', twitter: '' }
-       },
-       ...overrides
-    });
 
     if (chatProperty) {
       // عرض بيانات العقار من الشات بوت
@@ -203,15 +178,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
           { icon: 'location_city', label: chatProperty.city || 'غير محدد' },
           ...(chatProperty.furnished === 'yes' ? [{ icon: 'chair', label: 'مفروش' }] : [])
         ],
-        agent: createDummyAgent({
-           name: 'System Agent', 
-           phone: '123456', 
-           avatar: '/assets/images/logo.png',
-           title: 'AI Assistant', 
-           experience: '5', 
-           deals: 50, 
-           rating: 4.8 
-        }),
+        agent: undefined,
         createdAt: new Date().toISOString()
       };
       this.chatbotService.clearSelectedChatProperty();
@@ -255,15 +222,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
             features: [],
             amenities: amenitiesList.length > 0 ? amenitiesList : [{ icon: 'home', label: 'عقار سكني' }],
             images: agentProperty.images && agentProperty.images.length > 0 ? agentProperty.images : [agentProperty.image],
-            agent: createDummyAgent({
-               name: 'الوكيل الحالي', 
-               phone: '', // Should be filled if available
-               avatar: '/assets/images/user-placeholder.png', 
-               title: 'مالك العقار', 
-               experience: '2', 
-               deals: 10, 
-               rating: 4.5
-            }),
+            agent: undefined,
             createdAt: new Date().toISOString()
           };
           this.updateUI();
@@ -300,15 +259,14 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
               };
               this.updateUI();
             } else {
-               // Fallback if ID not found, load first one (Safeguard)
-               // Note: This relies on properties() being loaded, which might not be true if we came here directly.
-               // Ideally we should show a 404.
-               console.warn('Property not found in service');
+               this.toast.show('العقار غير موجود', 'error');
+               this.router.navigate(['/not-found']);
             }
           },
           error: (err) => {
              console.error('Failed to load property details', err);
              this.toast.show('تعذر تحميل تفاصيل العقار', 'error');
+             this.router.navigate(['/not-found']);
           }
         });
       }

@@ -196,22 +196,30 @@
     }
 
     <div class="relative flex items-center gap-2">
-      <button class="p-2 text-text-secondary hover:text-primary dark:text-gray-400 dark:hover:text-white transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-        <span class="material-symbols-outlined text-xl">mic</span>
+      <button (click)="toggleRecording()"
+              [class.text-red-500]="audioService.isRecording()"
+              [class.animate-pulse]="audioService.isRecording()"
+              class="p-2 text-text-secondary hover:text-primary dark:text-gray-400 dark:hover:text-white transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+        <span class="material-symbols-outlined text-xl">{{ audioService.isRecording() ? 'mic' : 'mic_none' }}</span>
       </button>
       
       <input 
         [(ngModel)]="inputText" 
         (keyup.enter)="sendMessage()"
+        [disabled]="audioService.isRecording() || audioService.isProcessing()"
         type="text" 
-        class="flex-1 bg-background-light dark:bg-gray-900 border border-border-color dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-text-primary dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-text-secondary"
-        placeholder="اكتب رسالتك هنا..."
+        class="flex-1 bg-background-light dark:bg-gray-900 border border-border-color dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm text-text-primary dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-text-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+        [placeholder]="audioService.isRecording() ? 'جارِ التسجيل... (تحدث الآن)' : audioService.isProcessing() ? 'جارِ معالجة الصوت...' : 'اكتب رسالتك هنا...'"
       >
       
       <button (click)="sendMessage()" 
-              [disabled]="!inputText().trim()"
-              class="p-2 bg-primary text-white rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm">
-        <span class="material-symbols-outlined text-xl rtl:rotate-180">send</span>
+              [disabled]="!inputText().trim() || audioService.isProcessing()"
+              class="relative p-2 bg-primary text-white rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm">
+        @if (audioService.isProcessing()) {
+          <span class="material-symbols-outlined text-xl animate-spin">progress_activity</span>
+        } @else {
+          <span class="material-symbols-outlined text-xl rtl:rotate-180">send</span>
+        }
       </button>
     </div>
   </footer>

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   // 1. الصفحات العامة (Public Pages) - تستخدم التصميم الرئيسي
@@ -108,48 +109,56 @@ export const routes: Routes = [
   { 
     path: 'profile', 
     title: 'ملفي الشخصي',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/user/profile/profile.component').then(m => m.ProfileComponent) 
   },
   // لوحة تحكم الوكيل
   { 
     path: 'agent-dashboard', 
     title: 'لوحة تحكم الوكيل',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/agent/agent-dashboard/agent-dashboard.component').then(m => m.AgentDashboardComponent) 
   },
   // إضافة عقار جديد
   { 
     path: 'add-property', 
     title: 'إضافة عقار جديد',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/agent/add-property/add-property.component').then(m => m.AddPropertyComponent) 
   },
   // تعديل عقار
   { 
     path: 'edit-property/:id', 
     title: 'تعديل العقار',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/agent/edit-property/edit-property.component').then(m => m.EditPropertyComponent) 
   },
   // صفحة الرسائل
   { 
     path: 'messages', 
     title: 'رسائلي',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/user/messages/messages.component').then(m => m.MessagesComponent) 
   },
   // صفحة المفضلة
   { 
     path: 'favorites', 
     title: 'المفضلة',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/user/favorites/favorites.component').then(m => m.FavoritesComponent) 
   },
   // صفحة الإشعارات
   { 
     path: 'notifications', 
     title: 'الإشعارات',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/user/notifications/notifications.component').then(m => m.NotificationsComponent) 
   },
   // صفحة عمليات البحث المحفوظة
   { 
     path: 'saved-searches', 
     title: 'عمليات البحث المحفوظة',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/user/saved-searches/saved-searches.component').then(m => m.SavedSearchesComponent) 
   },
 
@@ -181,6 +190,7 @@ export const routes: Routes = [
   { 
     path: 'admin/dashboard', 
     title: 'لوحة تحكم المشرف',
+    // canActivate: [authGuard],
     loadComponent: () => import('./pages/admin/dashboard/dashboard.component').then(m => m.DashboardComponent) 
   },
 

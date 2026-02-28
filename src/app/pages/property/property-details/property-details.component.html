@@ -59,9 +59,31 @@
                 </span>
               </div>
             </div>
-            <div class="flex items-center gap-2 print:hidden">
-              <span class="bg-primary/10 text-primary dark:bg-primary/20 dark:text-white text-xs font-bold px-3 py-1 rounded-full">{{ property!.type === 'sale' ? 'بيع' : 'إيجار' }}</span>
-              <span class="text-text-secondary dark:text-gray-400 text-sm">كود: {{ property!.refCode }}</span>
+            <div class="flex flex-col items-end gap-3 print:hidden">
+              <div class="flex items-center gap-2">
+                <span class="bg-primary/10 text-primary dark:bg-primary/20 dark:text-white text-xs font-bold px-3 py-1 rounded-full">{{ property!.type === 'sale' ? 'بيع' : 'إيجار' }}</span>
+                <span class="text-text-secondary dark:text-gray-400 text-sm">كود: {{ property!.refCode }}</span>
+              </div>
+              
+              <!-- Quick Actions Toolbar -->
+              <div class="flex items-center gap-3 text-text-secondary dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-1.5 rounded-lg border border-gray-100 dark:border-gray-700">
+                <button (click)="shareProperty()" class="p-1.5 hover:bg-white dark:hover:bg-gray-700 hover:text-primary rounded-md transition-all group" title="مشاركة">
+                  <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">share</span>
+                </button>
+                <button (click)="printPage()" class="p-1.5 hover:bg-white dark:hover:bg-gray-700 hover:text-primary rounded-md transition-all group" title="طباعة">
+                  <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">print</span>
+                </button>
+                <button class="p-1.5 hover:bg-white dark:hover:bg-gray-700 hover:text-primary rounded-md transition-all cursor-not-allowed opacity-50 group" title="تحميل PDF">
+                  <span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                </button>
+                <div class="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                <button (click)="toggleReport()" 
+                        class="p-1.5 rounded-md transition-all group flex items-center gap-1"
+                        [ngClass]="{'text-red-500 bg-red-50 dark:bg-red-900/30': isReported(), 'hover:bg-white dark:hover:bg-gray-700 hover:text-red-500': !isReported()}"
+                        title="إبلاغ">
+                  <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform" [class.font-variation-filled]="isReported()">flag</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -282,28 +304,29 @@
       <div class="w-full lg:w-[35%] print:w-full print:mt-8">
         <div class="sticky top-24 flex flex-col gap-6">
           
+          @if (property!.agent) {
           <div class="bg-card-background dark:bg-background-dark rounded-xl p-6 border border-border-color dark:border-gray-700 shadow-sm print:border">
             <div class="flex items-center gap-4">
               <div class="w-16 h-16 bg-center bg-no-repeat bg-cover rounded-full border-2 border-primary/20" 
-                   [style.background-image]="'url(' + (property!.agent.avatar || '/assets/images/user-placeholder.png') + ')'"></div>
+                   [style.background-image]="'url(' + (property!.agent.avatar || property!.agent.profileImage || '/assets/images/user-placeholder.png') + ')'"></div>
               <div>
-                <h3 class="text-lg font-bold text-text-primary dark:text-white">{{ property!.agent.name }}</h3>
-                <p class="text-sm text-text-secondary dark:text-gray-400">{{ property!.agent.title || 'وكيل عقاري' }}</p>
+                <h3 class="text-lg font-bold text-text-primary dark:text-white">{{ property!.agent.name || (property!.agent.firstName + ' ' + property!.agent.lastName) }}</h3>
+                <p class="text-sm text-text-secondary dark:text-gray-400">{{ property!.agent.title || property!.agent.agentProfile.title || 'وكيل عقاري' }}</p>
               </div>
             </div>
 
             <div class="mt-6 flex justify-between text-center border-t border-gray-100 dark:border-gray-700 pt-4">
               <div> 
-                <p class="font-bold text-primary">{{ property!.agent.experience || '3' }}</p>
+                <p class="font-bold text-primary">{{ property!.agent.experience || property!.agent.agentProfile.experience || '3' }}</p>
                 <p class="text-xs text-text-secondary">سنوات خبرة</p>
               </div>
               <div>
-                <p class="font-bold text-primary">{{ property!.agent.deals || '20' }}</p>
+                <p class="font-bold text-primary">{{ property!.agent.deals || property!.agent.agentProfile.activeProperties || '0' }}</p>
                 <p class="text-xs text-text-secondary">عقار مباع</p>
               </div>
               <div>
                 <div class="flex items-center justify-center gap-1 font-bold text-yellow-500">
-                    {{ property!.agent.rating || '4.8' }} <span class="material-symbols-outlined text-base">star</span>
+                    {{ property!.agent.rating || property!.agent.agentProfile.rating || '4.8' }} <span class="material-symbols-outlined text-base">star</span>
                 </div>
                 <p class="text-xs text-text-secondary">التقييم</p>
               </div>
@@ -321,6 +344,7 @@
               </button>
             </div>
           </div>
+          }
 
           <div class="bg-card-background dark:bg-background-dark rounded-xl p-6 border border-border-color dark:border-gray-700 shadow-sm print:hidden">
             <h3 class="text-lg font-bold text-text-primary dark:text-white mb-4">حجز موعد للمعاينة</h3>
@@ -405,31 +429,7 @@
             </div>
           </div>
 
-          <div class="bg-card-background dark:bg-background-dark rounded-xl p-4 border border-border-color dark:border-gray-700 shadow-sm print:hidden">
-            <div class="flex justify-around text-text-secondary dark:text-gray-400">
-              <button (click)="shareProperty()" class="flex flex-col items-center gap-1 hover:text-primary transition-colors">
-                <span class="material-symbols-outlined">share</span>
-                <span class="text-xs">مشاركة</span>
-              </button>
-              <button (click)="printPage()" class="flex flex-col items-center gap-1 hover:text-primary transition-colors">
-                <span class="material-symbols-outlined">print</span>
-                <span class="text-xs">طباعة</span>
-              </button>
-              <button class="flex flex-col items-center gap-1 hover:text-primary transition-colors cursor-not-allowed opacity-50">
-                <span class="material-symbols-outlined">picture_as_pdf</span>
-                <span class="text-xs">PDF</span>
-              </button>
-              <button (click)="toggleReport()" 
-                      class="flex flex-col items-center gap-1 transition-all duration-300 rounded-lg p-1"
-                      [class.text-red-500]="isReported()"
-                      [class.bg-red-50]="isReported()"
-                      [class.dark:bg-red-900]="isReported()"
-                      [class.hover:text-red-500]="!isReported()">
-                <span class="material-symbols-outlined" [class.font-variation-filled]="isReported()">flag</span>
-                <span class="text-xs">{{ isReported() ? 'تم الإبلاغ' : 'إبلاغ' }}</span>
-              </button>
-            </div>
-          </div>
+
 
         </div>
       </div>

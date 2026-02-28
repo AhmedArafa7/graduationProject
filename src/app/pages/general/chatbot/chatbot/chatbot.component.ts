@@ -1,10 +1,11 @@
-import { Component, signal, ViewChild, ElementRef, afterNextRender, inject, computed } from '@angular/core';
+import { Component, signal, ViewChild, ElementRef, afterNextRender, inject, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChatbotService } from '../../../../core/services/chatbot/chatbot.service';
 import { ChatResponse, ChatProperty, ChatMessage } from '../../../../core/models/chatbot.model';
 import { UserService } from '../../../../core/services/user.service';
+import { AudioRecorderService } from '../../../../core/services/chatbot/audio-recorder.service';
 
 @Component({
   selector: 'app-chatbot',
@@ -17,6 +18,7 @@ export class ChatbotComponent {
 
   // يجب أن تكون public لتُستخدم في الـ HTML
   public chatbotService = inject(ChatbotService);
+  public audioService = inject(AudioRecorderService);
   private router = inject(Router);
   private userService = inject(UserService);
 
@@ -45,6 +47,16 @@ export class ChatbotComponent {
   ];
 
   constructor() {
+    effect(() => {
+      const text = this.audioService.transcribedText();
+      if (text) {
+        untracked(() => {
+          const current = this.inputText();
+          this.inputText.set(current ? current + ' ' + text : text);
+        });
+      }
+    });
+
     afterNextRender(() => {
       this.scrollToBottom();
       // فحص الاتصال عند البداية
@@ -54,6 +66,14 @@ export class ChatbotComponent {
 
   toggleChat() {
     this.chatbotService.toggle();
+  }
+
+  toggleRecording() {
+    if (this.audioService.isRecording()) {
+      this.audioService.stopRecording();
+    } else {
+      this.audioService.startRecording();
+    }
   }
 
   async sendMessage(text: string = this.inputText()) {
