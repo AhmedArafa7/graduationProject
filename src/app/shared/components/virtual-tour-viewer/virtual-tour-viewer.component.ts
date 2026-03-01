@@ -35,19 +35,19 @@ export class VirtualTourViewerComponent implements OnInit, AfterViewInit, OnDest
     {
       id: 'living-room',
       name: 'غرفة المعيشة',
-      panorama: 'https://pannellum.org/images/alma.jpg',
+      panorama: 'https://upload.wikimedia.org/wikipedia/commons/1/16/Hagia_Sophia_Interior_Equirectangular_Panorama.jpg',
       x: 30, y: 70
     },
     {
       id: 'bedroom',
       name: 'غرفة النوم',
-      panorama: 'https://pannellum.org/images/bma-0.jpg',
+      panorama: 'https://upload.wikimedia.org/wikipedia/commons/c/c5/1_Interior_of_the_Palais_Garnier_equirectangular_panorama_2.jpg',
       x: 70, y: 30
     },
     {
       id: 'kitchen',
       name: 'المطبخ',
-      panorama: 'https://pannellum.org/images/cerro-paranal.jpg',
+      panorama: 'https://upload.wikimedia.org/wikipedia/commons/f/f0/Puy_de_Sancy_Equirectangular_Panorama.jpg',
       x: 30, y: 30
     }
   ];

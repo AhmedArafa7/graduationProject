@@ -314,7 +314,8 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   async ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
       try {
-        this.L = await import('leaflet');
+        const leafletModule = await import('leaflet');
+        this.L = leafletModule.default || leafletModule;
         // If property is already loaded, init map (wait for DOM)
         if (this.property) {
              setTimeout(() => this.initLocationMap(), 100);
