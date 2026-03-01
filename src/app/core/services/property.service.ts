@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 import { Property, PropertyAmenity, PropertyAiAnalysis } from '../models/property.model';
@@ -30,7 +30,60 @@ export class PropertyService {
 
   loadProperties() {
     this.http.get<any[]>(this.apiUrl).pipe(
-      map(data => data.map(item => this.mapBackendToFrontend(item)))
+      map(data => {
+        // --- DUMMY DATA FOR TESTING WHEN DB IS EMPTY ---
+        if (!data || data.length === 0) {
+          data = [
+            {
+              _id: '6985e95c9e19c31acb5b75a2',
+              title: 'فيلا فاخرة بتشطيب سوبر لوكس',
+              description: 'فيلا رائعة تتميز بتصميم عصري وإطلالة بانورامية مزدوجة. تحتوي على مساحات واسعة وغرف نوم ماستر. مثالية للعائلات التي تبحث عن الفخامة والخصوصية في قلب المدينة.',
+              price: 15000000,
+              currency: 'EGP',
+              area: 450,
+              location: {
+                city: 'القاهرة الجديدة',
+                address: 'التجمع الخامس, شارع التسعين الجنوبي',
+                coordinates: {
+                  type: 'Point',
+                  coordinates: [31.4500, 30.0100]
+                }
+              },
+              type: 'sale',
+              propertyType: 'villa',
+              bedrooms: 5,
+              bathrooms: 4,
+              floor: 0,
+              images: [
+                'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1622866306950-81d17097d458?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
+              ],
+              coverImage: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+              features: ['pool', 'garage', 'garden', 'security', 'ac'],
+              agent: {
+                _id: 'agent_123',
+                firstName: 'أحمد',
+                lastName: 'عرفة',
+                email: 'ahmed@baytology.com',
+                phone: '01012345678',
+                profileImage: 'https://i.pravatar.cc/150?u=ahmed',
+                agentProfile: {
+                  company: 'بيتولوجي للعقارات',
+                  rating: 4.8,
+                  reviewsCount: 124
+                }
+              },
+              createdAt: new Date().toISOString(),
+              isFeatured: true,
+              status: 'available'
+            }
+          ];
+        }
+        // -----------------------------------------------
+        
+        return data.map(item => this.mapBackendToFrontend(item));
+      })
     ).subscribe({
       next: (properties) => this.propertiesSignal.set(properties),
       error: (err: any) => console.error('Failed to load properties', err)
@@ -109,7 +162,18 @@ export class PropertyService {
 
     // 2. Fetch from API
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      map(item => this.mapBackendToFrontend(item))
+      map(item => {
+        if (!item) throw new Error('Property not found');
+        return this.mapBackendToFrontend(item);
+      }),
+      catchError(err => {
+        // If backend returns 404 or any error, check if we are requesting our dummy ID
+        if (id === '6985e95c9e19c31acb5b75a2') {
+           const dummy = this.propertiesSignal().find(p => p._id === id);
+           if (dummy) return of(dummy);
+        }
+        throw err;
+      })
     );
   }
   
