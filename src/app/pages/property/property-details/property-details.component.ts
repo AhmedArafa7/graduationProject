@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit, PLATFORM_ID, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, PLATFORM_ID, AfterViewInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -39,6 +39,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   
   private locationMap: any | null = null; // Changed to any
   private L: any = null; // Leaflet module
+  private cdr = inject(ChangeDetectorRef);
 
 
   // --- UI States ---
@@ -100,7 +101,9 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   } 
 
   // الكائن الحالي المعروض (يتم تحديثه ديناميكياً)
-  property: Property | undefined; // Will be initialized in loadProperty
+  private _property = signal<Property | undefined>(undefined);
+  get property(): Property | undefined { return this._property(); }
+  set property(val: Property | undefined) { this._property.set(val); }
 
   // --- Mortgage Calculator ---
   mortgagePrice = signal(0);
@@ -227,49 +230,54 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
             createdAt: new Date().toISOString()
           };
           this.updateUI();
+        } else {
+          this.fallbackToPropertyService(id);
         }
       },
       error: () => {
-        // 2. البحث في PropertyService (Consolidated Source) كـ fallback
-        // NEW: PropertyService now returns Observable
-        this.propertyService.getPropertyById(id).subscribe({
-          next: (serviceProperty) => {
-            if (serviceProperty) {
-              const safeId = serviceProperty._id || id;
-              this.property = {
-                id: safeId,
-                title: serviceProperty.title,
-                location: serviceProperty.location,
-                type: serviceProperty.type === 'sale' ? 'sale' : 'rent',
-                propertyType: serviceProperty.propertyType,
-                refCode: serviceProperty.refCode || `BYT-${safeId.substring(0,6)}`,
-                price: serviceProperty.price,
-                currency: serviceProperty.currency,
-                area: serviceProperty.area,
-                description: serviceProperty.description,
-                bedrooms: serviceProperty.bedrooms,
-                bathrooms: serviceProperty.bathrooms,
-                beds: serviceProperty.bedrooms,
-                baths: serviceProperty.bathrooms,
-                floor: serviceProperty.floor || 0,
-                features: serviceProperty.features,
-                amenities: serviceProperty.amenities || serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
-                images: serviceProperty.images,
-                agent: serviceProperty.agent, // Assuming this is fully populated or matches Agent interface
-                createdAt: serviceProperty.createdAt
-              };
-              this.updateUI();
-            } else {
-               this.toast.show('العقار غير موجود', 'error');
-               this.router.navigate(['/not-found']);
-            }
-          },
-          error: (err) => {
-             console.error('Failed to load property details', err);
-             this.toast.show('تعذر تحميل تفاصيل العقار', 'error');
-             this.router.navigate(['/not-found']);
-          }
-        });
+        this.fallbackToPropertyService(id);
+      }
+    });
+  }
+
+  private fallbackToPropertyService(id: string) {
+    // 2. البحث في PropertyService (Consolidated Source) كـ fallback
+    this.propertyService.getPropertyById(id).subscribe({
+      next: (serviceProperty) => {
+        if (serviceProperty) {
+          const safeId = serviceProperty._id || id;
+          this.property = {
+            id: safeId,
+            title: serviceProperty.title,
+            location: serviceProperty.location,
+            type: serviceProperty.type === 'sale' ? 'sale' : 'rent',
+            propertyType: serviceProperty.propertyType,
+            refCode: serviceProperty.refCode || `BYT-${safeId.substring(0,6)}`,
+            price: serviceProperty.price,
+            currency: serviceProperty.currency,
+            area: serviceProperty.area,
+            description: serviceProperty.description,
+            bedrooms: serviceProperty.bedrooms,
+            bathrooms: serviceProperty.bathrooms,
+            beds: serviceProperty.bedrooms,
+            baths: serviceProperty.bathrooms,
+            floor: serviceProperty.floor || 0,
+            features: serviceProperty.features,
+            amenities: serviceProperty.amenities || serviceProperty.features.map(f => ({ icon: 'check_circle', label: f })),
+            images: serviceProperty.images,
+            agent: serviceProperty.agent, // Assuming this is fully populated or matches Agent interface
+            createdAt: serviceProperty.createdAt
+          };
+          this.updateUI();
+        } else {
+           this.toast.show('العقار غير موجود', 'error');
+           this.router.navigate(['/not-found']);
+        }
+      },
+      error: (err) => {
+         console.error('Failed to load property details', err);
+         this.toast.show('تعذر تحميل تفاصيل العقار', 'error');
+         this.router.navigate(['/not-found']);
       }
     });
   }
@@ -299,6 +307,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
       if (isPlatformBrowser(this.platformId)) {
         setTimeout(() => this.initLocationMap(), 500);
       }
+      this.cdr.markForCheck();
     }
   }
 
