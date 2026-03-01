@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: '/api' // Relative path for Vercel (Frontend & Backend on same domain)
+  apiUrl: '/api', // Relative path for Vercel (Frontend & Backend on same domain)
+  speechToTextApiUrl: '',
+  chatHistoryApiUrl: ''
 };
