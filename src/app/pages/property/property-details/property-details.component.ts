@@ -14,11 +14,11 @@ import { MessagesService } from '../../../core/services/messages.service';
 import { RatingService } from '../../../core/services/rating.service';
 import { ReportService } from '../../../core/services/report.service';
 import { Agent } from '../../../core/models/agent.model';
-
+import { VirtualTourViewerComponent } from '../../../shared/components/virtual-tour-viewer/virtual-tour-viewer.component';
 
 @Component({
   selector: 'app-property-details',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, VirtualTourViewerComponent],
   templateUrl: './property-details.component.html',
   styleUrl: './property-details.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -46,6 +46,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   isAiModalOpen = signal(false);
   isReported = signal(false); // حالة زر الإبلاغ
   activeImage = signal(''); 
+  isVirtualTourOpen = signal(false); // الحالة لفتح الجولة الافتراضية 360
 
   // --- Rating & Reviews ---
   propertyReviews = computed(() => this.ratingService.getReviews(this.property?.id || '', 'property')());
@@ -403,7 +404,11 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   startVirtualTour() {
-    this.toast.show('جاري تحميل الجولة الافتراضية 360 درجة...', 'info');
+    this.isVirtualTourOpen.set(true);
+  }
+
+  closeVirtualTour() {
+    this.isVirtualTourOpen.set(false);
   }
 
   submitBooking() {

@@ -1,0 +1,59 @@
+@if (isOpen) {
+  <div class="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur-md animate-fadeIn" role="dialog" aria-modal="true">
+    
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between p-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10 pointer-events-none">
+      <div class="flex items-center gap-3 text-white">
+        <span class="material-symbols-outlined text-3xl animate-pulse">360</span>
+        <div>
+          <h2 class="font-bold text-lg">جولة افتراضية (الواقع المعزز)</h2>
+          <p class="text-xs text-gray-300">حرك هاتفك لاستكشاف الغرفة</p>
+        </div>
+      </div>
+      <button (click)="close()" class="p-2 bg-white/10 hover:bg-red-500 hover:text-white rounded-full text-white backdrop-blur-sm transition-all pointer-events-auto">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Pannellum Viewer Container -->
+    <div class="flex-1 w-full relative">
+       <div #panoramaContainer class="w-full h-full"></div>
+
+       <!-- Interactive Floor Plan Overlay (Bottom Left) -->
+       <div class="absolute bottom-6 left-6 z-20 bg-black/60 backdrop-blur-md border border-white/20 p-3 rounded-xl shadow-2xl pointer-events-auto transition-transform hover:scale-105">
+          <p class="text-white text-xs font-bold mb-2 text-center">المخطط التوضيحي</p>
+          <div class="relative w-32 h-32 md:w-48 md:h-48 border-2 border-white/30 rounded-lg bg-white/10 overflow-hidden">
+             <!-- SVG Floor Plan Representation -->
+             <svg width="100%" height="100%" viewBox="0 0 100 100" class="opacity-50 pointer-events-none">
+                <rect x="10" y="10" width="45" height="40" fill="none" stroke="white" stroke-width="1.5" />
+                <rect x="55" y="10" width="35" height="40" fill="none" stroke="white" stroke-width="1.5" />
+                <rect x="10" y="50" width="80" height="40" fill="none" stroke="white" stroke-width="1.5" />
+             </svg>
+             
+             <!-- Interactive Room Dots -->
+             @for (room of rooms; track room.id) {
+               <button (click)="changeRoom(room.id)"
+                       class="absolute w-4 h-4 rounded-full -translate-x-1/2 -translate-y-1/2 transition-all shadow-[0_0_10px_rgba(255,255,255,0.8)] flex items-center justify-center group"
+                       [style.left.%]="room.x" 
+                       [style.top.%]="room.y"
+                       [class.bg-primary]="activeRoomId === room.id"
+                       [class.scale-125]="activeRoomId === room.id"
+                       [class.bg-white]="activeRoomId !== room.id"
+                       [class.hover:scale-110]="activeRoomId !== room.id"
+                       [title]="room.name">
+                  @if (activeRoomId === room.id) {
+                    <div class="absolute inset-0 bg-primary rounded-full animate-ping opacity-50"></div>
+                  }
+                  
+                  <!-- Tooltip -->
+                  <span class="absolute bottom-full mb-2 bg-black/80 px-2 py-1 rounded text-[10px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    {{ room.name }}
+                  </span>
+               </button>
+             }
+          </div>
+       </div>
+
+    </div>
+  </div>
+}

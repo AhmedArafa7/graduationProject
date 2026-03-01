@@ -443,6 +443,13 @@
   }
 </div>
 
+@if (isVirtualTourOpen()) {
+  <app-virtual-tour-viewer
+    [isOpen]="isVirtualTourOpen()"
+    (closeTour)="closeVirtualTour()">
+  </app-virtual-tour-viewer>
+}
+
 @if (isAiModalOpen()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
     <div class="bg-white dark:bg-background-dark rounded-xl shadow-2xl w-full max-w-lg border border-border-color dark:border-gray-700" (click)="$event.stopPropagation()">
