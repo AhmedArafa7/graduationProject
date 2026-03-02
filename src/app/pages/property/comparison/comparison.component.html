@@ -47,9 +47,11 @@
           <tr>
             <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">المساحة</td>
             @for (prop of properties(); track prop.id) {
-              <td class="p-4 flex justify-center items-center gap-1">
-                <span class="material-symbols-outlined text-gray-400">square_foot</span>
-                {{prop.area}} م²
+              <td class="p-4 text-center">
+                <div class="flex justify-center items-center gap-1">
+                  <span class="material-symbols-outlined text-gray-400">square_foot</span>
+                  <span class="font-bold">{{prop.area}}</span> م²
+                </div>
               </td>
             }
           </tr>
@@ -90,6 +92,57 @@
                   }
                 </div>
               </td>
+            }
+          </tr>
+
+          <!-- Price Per SQM (Smart Feature) -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50 border-t border-gray-100 dark:border-gray-700">
+               سعر المتر 
+               <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full mr-2">مقارنة أذكى</span>
+            </td>
+            @for (prop of properties(); track prop.id) {
+               <td class="p-4 font-bold text-gray-600 dark:text-gray-300 border-t border-gray-100 dark:border-gray-700">
+                  {{getPricePerSqm(prop.price, prop.area) | number:'1.0-0'}} ج.م / م²
+               </td>
+            }
+          </tr>
+
+          <!-- Value Rating (Smart Feature) -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">
+               القيمة الاستثمارية
+               <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full mr-2">مقارنة أذكى</span>
+            </td>
+            @for (prop of properties(); track prop.id) {
+               <td class="p-4">
+                 <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">
+                   {{getValueRating(prop.price, prop.area)}}
+                 </span>
+               </td>
+            }
+          </tr>
+
+          <!-- Overall Score (Smart Feature) -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">
+               تقييم ذكي للصلاحية
+               <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full mr-2">مقارنة أذكى</span>
+            </td>
+            @for (prop of properties(); track prop.id) {
+               <td class="p-4">
+                 <div class="flex flex-col items-center justify-center">
+                    <div class="text-3xl font-black text-primary">{{getOverallScore(prop)}}<span class="text-sm text-gray-400 font-normal">/10</span></div>
+                    <div class="flex gap-0.5 mt-2">
+                       @for (star of [1,2,3,4,5,6,7,8,9,10]; track star) {
+                          <div class="h-1.5 w-2 rounded-sm" 
+                               [class.bg-primary]="star <= getOverallScore(prop)" 
+                               [class.bg-gray-200]="star > getOverallScore(prop)"
+                               [class.dark:bg-gray-600]="star > getOverallScore(prop)"></div>
+                       }
+                    </div>
+                 </div>
+               </td>
             }
           </tr>
 

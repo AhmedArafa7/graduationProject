@@ -4,11 +4,13 @@ import { ReportService } from '../../../core/services/report.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 import { Report } from '../../../core/models/report.model';
+import { AdminBlogsComponent } from '../admin-blogs/admin-blogs.component';
+import { AdminTestimonialsComponent } from '../admin-testimonials/admin-testimonials.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AdminBlogsComponent, AdminTestimonialsComponent],
   templateUrl: './dashboard.component.html',
   styles: []
 })
@@ -18,6 +20,11 @@ export class DashboardComponent implements OnInit {
 
   reports = signal<Report[]>([]);
   isLoading = signal(true);
+  activeTab = signal<'reports' | 'blogs' | 'testimonials'>('reports');
+
+  setTab(tab: 'reports' | 'blogs' | 'testimonials') {
+    this.activeTab.set(tab);
+  }
 
   ngOnInit() {
     this.loadReports();

@@ -682,11 +682,11 @@ const seedContent = async () => {
 };
 // Run seed on connection
 // Run seed on connection (Using existing connection to prevent pool exhaustion)
-if (mongoose.connection.readyState === 1) {
-  seedContent();
-} else {
-  mongoose.connection.once('connected', seedContent);
-}
+// if (mongoose.connection.readyState === 1) {
+//   seedContent();
+// } else {
+//   mongoose.connection.once('connected', seedContent);
+// }
 
 // Report Schema (Moderation)
 const ReportSchema = new Schema({
@@ -698,6 +698,7 @@ const ReportSchema = new Schema({
 });
 const Report = mongoose.model('Report', ReportSchema);
 app.use('/api/reports', createCrudRoutes(Report));
+app.use('/api/notifications', createCrudRoutes(Notification));
 
 // Custom Moderation Routes
 const router = express.Router();

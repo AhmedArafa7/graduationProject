@@ -33,7 +33,7 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
   private propertyService = inject(PropertyService);
   private agentPropertiesService = inject(AgentPropertiesService);
   private messagesService = inject(MessagesService);
-  private userService = inject(UserService);
+  public userService = inject(UserService);
   private ratingService = inject(RatingService);
   private reportService = inject(ReportService);
   
@@ -82,22 +82,30 @@ export class PropertyDetailsComponent implements OnInit, AfterViewInit, OnDestro
 
     this.newReview.isSubmitting.set(true);
     
-    // Simulate API delay
-    setTimeout(() => {
-      this.ratingService.addReview(
-        this.property!.id || '',
-        'property',
-        this.newReview.rating(),
-        this.newReview.text(),
-        'أنت (زائر)',
-        '/assets/images/user-placeholder.png'
-      );
-      
-      this.toast.show('تم إضافة تقييمك بنجاح!', 'success');
-      this.newReview.text.set('');
-      this.newReview.rating.set(5);
-      this.newReview.isSubmitting.set(false);
-    }, 800);
+    const user = this.userService.userData();
+    const authorName = user ? `${user.firstName} ${user.lastName}` : 'مستخدم ضيف';
+    const avatar = user?.profileImage || '/assets/images/user-placeholder.png';
+
+    this.ratingService.addReview(
+      this.property!.id || '',
+      'property',
+      this.newReview.rating(),
+      this.newReview.text(),
+      authorName,
+      avatar
+    ).subscribe({
+      next: () => {
+        this.toast.show('تم إضافة تقييمك بنجاح!', 'success');
+        this.newReview.text.set('');
+        this.newReview.rating.set(5);
+        this.newReview.isSubmitting.set(false);
+      },
+      error: (err) => {
+        console.error('Error adding review:', err);
+        this.toast.show('حدث خطأ أثناء إضافة التقييم', 'error');
+        this.newReview.isSubmitting.set(false);
+      }
+    });
   } 
 
   // الكائن الحالي المعروض (يتم تحديثه ديناميكياً)

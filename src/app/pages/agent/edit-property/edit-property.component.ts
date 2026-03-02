@@ -229,12 +229,27 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
   initMap() {
     if (!isPlatformBrowser(this.platformId) || !this.L) return;
 
+    // Small delay to ensure DOM is rendered before mapping
+    setTimeout(() => {
       const mapContainer = document.getElementById('edit-leaflet-map');
       if (!mapContainer) return;
 
       if (this.map) {
-          this.map.remove();
+          this.map.invalidateSize();
+          return;
       }
+
+      // Fix for Leaflet default marker icons
+      const iconDefault = this.L.icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+      this.L.Marker.prototype.options.icon = iconDefault;
 
       this.map = this.L.map('edit-leaflet-map').setView([30.0444, 31.2357], 13);
       this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -260,6 +275,7 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
               this.map.setView([lat, lng], 13);
            }
       }
+    }, 200);
   }
 
   saveChanges() {

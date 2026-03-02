@@ -16,6 +16,13 @@
       </button>
     </div>
 
+    <!-- Profile Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-border-color dark:border-gray-700 flex flex-col md:flex-row items-center gap-6">
+      <div class="relative w-24 h-24 rounded-full border-4 border-white dark:border-gray-700 shadow-md flex-shrink-0">
+        <img [src]="agent().profileImage || '/assets/images/user-placeholder.png'" alt="صورة الوكيل" class="w-full h-full object-cover rounded-full">
+      </div>
+    </div>
+
     <!-- Properties Table -->
     <div class="overflow-x-auto bg-card-background dark:bg-gray-800 rounded-xl border border-border-color dark:border-gray-700 shadow-sm">
       <table class="w-full text-right">

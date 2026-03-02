@@ -223,7 +223,7 @@
           <div class="space-y-8">
             @for (review of agentReviews(); track review.id) {
               <div class="flex gap-4 animate-fadeIn">
-                <img class="w-12 h-12 rounded-full border border-gray-200 object-cover" [src]="review.avatar" alt="User avatar"/>
+                <img class="w-12 h-12 rounded-full border border-gray-200 object-cover" [src]="review.avatar || '/assets/images/user-placeholder.png'" alt="User avatar"/>
                 <div>
                   <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
                     <h4 class="font-bold text-text-primary dark:text-white text-base">{{ review.author }}</h4>

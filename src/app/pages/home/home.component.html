@@ -187,7 +187,7 @@
       @for (agent of displayAgents(); track agent._id) {
         <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group" [routerLink]="['/agent', agent._id]"> 
           <div class="flex items-center gap-4">
-            <img [src]="agent.profileImage || 'assets/default-avatar.png'" [alt]="agent.firstName" class="size-16 rounded-full object-cover border-2 border-gray-100 group-hover:border-primary transition-colors">
+            <img [src]="agent.profileImage || '/assets/images/user-placeholder.png'" [alt]="agent.firstName" class="size-16 rounded-full object-cover border-2 border-gray-100 group-hover:border-primary transition-colors">
             <div class="flex-1">
               <h3 class="font-bold text-gray-900 text-lg group-hover:text-primary transition-colors">{{agent.firstName}} {{agent.lastName}}</h3>
               <div class="flex items-center gap-1 text-sm text-yellow-500 mt-1">

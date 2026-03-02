@@ -222,33 +222,42 @@
 
           <!-- Add Review Form -->
           <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 mb-8 border border-border-color dark:border-gray-700">
-            <h4 class="font-bold text-text-primary dark:text-white mb-4">أضف تقييمك لهذا العقار</h4>
-            <div class="flex gap-2 mb-4">
-              @for (star of [1,2,3,4,5]; track star) {
-                <button (click)="newReview.rating.set(star)" class="text-2xl transition-transform hover:scale-110 focus:outline-none"
-                        [class.text-yellow-400]="star <= newReview.rating()"
-                        [class.text-gray-300]="star > newReview.rating()">
-                  ★
+            @if (userService.userData()) {
+              <h4 class="font-bold text-text-primary dark:text-white mb-4">أضف تقييمك لهذا العقار</h4>
+              <div class="flex gap-2 mb-4">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <button (click)="newReview.rating.set(star)" class="text-2xl transition-transform hover:scale-110 focus:outline-none"
+                          [class.text-yellow-400]="star <= newReview.rating()"
+                          [class.text-gray-300]="star > newReview.rating()">
+                    ★
+                  </button>
+                }
+              </div>
+              <textarea [ngModel]="newReview.text()" (ngModelChange)="newReview.text.set($event)" 
+                        class="w-full p-3 rounded-lg border border-border-color dark:border-gray-600 bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:ring-2 focus:ring-primary/50 outline-none resize-none mb-3"
+                        rows="3" placeholder="ما رأيك في هذا العقار؟ شارك تجربتك..."></textarea>
+              <div class="flex justify-end">
+                <button (click)="submitReview()" 
+                        [disabled]="newReview.isSubmitting()"
+                        class="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  {{ newReview.isSubmitting() ? 'جاري النشر...' : 'نشر التقييم' }}
                 </button>
-              }
-            </div>
-            <textarea [ngModel]="newReview.text()" (ngModelChange)="newReview.text.set($event)" 
-                      class="w-full p-3 rounded-lg border border-border-color dark:border-gray-600 bg-white dark:bg-gray-800 text-text-primary dark:text-white focus:ring-2 focus:ring-primary/50 outline-none resize-none mb-3"
-                      rows="3" placeholder="ما رأيك في هذا العقار؟ شارك تجربتك..."></textarea>
-            <div class="flex justify-end">
-              <button (click)="submitReview()" 
-                      [disabled]="newReview.isSubmitting()"
-                      class="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                {{ newReview.isSubmitting() ? 'جاري النشر...' : 'نشر التقييم' }}
-              </button>
-            </div>
+              </div>
+            } @else {
+              <div class="text-center py-6">
+                <p class="text-text-secondary dark:text-gray-400 mb-4 font-semibold text-lg">يجب عليك تسجيل الدخول لإضافة تقييم.</p>
+                <a routerLink="/auth/login" class="inline-block px-8 py-2.5 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors shadow-sm">
+                  تسجيل الدخول
+                </a>
+              </div>
+            }
           </div>
 
           <div class="space-y-8">
             @for (review of propertyReviews(); track review.id) {
-              <div class="flex gap-4 animate-fadeIn">
-                <img class="w-12 h-12 rounded-full border border-gray-200 object-cover" [src]="review.avatar" alt="User avatar"/>
-                <div>
+              <div class="flex items-start gap-4 mb-4">
+                <img class="w-12 h-12 rounded-full border border-gray-200 object-cover" [src]="review.avatar || '/assets/images/user-placeholder.png'" [alt]="review.author || 'مستخدم'"/>
+                <div class="flex-1">
                   <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
                     <h4 class="font-bold text-text-primary dark:text-white text-base">{{ review.author }}</h4>
                     <span class="text-xs text-text-secondary dark:text-gray-500">{{ review.date }}</span>

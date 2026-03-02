@@ -50,7 +50,7 @@
 
               <!-- Property Type -->
               <div>
-                <label class="block text-text-primary dark:text-white font-medium mb-2">نوع العقار</label>
+                <label class="block ps-6 text-text-primary dark:text-white font-medium mb-2">نوع العقار</label>
                 <select [(ngModel)]="form.propertyType"
                         class="w-full h-14 px-8 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white outline-none focus:ring-2 focus:ring-primary/50">
                   @for (type of propertyTypes; track type) {
@@ -111,7 +111,7 @@
 
               <!-- Room Dimensions -->
               <div class="md:col-span-2">
-                <label class="block text-text-primary dark:text-white font-medium mb-2">أبعاد الغرف</label>
+                <label class="block ps-6 text-text-primary dark:text-white font-medium mb-2">أبعاد الغرف</label>
                 <div class="space-y-4">
                   @for (room of form.roomDimensions; track $index; let i = $index) {
                     <div class="flex items-center gap-4 flex-wrap bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-border-color dark:border-gray-700">

@@ -38,7 +38,7 @@
                [class.dark:hover:bg-gray-700]="selectedConversation()?.id !== conv.id">
             
             <div class="relative">
-              <img [src]="conv.avatar" [alt]="conv.name" class="w-12 h-12 rounded-full object-cover" />
+              <img [src]="conv.avatar || '/assets/images/user-placeholder.png'" [alt]="conv.name" class="w-12 h-12 rounded-full object-cover" />
               @if (conv.online) {
                 <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
               }
@@ -84,7 +84,7 @@
       @if (selectedConversation()) {
         <!-- Chat Header -->
         <header class="flex items-center gap-4 p-4 border-b border-border-color dark:border-gray-700 bg-card-background dark:bg-gray-800">
-          <img [src]="selectedConversation()!.avatar" [alt]="selectedConversation()!.name" class="w-10 h-10 rounded-full object-cover" />
+          <img [src]="selectedConversation()!.avatar || '/assets/images/user-placeholder.png'" [alt]="selectedConversation()!.name" class="w-10 h-10 rounded-full object-cover" />
           <div>
             <h3 class="font-bold text-text-primary dark:text-white">{{ selectedConversation()!.name }}</h3>
             @if (selectedConversation()!.online) {
