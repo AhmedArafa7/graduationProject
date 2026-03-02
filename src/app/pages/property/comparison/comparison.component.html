@@ -123,6 +123,32 @@
             }
           </tr>
 
+          <!-- Estimated Rent Yield (Smart Feature) -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50 border-t border-gray-100 dark:border-gray-700">
+               العائد الإيجاري المتوقع 
+               <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full mr-2">مقارنة أذكى</span>
+            </td>
+            @for (prop of properties(); track prop.id) {
+               <td class="p-4 text-green-600 dark:text-green-400 font-bold border-t border-gray-100 dark:border-gray-700">
+                  {{getEstimatedRentYield(prop.price)}}
+               </td>
+            }
+          </tr>
+
+          <!-- 5-Year Projection (Smart Feature) -->
+          <tr>
+            <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">
+               القيمة بعد 5 سنوات
+               <span class="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full mr-2">مقارنة أذكى</span>
+            </td>
+            @for (prop of properties(); track prop.id) {
+               <td class="p-4 text-primary font-bold">
+                  {{getValueProjection(prop.price)}}
+               </td>
+            }
+          </tr>
+
           <!-- Overall Score (Smart Feature) -->
           <tr>
             <td class="p-4 font-bold text-gray-700 dark:text-gray-300 text-start bg-gray-50/50">

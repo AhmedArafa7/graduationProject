@@ -187,7 +187,7 @@
       @for (agent of displayAgents(); track agent._id) {
         <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group" [routerLink]="['/agent', agent._id]"> 
           <div class="flex items-center gap-4">
-            <img [src]="agent.profileImage || '/assets/images/user-placeholder.png'" [alt]="agent.firstName" class="size-16 rounded-full object-cover border-2 border-gray-100 group-hover:border-primary transition-colors">
+            <img [src]="agent.avatar || agent.profileImage || '/assets/images/user-placeholder.png'" [alt]="agent.firstName" class="size-16 rounded-full object-cover border-2 border-gray-100 group-hover:border-primary transition-colors">
             <div class="flex-1">
               <h3 class="font-bold text-gray-900 text-lg group-hover:text-primary transition-colors">{{agent.firstName}} {{agent.lastName}}</h3>
               <div class="flex items-center gap-1 text-sm text-yellow-500 mt-1">
@@ -213,17 +213,17 @@
         <h2 class="text-3xl font-bold text-gray-900">ماذا يقول عملاؤنا</h2>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        @for (testimonial of testimonials; track testimonial.name) {
+        @for (testimonial of testimonials(); track testimonial._id || testimonial.name) {
           <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 relative hover:-translate-y-1 transition-transform">
             <span class="material-symbols-outlined text-6xl text-gray-100 absolute top-4 left-4">format_quote</span>
-            <p class="text-gray-600 mb-6 relative z-10 leading-relaxed">"{{testimonial.text}}"</p>
+            <p class="text-gray-600 mb-6 relative z-10 leading-relaxed">"{{testimonial.content || testimonial.text}}"</p>
             <div class="flex items-center gap-3">
-              <img [src]="testimonial.image" class="w-10 h-10 rounded-full object-cover" [alt]="testimonial.name">
+              <img [src]="testimonial.authorImage || testimonial.image || '/assets/images/user-placeholder.png'" class="w-10 h-10 rounded-full object-cover" [alt]="testimonial.authorName || testimonial.name">
               <div>
-                <h4 class="font-bold text-gray-900 text-sm">{{testimonial.name}}</h4>
+                <h4 class="font-bold text-gray-900 text-sm">{{testimonial.authorName || testimonial.name}}</h4>
                 <div class="flex text-yellow-400 text-xs">
                   @for (star of [1,2,3,4,5]; track star) {
-                    <span class="material-symbols-outlined text-sm">{{ star <= testimonial.rating ? 'star' : 'star_outline' }}</span>
+                    <span class="material-symbols-outlined text-sm">{{ star <= (testimonial.rating || 5) ? 'star' : 'star_outline' }}</span>
                   }
                 </div>
               </div>

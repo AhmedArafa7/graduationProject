@@ -65,7 +65,7 @@ export class HomeComponent {
 
   displayAgents = computed(() => this.agentsService.agents().slice(0, 4));
 
-  testimonials = this.testimonialsService.getAllTestimonials();
+  testimonials = this.testimonialsService.testimonials;
   
   latestPosts = this.blogService.getAllPosts().slice(0, 3);
 

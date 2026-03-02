@@ -24,7 +24,7 @@ export class TestimonialsService {
     });
   }
 
-  getAllTestimonials() {
-    return this.testimonialsSignal();
+  get testimonials() {
+    return this.testimonialsSignal.asReadonly();
   }
 }

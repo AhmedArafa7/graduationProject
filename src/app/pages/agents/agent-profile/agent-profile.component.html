@@ -17,7 +17,7 @@
       <div class="absolute -bottom-16 left-8 md:left-16">
         <div class="relative group">
           <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-32 w-32 md:h-40 md:w-40 border-4 border-white dark:border-background-dark shadow-lg transition-transform group-hover:scale-105"
-               [style.background-image]="'url(' + (agent()?.profileImage || '/assets/images/user-placeholder.png') + ')'">
+               [style.background-image]="'url(' + (agent()?.avatar || agent()?.profileImage || '/assets/images/user-placeholder.png') + ')'">
           </div>
           @if (agent()?.agentProfile?.verified) {
             <div class="absolute bottom-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
