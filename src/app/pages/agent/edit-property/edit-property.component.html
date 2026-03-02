@@ -129,6 +129,62 @@
                        class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary" />
               </div>
 
+              <!-- Room Dimensions -->
+              <div class="md:col-span-2">
+                <label class="block text-text-primary dark:text-white font-medium mb-2">أبعاد الغرف</label>
+                <div class="space-y-4">
+                  @for (room of form.roomDimensions; track $index; let i = $index) {
+                    <div class="flex items-center gap-4 flex-wrap bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-border-color dark:border-gray-700">
+                      
+                      <!-- Room Type Dropdown -->
+                      <div class="flex-1 min-w-[200px]">
+                        <select [(ngModel)]="room.name"
+                                class="w-full h-14 px-4 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white outline-none focus:ring-2 focus:ring-primary/50">
+                          <option value="" disabled selected>اختر نوع الغرفة</option>
+                          @for (type of roomTypes; track type) {
+                            <option [value]="type">{{ type }}</option>
+                          }
+                        </select>
+                      </div>
+
+                      <!-- Dimensions -->
+                      <div class="flex items-center gap-2">
+                        <input [(ngModel)]="room.length" type="number" placeholder="الطول"
+                               class="w-24 h-14 px-3 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+                        <span class="text-text-secondary">×</span>
+                        <input [(ngModel)]="room.width" type="number" placeholder="العرض"
+                               class="w-24 h-14 px-3 rounded-lg border border-border-color dark:border-gray-600 bg-background-light dark:bg-gray-700 text-text-primary dark:text-white placeholder:text-text-secondary outline-none focus:ring-2 focus:ring-primary/50" />
+                        <span class="text-text-secondary">م</span>
+                      </div>
+
+                      <!-- Room Image Input for AR -->
+                      <div class="flex items-center relative">
+                        <!-- We use room.imagePreview for temporary upload viewing, or room.image for already saved images -->
+                        <label class="flex items-center justify-center w-14 h-14 rounded-lg border border-dashed border-primary text-primary cursor-pointer hover:bg-primary/10 transition-colors" [title]="room.name ? 'صورة 360 للغرفة ' + room.name : 'رفع صورة للغرفة'">
+                          @if (room.imagePreview || room.image) {
+                            <img [src]="room.imagePreview || room.image" class="w-full h-full object-cover rounded-lg" alt="غرفة" />
+                          } @else {
+                            <span class="material-symbols-outlined">add_a_photo</span>
+                          }
+                          <input type="file" (change)="onRoomImageSelected($event, i)" class="hidden" accept="image/*" />
+                        </label>
+                      </div>
+
+                      <!-- Delete Room Button -->
+                      @if (form.roomDimensions.length > 1) {
+                        <button (click)="removeRoom(i)" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer transition-colors" title="حذف الغرفة">
+                          <span class="material-symbols-outlined">delete</span>
+                        </button>
+                      }
+                    </div>
+                  }
+                  <button (click)="addRoom()" class="flex items-center gap-2 text-primary font-bold text-sm cursor-pointer">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>إضافة غرفة أخرى</span>
+                  </button>
+                </div>
+              </div>
+
               <!-- Description -->
               <div class="md:col-span-2">
                 <label class="block text-text-primary dark:text-white font-medium mb-2">الوصف</label>

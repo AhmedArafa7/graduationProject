@@ -13,6 +13,8 @@ export interface RoomDimension {
   name: string;
   length: number | null;
   width: number | null;
+  image?: string; // For raw file/b64 data
+  imagePreview?: string; // For displaying uploaded file
 }
 
 export interface AgentProperty {

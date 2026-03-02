@@ -35,7 +35,7 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
   isEditMode = signal(false);
   isLoading = signal(true);
   currentStep = signal(1);
-  totalSteps = 4;
+  totalSteps = 3;
 
   form = {
     title: '',
@@ -66,6 +66,7 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   propertyTypes = ['شقة', 'فيلا', 'تاون هاوس', 'شاليه', 'أرض', 'تجاري'];
   statusOptions: ('للبيع' | 'للإيجار' | 'مباع' | 'معلق')[] = ['للبيع', 'للإيجار', 'مباع', 'معلق'];
+  roomTypes = ['غرفة نوم', 'حمام', 'غرفة معيشة', 'مطبخ', 'غرفة طعام', 'شرفة', 'حديقة', 'أخرى'];
 
   get progressPercentage(): number {
     return (this.currentStep() / this.totalSteps) * 100;
@@ -182,6 +183,49 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  addRoom() {
+    const maxRooms = (this.form.bedrooms || 0) + (this.form.bathrooms || 0) + 3; // +3 for living, kitchen, etc.
+    if (this.form.roomDimensions.length >= maxRooms) {
+      this.toast.show(`لقد وصلت للحد الأقصى من الغرف (${maxRooms} غرفة)`, 'info');
+      return;
+    }
+    this.form.roomDimensions.push({ name: '', length: null, width: null, image: undefined, imagePreview: undefined });
+  }
+
+  removeRoom(index: number) {
+    if (this.form.roomDimensions.length > 1) {
+      this.form.roomDimensions.splice(index, 1);
+    }
+  }
+
+  onRoomImageSelected(event: Event, index: number) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        this.toast.show('يرجى اختيار صورة صحيحة', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const originalImage = e.target?.result as string;
+        
+        // Show loading or immediate preview
+        this.form.roomDimensions[index].imagePreview = originalImage;
+        
+        // Compress
+        this.imageCompress.compressFile(originalImage, -1, 50, 50).then(
+          (compressedImage: string) => {
+            this.form.roomDimensions[index].imagePreview = compressedImage;
+            this.form.roomDimensions[index].image = compressedImage;
+          }
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   initMap() {
     if (!isPlatformBrowser(this.platformId) || !this.L) return;
 
@@ -236,6 +280,9 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
       const priceStr = this.form.price.toLocaleString('ar-EG') + ' جنيه' + 
         (this.form.status === 'للإيجار' ? '/شهر' : '');
 
+      const roomImages = this.form.roomDimensions.filter(r => r.image || r.imagePreview).map(r => r.image || r.imagePreview as string);
+      const allImages = this.form.image ? [this.form.image, ...roomImages] : roomImages;
+
       this.agentProperties.updateProperty(id, {
         address: this.form.title,
         price: priceStr,
@@ -252,8 +299,8 @@ export class EditPropertyComponent implements OnInit, AfterViewInit, OnDestroy {
         longitude: this.form.longitude,
         locationId: this.form.locationId,
         amenities: this.form.amenities,
-         // Note: If image changed, we might need to handle it. Current form has form.image
-         image: this.form.image // Add image update
+         image: allImages.length > 0 ? allImages[0] : '', // Add image update
+         images: allImages
       }).subscribe({
         next: () => {
           this.toast.show('تم تحديث العقار بنجاح!', 'success');

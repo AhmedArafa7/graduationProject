@@ -64,6 +64,18 @@ export class AgentsListComponent {
     });
   });
 
+  // --- True Pagination Logic ---
+  itemsPerPage = 6;
+
+  totalPages = computed(() => {
+    return Math.ceil(this.filteredAgents().length / this.itemsPerPage) || 1;
+  });
+
+  paginatedAgents = computed(() => {
+    const startIndex = (this.currentPage() - 1) * this.itemsPerPage;
+    return this.filteredAgents().slice(startIndex, startIndex + this.itemsPerPage);
+  });
+
   // --- Actions ---
   setSpecialty(type: string) {
     this.specialtyFilter.set(type);
@@ -94,8 +106,10 @@ export class AgentsListComponent {
   }
 
   onPageChange(page: number) {
-    this.currentPage.set(page);
-    this.scrollToTop();
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.scrollToTop();
+    }
   }
 
   // دالة مساعدة للتمرير للأعلى مع حماية SSR

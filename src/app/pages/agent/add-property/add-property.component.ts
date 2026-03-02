@@ -34,7 +34,7 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
   private L: any = null; // Leaflet module
 
   currentStep = signal(1);
-  totalSteps = 4;
+  totalSteps = 3;
   validationErrors = signal<ValidationError[]>([]);
 
   // موقع القاهرة كموقع افتراضي
@@ -70,6 +70,7 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
 
   propertyTypes = ['شقة', 'فيلا', 'تاون هاوس', 'شاليه', 'أرض', 'تجاري'];
   statusOptions = ['للبيع', 'للإيجار'];
+  roomTypes = ['غرفة نوم', 'حمام', 'غرفة معيشة', 'مطبخ', 'غرفة طعام', 'شرفة', 'حديقة', 'أخرى'];
 
   get progressPercentage(): number {
     return (this.currentStep() / this.totalSteps) * 100;
@@ -265,7 +266,12 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
   }
 
   addRoom() {
-    this.form.roomDimensions.push({ name: '', length: null, width: null });
+    const maxRooms = (this.form.bedrooms || 0) + (this.form.bathrooms || 0) + 3; // +3 for living, kitchen, etc.
+    if (this.form.roomDimensions.length >= maxRooms) {
+      this.toast.show(`لقد وصلت للحد الأقصى من الغرف (${maxRooms} غرفة)`, 'info');
+      return;
+    }
+    this.form.roomDimensions.push({ name: '', length: null, width: null, image: undefined, imagePreview: undefined });
   }
 
   removeRoom(index: number) {
@@ -274,50 +280,35 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private imageCompress = inject(ImageCompressService);
-
-  onFileSelected(event: Event) {
+  onRoomImageSelected(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
-    if (input.files) {
-      Array.from(input.files).forEach(file => {
-        // Validation check
-        if (!file.type.startsWith('image/')) return;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        this.toast.show('يرجى اختيار صورة صحيحة', 'error');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const originalImage = e.target?.result as string;
         
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const originalImage = e.target?.result as string;
-          
-          // Add as 'Analyzing' placeholder first (UX)
-          const imageEntry = {
-            file,
-            preview: originalImage, // Show original while compressing
-            status: 'جاري الضغط والتحليل...',
-            altText: ''
-          };
-          this.form.images.push(imageEntry);
-
-          // Compress
-          this.imageCompress.compressFile(originalImage, -1, 50, 50).then(
-            (compressedImage: string) => {
-              // Update with compressed version
-              imageEntry.preview = compressedImage;
-              
-              // Simulate AI Analysis (keep existing timeout logic for UX)
-              setTimeout(() => {
-                imageEntry.status = 'مكتمل';
-                imageEntry.altText = `صورة ${file.name.split('.')[0]} - غرفة واسعة ومضيئة`;
-              }, 1500);
-            }
-          );
-        };
-        reader.readAsDataURL(file);
-      });
+        // Show loading or immediate preview
+        this.form.roomDimensions[index].imagePreview = originalImage;
+        
+        // Compress
+        this.imageCompress.compressFile(originalImage, -1, 50, 50).then(
+          (compressedImage: string) => {
+            this.form.roomDimensions[index].imagePreview = compressedImage;
+            this.form.roomDimensions[index].image = compressedImage;
+          }
+        );
+      };
+      reader.readAsDataURL(file);
     }
   }
 
-  removeImage(index: number) {
-    this.form.images.splice(index, 1);
-  }
+  private imageCompress = inject(ImageCompressService);
 
   saveDraft() {
     localStorage.setItem('property_draft', JSON.stringify(this.form));
@@ -351,16 +342,19 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    if (this.form.images.length === 0) {
-       this.toast.show('يجب إضافة صورة واحدة على الأقل للعقار', 'error');
-       this.currentStep.set(1); // Go back to step 1 (where images usually are, or just focus)
+    const roomImages = this.form.roomDimensions.filter(r => r.imagePreview).map(r => r.imagePreview as string);
+    const hasRoomImages = roomImages.length > 0;
+
+    if (!hasRoomImages) {
+       this.toast.show('يجب إضافة صورة واحدة على الأقل للعقار (في قسم أبعاد الغرف)', 'error');
+       this.currentStep.set(1); // Go to step 1 where room dimensions are
        return;
     }
-    
+
+    const coverImage = roomImages[0];
+
     this.agentProperties.addProperty({
-      image: this.form.images.length > 0 
-        ? this.form.images[0].preview 
-        : 'https://images.unsplash.com/photo-1600596542815-e32cb51813b9?q=80&w=200&auto=format&fit=crop',
+      image: coverImage,
       address: this.form.title,
       price: this.formatPrice(this.form.price!),
       priceValue: this.form.price!,
@@ -376,7 +370,7 @@ export class AddPropertyComponent implements AfterViewInit, OnDestroy {
       longitude: this.form.longitude,
       locationId: this.form.locationId,
       amenities: this.form.amenities,
-      images: this.form.images.map(img => img.preview)
+      images: roomImages
     }).subscribe({
       next: () => {
         this.toast.show('تم إضافة العقار بنجاح!', 'success');

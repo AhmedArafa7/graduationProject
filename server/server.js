@@ -139,6 +139,12 @@ const PropertySchema = new Schema({
   bedrooms: { type: Number, required: true },
   bathrooms: { type: Number, required: true },
   floor: { type: Number },
+  roomDimensions: [{
+    name: String,
+    length: Number,
+    width: Number,
+    image: String
+  }],
   images: [{ type: String }],
   coverImage: { type: String },
   features: [{ type: String }],
@@ -314,6 +320,18 @@ const createCrudRoutes = (model, routeName) => {
   // POST (Create)
   router.post('/', async (req, res) => {
     try {
+      // Prevent duplicate properties from the same agent
+      if (model.modelName === 'Property') {
+        const existing = await model.findOne({
+          title: req.body.title,
+          price: req.body.price,
+          agent: req.body.agent
+        });
+        if (existing) {
+          return res.status(400).json({ error: 'عذراً، هذا العقار مسجل مسبقاً بنفس البيانات' });
+        }
+      }
+
       const newItem = new model(req.body);
       const savedItem = await newItem.save();
       res.status(201).json(savedItem);

@@ -124,6 +124,7 @@ export class AgentPropertiesService {
       bedrooms: data.bedrooms || 1,
       bathrooms: data.bathrooms || 1,
       floor: data.floor || 0,
+      roomDimensions: data.roomDimensions || [],
       images: data.images || (data.image ? [data.image] : []),
       coverImage: data.image || (data.images && data.images[0]), // First image as cover
       features: features,

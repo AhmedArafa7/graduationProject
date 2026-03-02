@@ -40,7 +40,7 @@ export class AgentDashboardComponent implements OnInit {
   }
 
   editProperty(id: string) {
-    this.router.navigate(['/agent/edit-property', id]);
+    this.router.navigate(['/edit-property', id]);
   }
 
   deleteProperty(id: string) {
