@@ -7,7 +7,7 @@ export interface Agent {
   city?: string; // Added for location filtering
   profileImage: string;
   avatar?: string; // fallback or alias for profileImage
-  userType: 'agent';
+  userType: 'agent' | 'owner';
   agentProfile: {
     title: string;
     licenseNumber: string;
@@ -18,6 +18,11 @@ export interface Agent {
     rating: number;
     reviewsCount: number;
     activeProperties: number;
+    views?: number;
+    inquiries?: number;
+    responseRate?: number;
+    languages?: string[];
+    workingHours?: string;
     verified: boolean;
     socialLinks: {
       facebook: string;

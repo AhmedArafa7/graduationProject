@@ -5,13 +5,16 @@ export interface UserData {
   email: string;
   phone: string;
   profileImage: string | null;
-  userType: 'buyer' | 'agent' | 'admin';
+  userType: 'buyer' | 'agent' | 'owner' | 'admin';
   // Agent specific
   licenseNumber?: string;
   company?: string;
   experience?: string;
   specialization?: string;
   bio?: string;
+  city?: string;
+  languages?: string[];
+  workingHours?: string;
   password?: string; // Only for registration
 }
 

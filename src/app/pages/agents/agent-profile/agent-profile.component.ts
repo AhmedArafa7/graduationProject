@@ -101,6 +101,15 @@ export class AgentProfileComponent implements OnInit {
   agentRating = computed(() => this.agent()?.agentProfile?.rating || 0);
   reviewsCount = computed(() => this.agent()?.agentProfile?.reviewsCount || 0);
 
+  // Show pro stats if user is an agent, OR if they are an owner with > 1 property
+  showProStats = computed(() => {
+    const a = this.agent();
+    if (!a) return false;
+    if (a.userType === 'agent') return true;
+    if (a.userType === 'owner' && this.agentPropertiesSignal().length > 1) return true;
+    return false;
+  });
+
   // Helper for UI to get displayable specialization array
   agentSpecializations = computed(() => {
     const spec = this.agent()?.agentProfile?.specialization;

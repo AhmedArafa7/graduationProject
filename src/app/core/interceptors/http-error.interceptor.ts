@@ -12,7 +12,11 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
       let message = 'حدث خطأ غير متوقع';
 
       if (error.status === 0) {
-        message = 'تعذر الاتصال بالخادم. يرجى التحقق من الإنترنت.';
+        if (req.url.includes('localhost:3000')) {
+           message = '⚠️ الخادم المحلي مغلق! يرجى تشغيل الباك إند باستخدام الأمر: node server/server.js';
+        } else {
+           message = 'تعذر الاتصال بالخادم. يرجى التحقق من الإنترنت.';
+        }
       } else if (error.status === 401) {
         message = 'جلسة العمل انتهت. يرجى تسجيل الدخول مجدداً.';
       } else if (error.status === 403) {

@@ -19,7 +19,7 @@ export class SignupComponent {
   private platformId = inject(PLATFORM_ID); // لدعم SSR
 
   // States
-  userType = signal<'buyer' | 'agent'>('buyer');
+  userType = signal<'buyer' | 'agent' | 'owner'>('buyer');
   isPasswordVisible = signal(false);
   isConfirmPasswordVisible = signal(false);
   isSubmitting = signal(false);
@@ -34,10 +34,17 @@ export class SignupComponent {
   newsletter = signal(false);
   profileImage = signal<string | null>(null);
 
+  // Agent/Owner specific fields
+  city = signal('');
+  company = signal('');
+  licenseNumber = signal('');
+  languages = signal('');
+  workingHours = signal('');
+
   // التحقق من تطابق الباسورد
   passwordsMatch = computed(() => this.password() === this.confirmPassword());
 
-  setUserType(type: 'buyer' | 'agent') {
+  setUserType(type: 'buyer' | 'agent' | 'owner') {
     this.userType.set(type);
   }
 
@@ -160,7 +167,7 @@ export class SignupComponent {
     const lastName = nameParts.slice(1).join(' ') || '';
 
     // إرسال طلب التسجيل
-    this.userService.registerUser({
+    const payload: any = {
       firstName,
       lastName,
       email: this.email(),
@@ -168,7 +175,19 @@ export class SignupComponent {
       password: this.password(),
       profileImage: this.profileImage(),
       userType: this.userType()
-    }).subscribe({
+    };
+
+    if (['agent', 'owner'].includes(this.userType())) {
+      payload.city = this.city() || undefined;
+      payload.agentProfile = {
+        company: this.company() || undefined,
+        licenseNumber: this.licenseNumber() || undefined,
+        languages: this.languages() ? this.languages().split(',').map(l => l.trim()) : undefined,
+        workingHours: this.workingHours() || undefined
+      };
+    }
+
+    this.userService.registerUser(payload).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.toast.show('تم إنشاء الحساب بنجاح! جاري تحويلك...', 'success');

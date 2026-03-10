@@ -9,86 +9,200 @@
     <!-- Header -->
     <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
       <h2 class="text-3xl md:text-4xl font-black text-text-primary dark:text-white">عقاراتي</h2>
-      <button (click)="addNewProperty()"
-              class="flex items-center justify-center gap-2 cursor-pointer rounded-lg h-11 px-6 bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary/90 transition-colors">
-        <span class="material-symbols-outlined">add</span>
-        <span>إضافة عقار جديد</span>
-      </button>
-    </div>
-
-    <!-- Profile Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-border-color dark:border-gray-700 flex flex-col md:flex-row items-center gap-6">
-      <div class="relative w-24 h-24 rounded-full border-4 border-white dark:border-gray-700 shadow-md flex-shrink-0">
-        <img [src]="agent().profileImage || '/assets/images/user-placeholder.png'" alt="صورة الوكيل" class="w-full h-full object-cover rounded-full">
+      <div class="flex items-center gap-3">
+        <!-- View Toggle Buttons -->
+        <div class="hidden sm:flex bg-card-background dark:bg-gray-800 rounded-lg p-1 border border-border-color dark:border-gray-700 items-center shadow-sm">
+          <button (click)="viewMode.set('grid')"
+                  class="p-2 w-10 h-10 rounded-md transition-colors flex items-center justify-center cursor-pointer"
+                  [class]="viewMode() === 'grid' ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light' : 'text-text-secondary hover:bg-gray-100 dark:hover:bg-gray-700'">
+            <span class="material-symbols-outlined text-[22px]">grid_view</span>
+          </button>
+          <button (click)="viewMode.set('table')"
+                  class="p-2 w-10 h-10 rounded-md transition-colors flex items-center justify-center cursor-pointer"
+                  [class]="viewMode() === 'table' ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light' : 'text-text-secondary hover:bg-gray-100 dark:hover:bg-gray-700'">
+            <span class="material-symbols-outlined text-[22px]">table_rows</span>
+          </button>
+        </div>
+        
+        <button (click)="addNewProperty()"
+                class="flex items-center justify-center gap-2 cursor-pointer rounded-lg h-11 px-6 bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary/90 transition-colors">
+          <span class="material-symbols-outlined">add</span>
+          <span class="hidden sm:inline">إضافة عقار جديد</span>
+        </button>
       </div>
     </div>
 
-    <!-- Properties Table -->
-    <div class="overflow-x-auto bg-card-background dark:bg-gray-800 rounded-xl border border-border-color dark:border-gray-700 shadow-sm">
-      <table class="w-full text-right">
-        <thead class="bg-gray-50 dark:bg-gray-700/50">
-          <tr>
-            <th class="p-4 text-sm font-semibold text-text-primary dark:text-white">الصورة</th>
-            <th class="p-4 text-sm font-semibold text-text-primary dark:text-white">العنوان</th>
-            <th class="p-4 text-sm font-semibold text-text-primary dark:text-white">السعر</th>
-            <th class="p-4 text-sm font-semibold text-text-primary dark:text-white">الحالة</th>
-            <th class="p-4 text-sm font-semibold text-text-primary dark:text-white">تاريخ الإضافة</th>
-            <th class="p-4 text-sm font-semibold text-text-primary dark:text-white text-center">الإجراءات</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-border-color dark:divide-gray-700">
+    <!-- Profile Header Section -->
+    <div class="bg-gradient-to-r from-primary to-secondary rounded-3xl p-8 mb-10 shadow-xl border border-white/10 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
+      <!-- Decorative background blur -->
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+      <div class="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
+
+      <!-- User Avatar -->
+      <div class="relative w-28 h-28 rounded-full border-4 border-white/80 dark:border-gray-800 shadow-2xl flex-shrink-0 z-10 bg-white dark:bg-gray-700 p-1">
+        <img [src]="agent().profileImage || '/assets/images/user-placeholder.png'" 
+             alt="صورة الوكيل" 
+             class="w-full h-full object-cover rounded-full">
+      </div>
+      
+      <!-- Welcome Text -->
+      <div class="z-10 text-center md:text-right flex-1">
+        <h3 class="text-2xl font-black text-white mb-2">مرحباً بعودتك، {{ agent().firstName }}!</h3>
+        <p class="text-white/80">هذه لوحة التحكم الخاصة بعقاراتك. يمكنك إدارة، إضافة، أو حذف عقاراتك من هنا.</p>
+        <div class="mt-4 flex gap-4 justify-center md:justify-start">
+          <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20 flex flex-col items-center justify-center">
+            <span class="text-xs text-white/80 font-semibold mb-1">إجمالي العقارات</span>
+            <span class="text-xl font-bold text-white">{{ properties().length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View Modes -->
+    @if (properties().length > 0) {
+      
+      <!-- Grid View -->
+      @if (viewMode() === 'grid') {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           @for (property of properties(); track property.id) {
-            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-              <td class="p-4">
+            <div class="bg-card-background dark:bg-gray-800 rounded-2xl border border-border-color dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
+              
+              <!-- Property Image & Badges -->
+              <div class="relative h-48 w-full overflow-hidden">
                 <img [src]="property.image" [alt]="property.address" 
-                     class="w-16 h-12 rounded-lg object-cover">
-              </td>
-              <td class="p-4 text-sm text-text-primary dark:text-gray-300">{{ property.address }}</td>
-              <td class="p-4 text-sm font-medium text-text-primary dark:text-gray-300">{{ property.price }}</td>
-              <td class="p-4">
-                <span class="px-3 py-1 text-xs font-semibold text-white rounded-full" [class]="property.statusColor">
-                  {{ property.status }}
-                </span>
-              </td>
-              <td class="p-4 text-sm text-text-secondary dark:text-gray-400">{{ property.createdAt }}</td>
-              <td class="p-4 text-center">
-                <div class="flex justify-center items-center gap-1">
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                
+                <!-- Gradient Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                
+                <!-- Badges -->
+                <div class="absolute top-4 right-4 flex gap-2">
+                  <span class="px-3 py-1 text-xs font-bold text-white rounded-full shadow-lg" [class]="property.statusColor">
+                    {{ property.status }}
+                  </span>
+                </div>
+                
+                <!-- Price overlay -->
+                <div class="absolute bottom-4 right-4 left-4">
+                  <p class="text-white font-black text-xl drop-shadow-md">{{ property.price }} <span class="text-sm font-normal opacity-80">ج.م</span></p>
+                </div>
+              </div>
+              
+              <!-- Property Details -->
+              <div class="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 class="text-text-primary dark:text-white font-bold text-lg mb-2 line-clamp-1" [title]="property.address">{{ property.address }}</h3>
+                  <p class="text-text-secondary dark:text-gray-400 text-xs flex items-center gap-1 mb-4">
+                    <span class="material-symbols-outlined text-sm">calendar_today</span>
+                    {{ property.createdAt }}
+                  </p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border-color dark:border-gray-700">
                   <button (click)="viewProperty(property.id)" 
-                          class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                          class="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-text-secondary hover:text-primary hover:bg-primary/10 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                           title="عرض">
-                    <span class="material-symbols-outlined text-text-primary dark:text-gray-300">visibility</span>
+                    <span class="material-symbols-outlined text-[22px]">visibility</span>
+                    <span class="text-[10px] font-bold">عرض</span>
                   </button>
                   <button (click)="editProperty(property.id)" 
-                          class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                          class="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-text-secondary hover:text-secondary hover:bg-secondary/10 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                           title="تعديل">
-                    <span class="material-symbols-outlined text-text-primary dark:text-gray-300">edit</span>
+                    <span class="material-symbols-outlined text-[22px]">edit</span>
+                    <span class="text-[10px] font-bold">تعديل</span>
                   </button>
                   <button (click)="deleteProperty(property.id)" 
-                          class="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors cursor-pointer"
+                          class="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-text-secondary hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
                           title="حذف">
-                    <span class="material-symbols-outlined text-red-600 dark:text-red-400">delete</span>
+                    <span class="material-symbols-outlined text-[22px]">delete</span>
+                    <span class="text-[10px] font-bold">حذف</span>
                   </button>
                 </div>
-              </td>
-            </tr>
+              </div>
+            </div>
           }
-        </tbody>
-      </table>
-
-      <!-- Empty State -->
-      @if (properties().length === 0) { 
-        <div class="text-center p-16">
-          <span class="material-symbols-outlined text-6xl text-gray-400">real_estate_agent</span>
-          <h3 class="mt-4 text-lg font-medium text-text-primary dark:text-white">لا توجد عقارات بعد</h3>
-          <p class="mt-1 text-sm text-text-secondary dark:text-gray-400">ابدأ بإضافة أول عقار لديك</p>
-          <button (click)="addNewProperty()"
-                  class="mt-6 flex items-center justify-center gap-2 cursor-pointer rounded-lg h-11 px-6 bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary/90 transition-colors mx-auto">
-            <span class="material-symbols-outlined">add</span>
-            <span>إضافة عقار جديد</span>
-          </button>
         </div>
       }
-    </div>
+
+      <!-- Table View -->
+      @if (viewMode() === 'table') {
+        <div class="bg-card-background dark:bg-gray-800 rounded-2xl border border-border-color dark:border-gray-700 shadow-sm overflow-hidden overflow-x-auto">
+          <table class="w-full text-right align-middle">
+            <thead class="bg-gray-50 dark:bg-gray-700/40 border-b border-border-color dark:border-gray-700">
+              <tr>
+                <th class="p-5 text-sm font-bold text-text-secondary dark:text-gray-300 w-24">الصورة</th>
+                <th class="p-5 text-sm font-bold text-text-secondary dark:text-gray-300">تفاصيل العقار</th>
+                <th class="p-5 text-sm font-bold text-text-secondary dark:text-gray-300">السعر</th>
+                <th class="p-5 text-sm font-bold text-text-secondary dark:text-gray-300">الحالة</th>
+                <th class="p-5 text-sm font-bold text-text-secondary dark:text-gray-300 text-center w-48">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-color dark:divide-gray-700/60">
+              @for (property of properties(); track property.id) {
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/20 transition-colors group">
+                  <td class="p-4">
+                    <div class="w-20 h-14 rounded-xl overflow-hidden relative border border-border-color dark:border-gray-600">
+                      <img [src]="property.image" [alt]="property.address" class="w-full h-full object-cover">
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <p class="font-bold text-text-primary dark:text-white mb-1 line-clamp-1 group-hover:text-primary transition-colors cursor-pointer" (click)="viewProperty(property.id)">{{ property.address }}</p>
+                    <p class="text-xs text-text-secondary dark:text-gray-400 flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                      {{ property.createdAt }}
+                    </p>
+                  </td>
+                  <td class="p-4">
+                    <p class="font-bold text-text-primary dark:text-white">{{ property.price }}</p>
+                    <span class="text-xs text-text-secondary dark:text-gray-400">ج.م</span>
+                  </td>
+                  <td class="p-4">
+                    <span class="px-3 py-1.5 text-xs font-bold text-white rounded-lg shadow-sm" [class]="property.statusColor">
+                      {{ property.status }}
+                    </span>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex justify-center items-center gap-2">
+                      <button (click)="viewProperty(property.id)" 
+                              class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-primary/10 hover:text-primary dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-primary/20 dark:hover:text-primary-light transition-all cursor-pointer"
+                              title="عرض">
+                        <span class="material-symbols-outlined text-[20px]">visibility</span>
+                      </button>
+                      <button (click)="editProperty(property.id)" 
+                              class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 text-gray-600 hover:bg-secondary/10 hover:text-secondary dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-secondary/20 dark:hover:text-secondary transition-all cursor-pointer"
+                              title="تعديل">
+                        <span class="material-symbols-outlined text-[20px]">edit</span>
+                      </button>
+                      <button (click)="deleteProperty(property.id)" 
+                              class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white transition-all cursor-pointer"
+                              title="حذف">
+                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    } @else {
+      <!-- Empty State -->
+      <div class="bg-card-background dark:bg-gray-800 rounded-2xl border border-dashed border-border-color dark:border-gray-700 flex flex-col items-center justify-center p-16 h-80 shadow-inner">
+        <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined text-5xl text-primary drop-shadow-sm">real_estate_agent</span>
+        </div>
+        <h3 class="text-xl font-bold text-text-primary dark:text-white mb-2">لا توجد عقارات بعد</h3>
+        <p class="text-text-secondary dark:text-gray-400 mb-8 max-w-md text-center">يبدو أنك لم تقم بإضافة أي عقارات حتى الآن. ابدأ بإضافة عقارك الأول لعرضه للمشترين المحتملين.</p>
+        <button (click)="addNewProperty()"
+                class="flex items-center justify-center gap-2 cursor-pointer rounded-xl h-12 px-8 bg-primary hover:bg-primary/90 text-white font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all w-full sm:w-auto">
+          <span class="material-symbols-outlined">add</span>
+          <span>إضافة عقار جديد</span>
+        </button>
+      </div>
+    }
 
   </main>
 </div>

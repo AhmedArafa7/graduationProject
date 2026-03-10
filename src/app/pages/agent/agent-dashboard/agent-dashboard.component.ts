@@ -23,6 +23,7 @@ export class AgentDashboardComponent implements OnInit {
   // استخدام الخدمة المشتركة
   properties = signal<AgentProperty[]>([]);
   agent = this.userService.userData;
+  viewMode = signal<'grid' | 'table'>('grid');
 
   ngOnInit() {
     this.loadProperties();

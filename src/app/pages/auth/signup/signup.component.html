@@ -4,7 +4,7 @@
     <div class="w-full max-w-md py-8">
       
       <div class="text-center mb-8">
-        @if (userType() === 'agent') {
+        @if (userType() === 'agent' || userType() === 'owner') {
           <h2 class="text-3xl font-bold text-text-primary dark:text-white mb-3">عقارك يسوى كام النهاردة؟</h2>
           <p class="text-text-secondary dark:text-gray-400 max-w-xs mx-auto text-sm leading-relaxed">
             التسعير الخاطئ هو السبب رقم 1 لعدم بيع العقارات.<br>اعرف السعر العادل مجاناً.
@@ -18,17 +18,23 @@
       </div>
 
       <div class="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-8 border border-border-color dark:border-gray-700">
-        <button (click)="setUserType('buyer')" 
-                class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+        <button type="button" (click)="setUserType('buyer')" 
+                class="flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
                 [class]="userType() === 'buyer' ? 'bg-white dark:bg-gray-700 text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-gray-400 hover:text-primary'">
-          <span class="material-symbols-outlined text-lg">person</span>
-          مشتري / مستأجر
+          <span class="material-symbols-outlined text-[16px]">person</span>
+          مشتري/مستأجر
         </button>
-        <button (click)="setUserType('agent')" 
-                class="flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+        <button type="button" (click)="setUserType('owner')" 
+                class="flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
+                [class]="userType() === 'owner' ? 'bg-white dark:bg-gray-700 text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-gray-400 hover:text-primary'">
+          <span class="material-symbols-outlined text-[16px]">home</span>
+          صاحب عقار
+        </button>
+        <button type="button" (click)="setUserType('agent')" 
+                class="flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
                 [class]="userType() === 'agent' ? 'bg-white dark:bg-gray-700 text-primary dark:text-white shadow-sm' : 'text-text-secondary dark:text-gray-400 hover:text-primary'">
-          <span class="material-symbols-outlined text-lg">real_estate_agent</span>
-          مالك عقار
+          <span class="material-symbols-outlined text-[16px]">real_estate_agent</span>
+          وكيل عقاري
         </button>
       </div>
 
@@ -158,6 +164,46 @@
             <p class="text-red-500 text-xs font-bold animate-fadeIn">يجب أن تكون 8 أحرف على الأقل</p>
           }
         </div>
+
+        @if (userType() === 'agent' || userType() === 'owner') {
+          <!-- Agent/Owner Specific Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeIn">
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">المدينة / المنطقة</label>
+              <input [ngModel]="city()" (ngModelChange)="city.set($event)" name="city" type="text"
+                     class="w-full h-12 px-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                     placeholder="مثل: القاهرة، التجمع الخامس">
+            </div>
+            
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">اسم الشركة (اختياري)</label>
+              <input [ngModel]="company()" (ngModelChange)="company.set($event)" name="company" type="text"
+                     class="w-full h-12 px-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                     placeholder="اسم شركتك أو مستقل">
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">ساعات العمل</label>
+              <input [ngModel]="workingHours()" (ngModelChange)="workingHours.set($event)" name="workingHours" type="text"
+                     class="w-full h-12 px-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                     placeholder="مثل: 9 ص - 5 م">
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">اللغات التي تتحدثها</label>
+              <input [ngModel]="languages()" (ngModelChange)="languages.set($event)" name="languages" type="text"
+                     class="w-full h-12 px-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                     placeholder="العربية, الإنجليزية">
+            </div>
+            
+            <div class="space-y-1.5 md:col-span-2">
+              <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">رقم الترخيص (إن وجد)</label>
+              <input [ngModel]="licenseNumber()" (ngModelChange)="licenseNumber.set($event)" name="licenseNumber" type="text"
+                     class="w-full h-12 px-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-text-primary dark:text-white transition-all placeholder:text-gray-400 focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-primary/50 outline-none"
+                     placeholder="رقم الترخيص العقاري الخاص بك">
+            </div>
+          </div>
+        }
 
         <div class="space-y-1.5">
           <label class="block text-sm font-medium text-text-secondary dark:text-gray-300">تأكيد كلمة المرور</label>

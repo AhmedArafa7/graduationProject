@@ -100,13 +100,18 @@ const UserSchema = new Schema({
   city: { type: String }, // For filtering agents by location
   address: { type: String },
   profileImage: { type: String },
-  userType: { type: String, enum: ['buyer', 'agent', 'admin'], default: 'buyer' },
+  userType: { type: String, enum: ['buyer', 'agent', 'owner', 'admin'], default: 'buyer' },
   agentProfile: {
     title: String, licenseNumber: String, company: String,
     experience: String, specialization: String, bio: String,
     rating: { type: Number, default: 0 },
     reviewsCount: { type: Number, default: 0 },
     activeProperties: { type: Number, default: 0 },
+    views: { type: Number, default: 0 },
+    inquiries: { type: Number, default: 0 },
+    responseRate: { type: Number, default: 100 },
+    languages: { type: [String], default: ['العربية', 'الإنجليزية'] },
+    workingHours: { type: String, default: '9 ص - 5 م' },
     verified: { type: Boolean, default: false },
     socialLinks: { facebook: String, linkedin: String, twitter: String }
   },

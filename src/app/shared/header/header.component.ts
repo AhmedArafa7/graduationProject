@@ -28,7 +28,7 @@ export class HeaderComponent {
   userName = computed(() => this.userService.getFullName());
   
   // هل المستخدم وكيل؟
-  isAgent = computed(() => this.userService.userData().userType === 'agent');
+  isAgent = computed(() => ['agent', 'owner'].includes(this.userService.userData().userType));
   
   // عدد الإشعارات غير المقروءة
   unreadCount = computed(() => this.notificationService.unreadCount());

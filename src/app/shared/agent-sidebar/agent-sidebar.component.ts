@@ -20,8 +20,11 @@ export class AgentSidebarComponent {
 
   // بيانات المستخدم
   userAvatar = computed(() => this.userService.getProfileImage());
+  pendingProfileImage = signal<string | null>(null);
   userName = computed(() => this.userService.getFullName());
-  isAgent = computed(() => this.userService.userData().userType === 'agent');
+  isAgent = computed(() => ['agent', 'owner'].includes(this.userService.userData().userType));
+
+  isImageFullscreen = signal(false);
 
   // عدد الرسائل الجديدة (غير المقروءة)
   newMessages = computed(() => this.messagesService.unreadCount());
@@ -40,5 +43,56 @@ export class AgentSidebarComponent {
   logout() {
     this.userService.logout();
     this.router.navigate(['/']);
+  }
+
+  // --- Image Handling (Mirroring Profile Component) ---
+  triggerFileInput(fileInput: HTMLInputElement, event: Event) {
+    event.stopPropagation(); // Prevent opening fullscreen when clicking edit icon
+    fileInput.click();
+  }
+
+  onImageClick() {
+    this.isImageFullscreen.set(true);
+  }
+
+  closeFullscreenImage() {
+    this.isImageFullscreen.set(false);
+  }
+
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      if (!file.type.startsWith('image/')) {
+        // toast not injected, using alert for simplicity in sidebar or we can inject toast
+        alert('يرجى اختيار ملف صورة صحيح');
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        alert('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const base64Image = e.target?.result as string;
+        this.pendingProfileImage.set(base64Image);
+        
+        // Auto-save in sidebar since there is no "Save Changes" button
+        const currentUser = this.userService.userData(); 
+        const userId = currentUser._id || '1'; 
+        if (userId) {
+          this.userService.updateProfileImage(userId, base64Image).subscribe({
+            next: () => {
+              this.pendingProfileImage.set(null); // Clear pending since it's saved to service
+            },
+            error: () => alert('حدث خطأ أثناء رفع الصورة')
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   }
 }

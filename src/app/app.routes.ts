@@ -108,7 +108,7 @@ export const routes: Routes = [
   // صفحة الملف الشخصي
   { 
     path: 'profile', 
-    title: 'ملفي الشخصي',
+    title: 'ملفى الشخصى',
     // canActivate: [authGuard],
     loadComponent: () => import('./pages/user/profile/profile.component').then(m => m.ProfileComponent) 
   },
